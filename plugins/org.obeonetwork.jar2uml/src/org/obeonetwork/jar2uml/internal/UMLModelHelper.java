@@ -12,11 +12,14 @@ package org.obeonetwork.jar2uml.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.emf.common.util.URI;
@@ -27,8 +30,10 @@ import org.eclipse.uml2.uml.Element;
 import org.eclipse.uml2.uml.Enumeration;
 import org.eclipse.uml2.uml.Interface;
 import org.eclipse.uml2.uml.Model;
+import org.eclipse.uml2.uml.NamedElement;
 import org.eclipse.uml2.uml.Package;
 import org.eclipse.uml2.uml.PackageableElement;
+import org.eclipse.uml2.uml.Type;
 import org.eclipse.uml2.uml.UMLFactory;
 
 import com.google.common.collect.Maps;
@@ -55,11 +60,25 @@ public final class UMLModelHelper {
 		Resource res = new ResourceSetImpl().createResource(semanticModelURI);
 		final Model model = UMLFactory.eINSTANCE.createModel();
 		model.setName(modelName.replace(".uml", ""));
-		for (Entry<File, Map<String, List<Class<?>>>> entry : map.entrySet()) {
+		model.createOwnedPrimitiveType("java.lang.String");
+		model.createOwnedPrimitiveType("java.lang.Integer");
+		model.createOwnedPrimitiveType("java.lang.Boolean");
+		model.createOwnedPrimitiveType("java.lang.Object");
+		model.createOwnedPrimitiveType("char");
+		model.createOwnedPrimitiveType("byte");
+		model.createOwnedPrimitiveType("short");
+		model.createOwnedPrimitiveType("long");
+		model.createOwnedPrimitiveType("float");
+		model.createOwnedPrimitiveType("double");
+		model.createOwnedPrimitiveType("boolean");
+		model.createOwnedPrimitiveType("int");
+
+		for (File file : map.keySet()) {
 			Component createdComponent = UMLFactory.eINSTANCE.createComponent();
 			model.getPackagedElements().add(createdComponent);
-			createdComponent.setName(entry.getKey().getName());
-			createElements(createdComponent, map.get(entry.getKey()));
+			createdComponent.setName(file.getName());
+			Map<Map<Element, Class<?>>, Map<Class<?>, Element>> index = createElements(createdComponent, map.get(file));
+			handleElementRelations(model, index);
 		}
 		if (model != null) {
 			res.getContents().add(model);
@@ -71,9 +90,72 @@ public final class UMLModelHelper {
 		}
 	}
 
-	private static void createElements(Component parent, Map<String, List<Class<?>>> foundItems) {
+	private static void handleElementRelations(Model model, Map<Map<Element, Class<?>>, Map<Class<?>, Element>> index) {
 
-		final Map<Class<?>, Element> index = new HashMap<Class<?>, Element>(); // TODO : return this index
+		Set<Entry<Map<Element, Class<?>>, Map<Class<?>, Element>>> entrySet = index.entrySet();
+		for (Entry<Map<Element, Class<?>>, Map<Class<?>, Element>> entry : entrySet) {
+			Map<Element, Class<?>> indexUML2Java = entry.getKey();
+			Map<Class<?>, Element> indexJava2UML = entry.getValue();
+
+			for (Element element : indexUML2Java.keySet()) {
+				if (element instanceof Interface) {
+					Class<?> javaInterface = indexUML2Java.get(element);
+					Interface anInterface = (Interface) element;
+					// TODO : handle Interface
+				} else if (element instanceof org.eclipse.uml2.uml.Class) {
+					Class<?> javaClass = indexUML2Java.get(element);
+					org.eclipse.uml2.uml.Class aClass = (org.eclipse.uml2.uml.Class) element;
+
+					// Methodes
+					for (Method method : javaClass.getMethods()) {
+						aClass.createOwnedOperation(method.getName(), null, null);
+						// TODO handle method args and return
+					}
+
+					// Attributes
+					for (Field field : javaClass.getFields()) {
+						Class<?> fieldType = field.getType();
+						if (indexJava2UML.containsKey(fieldType)) {
+							Element fieldUMLType = indexJava2UML.get(fieldType);
+							if (fieldUMLType instanceof Type) {
+								aClass.createOwnedAttribute(field.getName(), (Type) fieldUMLType);
+							} else {
+								System.err.println(fieldUMLType);
+							}
+						} else {
+							Class<?> currentType = field.getType();
+							int cardianality = 1;
+							if (currentType.isArray()) {
+								cardianality = -1;
+								currentType = currentType.getComponentType();
+							}
+
+							NamedElement member = model.getMember(currentType.getName());
+							if (member instanceof Type) {
+								Type foundType = (Type) member;
+								aClass.createOwnedAttribute(field.getName(), foundType, 0, cardianality);
+							} else {
+								Class<? extends Class> class1 = field.getType().getClass();
+								System.err.println("not handled type " + field.getType().getName());
+							}
+						}
+					}
+				} else if (element instanceof Enumeration) {
+					Class<?> javaEnumeration = indexUML2Java.get(element);
+					Enumeration anEnumeration = (Enumeration) element;
+					// TODO : handle Enumeration
+				}
+			}
+		}
+	}
+
+	private static Map<Map<Element, Class<?>>, Map<Class<?>, Element>> createElements(Component parent,
+			Map<String, List<Class<?>>> foundItems) {
+
+		final Map<Element, Class<?>> indexUML2Java = new HashMap<Element, Class<?>>();
+		final Map<Class<?>, Element> indexJava2UML = new HashMap<Class<?>, Element>();
+		final Map<Map<Element, Class<?>>, Map<Class<?>, Element>> index = new HashMap<Map<Element, Class<?>>, Map<Class<?>, Element>>();
+		index.put(indexUML2Java, indexJava2UML);
 
 		final List<Class<?>> classes = foundItems.get(Jars2UML.CLASS_KEY);
 
@@ -82,7 +164,8 @@ public final class UMLModelHelper {
 				org.eclipse.uml2.uml.Package pack = handlePackage(parent, aClass.getPackage());
 				org.eclipse.uml2.uml.Class createClass = pack.createOwnedClass(aClass.getSimpleName(),
 						Modifier.isAbstract(aClass.getModifiers()));
-				// TODO: set in index
+				indexUML2Java.put(createClass, aClass);
+				indexJava2UML.put(aClass, createClass);
 			}
 		}
 
@@ -92,7 +175,8 @@ public final class UMLModelHelper {
 			if (anInterface.getSimpleName() != null && anInterface.getSimpleName().length() > 0) {
 				org.eclipse.uml2.uml.Package pack = handlePackage(parent, anInterface.getPackage());
 				Interface createInterface = pack.createOwnedInterface(anInterface.getSimpleName());
-				// TODO: set in index
+				indexUML2Java.put(createInterface, anInterface);
+				indexJava2UML.put(anInterface, createInterface);
 			}
 		}
 
@@ -101,9 +185,11 @@ public final class UMLModelHelper {
 			if (anEnum.getSimpleName() != null && anEnum.getSimpleName().length() > 0) {
 				org.eclipse.uml2.uml.Package pack = handlePackage(parent, anEnum.getPackage());
 				Enumeration createEnumeration = pack.createOwnedEnumeration(anEnum.getSimpleName());
-				// TODO: set in index
+				indexUML2Java.put(createEnumeration, anEnum);
+				indexJava2UML.put(anEnum, createEnumeration);
 			}
 		}
+		return index;
 	}
 
 	private static org.eclipse.uml2.uml.Package handlePackage(Component parent, java.lang.Package pack) {
