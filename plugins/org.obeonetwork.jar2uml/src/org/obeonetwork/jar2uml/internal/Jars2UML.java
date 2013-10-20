@@ -121,26 +121,27 @@ public class Jars2UML extends Job {
 
 				// Complete class name
 				className = className.replace(".class", "").replace("/", ".");
-				// Load class definition from JVM
-				try {
-					Class<?> clazz = child.loadClass(className);
-
+				if (!className.contains("$")) {
+					// Load class definition from JVM
 					try {
-						// Verify the type of the "class"
-						if (clazz.isInterface()) {
-							interfaces.add(clazz);
-						} else if (clazz.isAnnotation()) {
-							annotations.add(clazz);
-						} else if (clazz.isEnum()) {
-							enums.add(clazz);
-						} else {
-							clazzes.add(clazz);
-						}
-					} catch (ClassCastException e) {
+						Class<?> clazz = child.loadClass(className);
+						try {
+							// Verify the type of the "class"
+							if (clazz.isInterface()) {
+								interfaces.add(clazz);
+							} else if (clazz.isAnnotation()) {
+								annotations.add(clazz);
+							} else if (clazz.isEnum()) {
+								enums.add(clazz);
+							} else {
+								clazzes.add(clazz);
+							}
+						} catch (ClassCastException e) {
 
+						}
+					} catch (ClassNotFoundException e) {
+						System.err.println(e.getMessage());
 					}
-				} catch (ClassNotFoundException e) {
-					System.err.println(e.getMessage());
 				}
 			}
 		}

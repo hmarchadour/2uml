@@ -19,6 +19,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreePath;
@@ -37,6 +38,7 @@ public class JDTJarArtifactHandler extends AbstractHandler {
 	 * 
 	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
+	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
 
@@ -45,9 +47,13 @@ public class JDTJarArtifactHandler extends AbstractHandler {
 			TreePath[] paths = treeSelection.getPaths();
 			if (paths.length > 0) {
 				Object rootSegment = paths[0].getFirstSegment();
-				if (rootSegment instanceof IProject) {
-
-					IProject project = (IProject) rootSegment;
+				if (rootSegment instanceof IProject || rootSegment instanceof IJavaProject) {
+					IProject project;
+					if (rootSegment instanceof IProject) {
+						project = (IProject) rootSegment;
+					} else {
+						project = ((IJavaProject) rootSegment).getProject();
+					}
 					List<File> files = new ArrayList<File>();
 					for (Object item : treeSelection.toList()) {
 						if (item instanceof IPackageFragmentRoot) {
