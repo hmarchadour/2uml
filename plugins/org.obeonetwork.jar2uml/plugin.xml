@@ -9,13 +9,11 @@
       </category>
       <command
             categoryId="org.obeonetwork.jar2uml"
-            defaultHandler="org.obeonetwork.jar2uml.handlers.JarFileHandler"
             id="org.obeonetwork.jar2uml.onJar"
             name="Convert a Jar File">
       </command>
       <command
             categoryId="org.obeonetwork.jar2uml"
-            defaultHandler="org.obeonetwork.jar2uml.handlers.JDTJarArtifactHandler"
             id="org.obeonetwork.jar2uml.onJDTJarArtifact"
             name="Convert a Jar File">
       </command>
