@@ -12,13 +12,16 @@ package org.obeonetwork.jar2uml.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
@@ -33,12 +36,17 @@ import org.eclipse.core.runtime.jobs.Job;
 public class Jars2UML extends Job {
 
 	public final static String EXTERNAL_KEY = "externals";
+
 	public final static String INTERFACE_KEY = "interfaces";
+
 	public final static String CLASS_KEY = "classes";
+
 	public final static String ANNOTATION_KEY = "annotations";
+
 	public final static String ENUM_KEY = "enums";
 
 	private final IProject project;
+
 	private final List<File> files;
 
 	/**
@@ -57,7 +65,7 @@ public class Jars2UML extends Job {
 	 */
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		Map<File, Map<String, List<Class<?>>>> result = new HashMap<File, Map<String, List<Class<?>>>>();
+		Map<File, Map<String, Set<Class<?>>>> result = new HashMap<File, Map<String, Set<Class<?>>>>();
 		monitor.beginTask("Handle selected jars", files.size());
 		for (File file : files) {
 			if (monitor.isCanceled()) {
@@ -65,7 +73,7 @@ public class Jars2UML extends Job {
 			}
 			monitor.subTask("Handle " + file.getName());
 			try {
-				Map<String, List<Class<?>>> foundItems = loadAndScanJar(file);
+				Map<String, Set<Class<?>>> foundItems = loadAndScanJar(file);
 				result.put(file, foundItems);
 			} catch (ZipException e) {
 				e.printStackTrace();
@@ -85,24 +93,41 @@ public class Jars2UML extends Job {
 		return Status.OK_STATUS;
 	}
 
-	private Map<String, List<Class<?>>> loadAndScanJar(File jarFile) throws ZipException, IOException {
+	private void addInMap(Class<?> clazz, Map<String, Set<Class<?>>> classes) {
+		if (clazz != null && !clazz.isPrimitive()) {
+			if (clazz.isArray()) {
+				addInMap(clazz.getComponentType(), classes);
+			} else {
+				if (clazz.isInterface()) {
+					classes.get(INTERFACE_KEY).add(clazz);
+				} else if (clazz.isAnnotation()) {
+					classes.get(ANNOTATION_KEY).add(clazz);
+				} else if (clazz.isEnum()) {
+					classes.get(ENUM_KEY).add(clazz);
+				} else {
+					classes.get(CLASS_KEY).add(clazz);
+				}
+			}
+		}
+	}
 
-		URL[] urls = new URL[] { jarFile.toURI().toURL() };
-		URLClassLoader child = new URLClassLoader(urls, this.getClass().getClassLoader());
+	private Map<String, Set<Class<?>>> loadAndScanJar(File jarFile) throws ZipException, IOException {
 
-		Map<String, List<Class<?>>> classes = new HashMap<String, List<Class<?>>>();
+		Set<Class<?>> externals = new HashSet<Class<?>>();
+		Set<Class<?>> interfaces = new HashSet<Class<?>>();
+		Set<Class<?>> clazzes = new HashSet<Class<?>>();
+		Set<Class<?>> enums = new HashSet<Class<?>>();
+		Set<Class<?>> annotations = new HashSet<Class<?>>();
 
-		List<Class<?>> externals = new ArrayList<Class<?>>();
-		List<Class<?>> interfaces = new ArrayList<Class<?>>();
-		List<Class<?>> clazzes = new ArrayList<Class<?>>();
-		List<Class<?>> enums = new ArrayList<Class<?>>();
-		List<Class<?>> annotations = new ArrayList<Class<?>>();
-
+		Map<String, Set<Class<?>>> classes = new HashMap<String, Set<Class<?>>>();
 		classes.put(EXTERNAL_KEY, externals);
 		classes.put(INTERFACE_KEY, interfaces);
 		classes.put(CLASS_KEY, clazzes);
 		classes.put(ANNOTATION_KEY, annotations);
 		classes.put(ENUM_KEY, enums);
+
+		URL[] urls = new URL[] {jarFile.toURI().toURL()};
+		URLClassLoader classLoader = new URLClassLoader(urls, this.getClass().getClassLoader());
 
 		// Your jar file
 		JarFile jar = new JarFile(jarFile);
@@ -124,22 +149,47 @@ public class Jars2UML extends Job {
 				if (!className.contains("$")) {
 					// Load class definition from JVM
 					try {
-						Class<?> clazz = child.loadClass(className);
+						Class<?> clazz = classLoader.loadClass(className);
 						try {
-							// Verify the type of the "class"
-							if (clazz.isInterface()) {
-								interfaces.add(clazz);
-							} else if (clazz.isAnnotation()) {
-								annotations.add(clazz);
-							} else if (clazz.isEnum()) {
-								enums.add(clazz);
-							} else {
-								clazzes.add(clazz);
+							addInMap(clazz, classes);
+
+							// Supertype
+							Class<?> superclass = clazz.getSuperclass();
+							if (superclass != null) {
+								addInMap(superclass, classes);
+							}
+							Class<?>[] implementedInterfaces = clazz.getInterfaces();
+							for (Class<?> implementedInterface : implementedInterfaces) {
+								addInMap(implementedInterface, classes);
+							}
+
+							// Attributes
+							Field[] fields = clazz.getFields();
+							for (Field field : fields) {
+								Class<?> fieldClazz = field.getType();
+								addInMap(fieldClazz, classes);
+							}
+							// Methods
+							try {
+								Method[] methods = clazz.getMethods();
+								for (Method method : methods) {
+									Class<?> returnType = method.getReturnType();
+									addInMap(returnType, classes);
+									Class<?>[] parameterTypes = method.getParameterTypes();
+									for (Class<?> parameterType : parameterTypes) {
+										addInMap(parameterType, classes);
+									}
+
+								}
+							} catch (NoClassDefFoundError e) {
+								System.err.println(e.getMessage());
 							}
 						} catch (ClassCastException e) {
-
+							System.err.println(e.getMessage());
 						}
 					} catch (ClassNotFoundException e) {
+						System.err.println(e.getMessage());
+					} catch (Exception e) {
 						System.err.println(e.getMessage());
 					}
 				}
@@ -147,5 +197,17 @@ public class Jars2UML extends Job {
 		}
 		jar.close();
 		return classes;
+	}
+
+	private class ClassProxy {
+
+		String name;
+
+		String packageName;
+
+		public ClassProxy(String name, String packageName) {
+			this.name = name;
+			this.packageName = packageName;
+		}
 	}
 }
