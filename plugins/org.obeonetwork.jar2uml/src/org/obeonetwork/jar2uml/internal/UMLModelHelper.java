@@ -59,25 +59,48 @@ public final class UMLModelHelper {
 	 * @param map
 	 *            The map of file/items (Classes, interfaces...)
 	 */
-	public static void createModel(IProject project, String modelName,
-			Map<File, Map<String, Set<Class<?>>>> map) {
+	public static void createModel(IProject project, String modelName, Map<File, Set<Class<?>>> filesBinding,
+			Map<String, Set<Class<?>>> classStore, Map<String, Set<Class<?>>> externalStore) {
 
-		final URI semanticModelURI = URI.createPlatformResourceURI('/' + project.getName() + '/' + modelName,
-				true);
+		final URI semanticModelURI = URI.createPlatformResourceURI('/' + project.getName() + '/' + modelName, true);
 		Resource res = new ResourceSetImpl().createResource(semanticModelURI);
 		final Model model = UMLFactory.eINSTANCE.createModel();
 		res.getContents().add(model);
 		model.setName(modelName.replace(".uml", ""));
 		importPrimitiveTypes(model, UMLResource.JAVA_PRIMITIVE_TYPES_LIBRARY_URI);
 
-		for (File file : map.keySet()) {
+		final Map<Element, Class<?>> indexUML2Java = new HashMap<Element, Class<?>>();
+		final Map<Class<?>, Element> indexJava2UML = new HashMap<Class<?>, Element>();
+
+		if (!externalStore.isEmpty()) {
+			Component createdComponent = UMLFactory.eINSTANCE.createComponent();
+			model.getPackagedElements().add(createdComponent);
+			createdComponent.setName("external");
+			for (String key : externalStore.keySet()) {
+				Map<Map<Element, Class<?>>, Map<Class<?>, Element>> externalStoreIndex = createModelElements(
+						createdComponent, externalStore.get(key));
+				Set<Entry<Map<Element, Class<?>>, Map<Class<?>, Element>>> entrySet = externalStoreIndex.entrySet();
+				for (Entry<Map<Element, Class<?>>, Map<Class<?>, Element>> entry : entrySet) {
+					indexUML2Java.putAll(entry.getKey());
+					indexJava2UML.putAll(entry.getValue());
+				}
+			}
+		}
+
+		for (File file : filesBinding.keySet()) {
 			Component createdComponent = UMLFactory.eINSTANCE.createComponent();
 			model.getPackagedElements().add(createdComponent);
 			createdComponent.setName(file.getName());
-			Map<Map<Element, Class<?>>, Map<Class<?>, Element>> index = createElements(createdComponent,
-					map.get(file));
-			handleElementRelations(model, index);
+			Map<Map<Element, Class<?>>, Map<Class<?>, Element>> storeIndex = createModelElements(createdComponent,
+					filesBinding.get(file));
+
+			Set<Entry<Map<Element, Class<?>>, Map<Class<?>, Element>>> entrySet = storeIndex.entrySet();
+			for (Entry<Map<Element, Class<?>>, Map<Class<?>, Element>> entry : entrySet) {
+				indexUML2Java.putAll(entry.getKey());
+				indexJava2UML.putAll(entry.getValue());
+			}
 		}
+		handleElementRelations(model, indexUML2Java, indexJava2UML);
 		try {
 			res.save(Maps.newHashMap());
 		} catch (IOException e) {
@@ -85,156 +108,143 @@ public final class UMLModelHelper {
 		}
 	}
 
-	private static void handleElementRelations(Model model,
-			Map<Map<Element, Class<?>>, Map<Class<?>, Element>> index) {
+	private static void handleElementRelations(Model model, Map<Element, Class<?>> indexUML2Java,
+			Map<Class<?>, Element> indexJava2UML) {
 
-		Set<Entry<Map<Element, Class<?>>, Map<Class<?>, Element>>> entrySet = index.entrySet();
-		for (Entry<Map<Element, Class<?>>, Map<Class<?>, Element>> entry : entrySet) {
-			Map<Element, Class<?>> indexUML2Java = entry.getKey();
-			Map<Class<?>, Element> indexJava2UML = entry.getValue();
+		for (Element element : indexUML2Java.keySet()) {
+			if (element instanceof Interface) {
+				Class<?> javaInterface = indexUML2Java.get(element);
+				Interface anInterface = (Interface) element;
+				// TODO : handle Interface
+			} else if (element instanceof org.eclipse.uml2.uml.Class) {
+				Class<?> javaClass = indexUML2Java.get(element);
+				org.eclipse.uml2.uml.Class aClass = (org.eclipse.uml2.uml.Class) element;
 
-			for (Element element : indexUML2Java.keySet()) {
-				if (element instanceof Interface) {
-					Class<?> javaInterface = indexUML2Java.get(element);
-					Interface anInterface = (Interface)element;
-					// TODO : handle Interface
-				} else if (element instanceof org.eclipse.uml2.uml.Class) {
-					Class<?> javaClass = indexUML2Java.get(element);
-					org.eclipse.uml2.uml.Class aClass = (org.eclipse.uml2.uml.Class)element;
-
-					// Methodes
-					try {
-						for (Method method : javaClass.getMethods()) {
-							Operation createOwnedOperation = aClass.createOwnedOperation(method.getName(),
-									null, null);
-							Element returnType = indexJava2UML.get(method.getReturnType());
-							if (returnType != null) {
-								createOwnedOperation.createReturnResult("return", (Type)returnType);
-							} else {
-								List<Package> importedPackages = model.getImportedPackages();
-								for (Package package1 : importedPackages) {
-									NamedElement member = package1
-											.getMember(method.getReturnType().getName());
-									if (member instanceof Type) {
-										returnType = (Type)member;
-									}
-								}
-								if (returnType != null) {
-									createOwnedOperation.createReturnResult("return", (Type)returnType);
-								} else {
-									System.out.println("not find in the model "
-											+ method.getReturnType().getName());
-								}
-							}
-							Class<?>[] parameterTypes = method.getParameterTypes();
-							for (Class<?> parameterType : parameterTypes) {
-								Element paramType = indexJava2UML.get(parameterType);
-								if (paramType != null) {
-									createOwnedOperation.createOwnedParameter("", (Type)paramType);
-								} else {
-									List<Package> importedPackages = model.getImportedPackages();
-									for (Package package1 : importedPackages) {
-										NamedElement member = package1.getMember(parameterType.getName());
-										if (member instanceof Type) {
-											paramType = (Type)member;
-										}
-									}
-									if (paramType != null) {
-										createOwnedOperation.createOwnedParameter("", (Type)paramType);
-									} else {
-										System.out.println("not find in the model "
-												+ method.getReturnType().getName());
-									}
-								}
+				// Methods
+				for (Method method : javaClass.getMethods()) {
+					Operation createOwnedOperation = aClass.createOwnedOperation(method.getName(), null, null);
+					Element returnType = indexJava2UML.get(method.getReturnType());
+					if (returnType != null) {
+						createOwnedOperation.createReturnResult("return", (Type) returnType);
+					} else {
+						List<Package> importedPackages = model.getImportedPackages();
+						for (Package package1 : importedPackages) {
+							NamedElement member = package1.getMember(method.getReturnType().getName());
+							if (member instanceof Type) {
+								returnType = member;
 							}
 						}
-					} catch (NoClassDefFoundError e) {
-						System.err.println(e.getMessage());
+						if (returnType != null) {
+							createOwnedOperation.createReturnResult("return", (Type) returnType);
+						} else {
+							String name = method.getReturnType().getName();
+							if (!"void".equals(name)) {
+								System.out.println("not found in the model " + method.getReturnType().getName());
+							}
+						}
 					}
-
-					// Attributes
-					try {
-						for (Field field : javaClass.getFields()) {
-							Class<?> fieldType = field.getType();
-							if (indexJava2UML.containsKey(fieldType)) {
-								Element fieldUMLType = indexJava2UML.get(fieldType);
-								if (fieldUMLType instanceof Type) {
-									aClass.createOwnedAttribute(field.getName(), (Type)fieldUMLType);
-								} else {
-									System.err.println(fieldUMLType);
-								}
-							} else {
-								Class<?> currentType = field.getType();
-								int cardianality = 1;
-								if (currentType.isArray()) {
-									cardianality = -1;
-									currentType = currentType.getComponentType();
-								}
-
-								NamedElement member = model.getMember(currentType.getName());
+					Class<?>[] parameterTypes = method.getParameterTypes();
+					for (Class<?> parameterType : parameterTypes) {
+						Element paramType = indexJava2UML.get(parameterType);
+						if (paramType != null) {
+							createOwnedOperation.createOwnedParameter("", (Type) paramType);
+						} else {
+							List<Package> importedPackages = model.getImportedPackages();
+							for (Package package1 : importedPackages) {
+								NamedElement member = package1.getMember(parameterType.getName());
 								if (member instanceof Type) {
-									Type foundType = (Type)member;
-									aClass.createOwnedAttribute(field.getName(), foundType, 0, cardianality);
-								} else {
-									Class<? extends Class> class1 = field.getType().getClass();
-									System.err.println("not handled type " + field.getType().getName());
+									paramType = member;
+								}
+							}
+							if (paramType != null) {
+								createOwnedOperation.createOwnedParameter("", (Type) paramType);
+							} else {
+								if (!"void".equals(method.getReturnType().getName())) {
+									System.out.println("not found in the model " + method.getReturnType().getName());
 								}
 							}
 						}
-					} catch (NoClassDefFoundError e) {
-						System.err.println(e.getMessage());
 					}
-				} else if (element instanceof Enumeration) {
-					Class<?> javaEnumeration = indexUML2Java.get(element);
-					Enumeration anEnumeration = (Enumeration)element;
-					// TODO : handle Enumeration
 				}
+
+				// Attributes
+				for (Field field : javaClass.getFields()) {
+					Class<?> fieldType = field.getType();
+					if (indexJava2UML.containsKey(fieldType)) {
+						Element fieldUMLType = indexJava2UML.get(fieldType);
+						if (fieldUMLType instanceof Type) {
+							aClass.createOwnedAttribute(field.getName(), (Type) fieldUMLType);
+						} else {
+							System.err.println(fieldUMLType);
+						}
+					} else {
+						Class<?> currentType = field.getType();
+						int cardianality = 1;
+						if (currentType.isArray()) {
+							cardianality = -1;
+							currentType = currentType.getComponentType();
+						}
+
+						NamedElement member = model.getMember(currentType.getName());
+						if (member instanceof Type) {
+							Type foundType = (Type) member;
+							aClass.createOwnedAttribute(field.getName(), foundType, 0, cardianality);
+						} else {
+							Class<? extends Class> class1 = field.getType().getClass();
+							System.err.println("not handled type " + field.getType().getName());
+						}
+					}
+				}
+			} else if (element instanceof Enumeration) {
+				Class<?> javaEnumeration = indexUML2Java.get(element);
+				Enumeration anEnumeration = (Enumeration) element;
+				// TODO : handle Enumeration
 			}
 		}
 	}
 
-	private static Map<Map<Element, Class<?>>, Map<Class<?>, Element>> createElements(Component parent,
-			Map<String, Set<Class<?>>> foundItems) {
+	private static Map<Map<Element, Class<?>>, Map<Class<?>, Element>> createModelElements(Component parent,
+			Set<Class<?>> foundItems) {
 
 		final Map<Element, Class<?>> indexUML2Java = new HashMap<Element, Class<?>>();
 		final Map<Class<?>, Element> indexJava2UML = new HashMap<Class<?>, Element>();
 		final Map<Map<Element, Class<?>>, Map<Class<?>, Element>> index = new HashMap<Map<Element, Class<?>>, Map<Class<?>, Element>>();
 		index.put(indexUML2Java, indexJava2UML);
 
-		final Set<Class<?>> classes = foundItems.get(Jars2UML.CLASS_KEY);
+		for (Class<?> item : foundItems) {
 
-		for (Class<?> aClass : classes) {
-			if (aClass.getSimpleName() != null && aClass.getSimpleName().length() > 0) {
-				org.eclipse.uml2.uml.Package pack = handlePackage(parent, aClass.getPackage());
-				org.eclipse.uml2.uml.Class createClass = pack.createOwnedClass(aClass.getSimpleName(),
-						Modifier.isAbstract(aClass.getModifiers()));
-				indexUML2Java.put(createClass, aClass);
-				indexJava2UML.put(aClass, createClass);
-			}
-		}
-
-		final Set<Class<?>> interfaces = foundItems.get(Jars2UML.INTERFACE_KEY);
-
-		for (Class<?> anInterface : interfaces) {
-			if (anInterface.getSimpleName() != null && anInterface.getSimpleName().length() > 0) {
-				if (!anInterface.isPrimitive()) {
-					org.eclipse.uml2.uml.Package pack = handlePackage(parent, anInterface.getPackage());
-					Interface createInterface = pack.createOwnedInterface(anInterface.getSimpleName());
-					indexUML2Java.put(createInterface, anInterface);
-					indexJava2UML.put(anInterface, createInterface);
+			if (item.isInterface()) {
+				Class<?> anInterface = item;
+				if (anInterface.getSimpleName() != null && anInterface.getSimpleName().length() > 0) {
+					if (!anInterface.isPrimitive()) {
+						org.eclipse.uml2.uml.Package pack = handlePackage(parent, anInterface.getPackage());
+						Interface createInterface = pack.createOwnedInterface(anInterface.getSimpleName());
+						indexUML2Java.put(createInterface, anInterface);
+						indexJava2UML.put(anInterface, createInterface);
+					}
+				}
+			} else if (item.isAnnotation()) {
+				// TODO: handle annotation
+			} else if (item.isEnum()) {
+				Class<?> anEnum = item;
+				if (anEnum.getSimpleName() != null && anEnum.getSimpleName().length() > 0) {
+					org.eclipse.uml2.uml.Package pack = handlePackage(parent, anEnum.getPackage());
+					Enumeration createEnumeration = pack.createOwnedEnumeration(anEnum.getSimpleName());
+					indexUML2Java.put(createEnumeration, anEnum);
+					indexJava2UML.put(anEnum, createEnumeration);
+				}
+			} else {
+				Class<?> aClass = item;
+				if (aClass.getSimpleName() != null && aClass.getSimpleName().length() > 0) {
+					org.eclipse.uml2.uml.Package pack = handlePackage(parent, aClass.getPackage());
+					org.eclipse.uml2.uml.Class createClass = pack.createOwnedClass(aClass.getSimpleName(),
+							Modifier.isAbstract(aClass.getModifiers()));
+					indexUML2Java.put(createClass, aClass);
+					indexJava2UML.put(aClass, createClass);
 				}
 			}
 		}
 
-		final Set<Class<?>> enums = foundItems.get(Jars2UML.ENUM_KEY);
-		for (Class<?> anEnum : enums) {
-			if (anEnum.getSimpleName() != null && anEnum.getSimpleName().length() > 0) {
-				org.eclipse.uml2.uml.Package pack = handlePackage(parent, anEnum.getPackage());
-				Enumeration createEnumeration = pack.createOwnedEnumeration(anEnum.getSimpleName());
-				indexUML2Java.put(createEnumeration, anEnum);
-				indexJava2UML.put(anEnum, createEnumeration);
-			}
-		}
 		return index;
 	}
 
@@ -247,7 +257,7 @@ public final class UMLModelHelper {
 				for (PackageableElement packageableElement : packagedElements) {
 					if (packageableElement instanceof org.eclipse.uml2.uml.Package) {
 						if (subpackage.equals(packageableElement.getName())) {
-							current = (org.eclipse.uml2.uml.Package)packageableElement;
+							current = (org.eclipse.uml2.uml.Package) packageableElement;
 							break;
 						}
 					}
@@ -281,8 +291,7 @@ public final class UMLModelHelper {
 		final ResourceSet resourceSet = namespace.eResource().getResourceSet();
 		final Resource resource = resourceSet.getResource(URI.createURI(libraryUri), true);
 
-		final Package root = (Package)EcoreUtil.getObjectByType(resource.getContents(),
-				UMLPackage.Literals.PACKAGE);
+		final Package root = (Package) EcoreUtil.getObjectByType(resource.getContents(), UMLPackage.Literals.PACKAGE);
 		// We check if a package import already exists
 		if (!namespace.getImportedPackages().contains(root)) {
 			namespace.createPackageImport(root);
