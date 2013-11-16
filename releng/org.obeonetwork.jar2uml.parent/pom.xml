@@ -48,12 +48,13 @@
   <modules>
     <!-- plugins -->
     <module>../../plugins/${project.groupId}.core</module>
-
+	<module>../../plugins/${project.groupId}.core.tests</module>
+	
     <!-- features -->
-    <module>../../packaging/org.obeonetwork.jar2uml.feature</module>
+    <module>../../packaging/${project.groupId}.feature</module>
 
     <!-- update sites -->
-    <module>../../packaging/org.obeonetwork.jar2uml.update</module>
+    <module>../../packaging/${project.groupId}.update</module>
   </modules>
 
   <build>
@@ -138,8 +139,15 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-
+	    </plugin>
+		<plugin>
+			<groupId>org.eclipse.tycho</groupId>
+			<artifactId>tycho-surefire-plugin</artifactId>
+			<version>${tycho-version}</version>
+			<configuration>
+				<testFailureIgnore>true</testFailureIgnore>
+			</configuration>
+		</plugin>
     </plugins>
     <pluginManagement>
       <plugins>

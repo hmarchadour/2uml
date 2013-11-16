@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: jar2uml tests
+Bundle-SymbolicName: org.obeonetwork.jar2uml.core.tests;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Require-Bundle: org.obeonetwork.jar2uml.core;bundle-version="1.0.0",
+ org.junit
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Bundle-Vendor: Obeo
