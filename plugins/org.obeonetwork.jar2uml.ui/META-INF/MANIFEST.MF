@@ -1,21 +1,20 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: jar2uml
-Bundle-SymbolicName: org.obeonetwork.jar2uml.core;singleton:=true
+Bundle-SymbolicName: org.obeonetwork.jar2uml.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: org.obeonetwork.jar2uml.core.Jar2UMLActivator
+Bundle-Activator: org.obeonetwork.jar2uml.ui.Jar2UMLUIActivator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.emf.common,
  org.eclipse.emf.ecore,
  com.google.guava,
- org.eclipse.uml2.uml
+ org.eclipse.uml2.uml,
+ org.obeonetwork.jar2uml.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Import-Package: com.google.common.base;version="10.0.1",
- org.eclipse.jdt.core,
+Import-Package: org.eclipse.jdt.core,
  org.eclipse.jdt.internal.core
 Bundle-Vendor: Obeo
-Export-Package: org.obeonetwork.jar2uml.core.api,
- org.obeonetwork.jar2uml.core.api.visitor
+Export-Package: org.obeonetwork.jar2uml.ui.handlers
