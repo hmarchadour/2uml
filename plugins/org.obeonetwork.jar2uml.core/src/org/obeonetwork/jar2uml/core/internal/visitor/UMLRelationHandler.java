@@ -23,8 +23,8 @@ import org.eclipse.uml2.uml.NamedElement;
 import org.eclipse.uml2.uml.Operation;
 import org.eclipse.uml2.uml.Package;
 import org.eclipse.uml2.uml.Type;
+import org.obeonetwork.jar2uml.core.api.store.ModelStore;
 import org.obeonetwork.jar2uml.core.api.visitor.JavaVisitorHandler;
-import org.obeonetwork.jar2uml.core.internal.store.ModelStore;
 
 public class UMLRelationHandler implements JavaVisitorHandler<Void> {
 

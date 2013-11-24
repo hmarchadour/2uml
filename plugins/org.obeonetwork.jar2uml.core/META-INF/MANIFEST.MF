@@ -18,4 +18,5 @@ Import-Package: com.google.common.base;version="10.0.1",
  org.eclipse.jdt.internal.core
 Bundle-Vendor: Obeo
 Export-Package: org.obeonetwork.jar2uml.core.api,
+ org.obeonetwork.jar2uml.core.api.store,
  org.obeonetwork.jar2uml.core.api.visitor

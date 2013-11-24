@@ -41,10 +41,10 @@ import org.eclipse.uml2.uml.UMLFactory;
 import org.eclipse.uml2.uml.resource.UMLResource;
 import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.Utils;
+import org.obeonetwork.jar2uml.core.api.store.ClassStore;
+import org.obeonetwork.jar2uml.core.api.store.ModelStore;
 import org.obeonetwork.jar2uml.core.api.visitor.JavaVisitor;
 import org.obeonetwork.jar2uml.core.api.visitor.JavaVisitorHandler;
-import org.obeonetwork.jar2uml.core.internal.store.ClassStore;
-import org.obeonetwork.jar2uml.core.internal.store.ModelStore;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -68,8 +68,8 @@ public class Jars2UML {
 	public Jars2UML(IProject project, Set<File> jarFiles) {
 		this.project = project;
 		this.jarFiles = jarFiles;
-		this.internal = new ClassStore();
-		this.external = new ClassStore();
+		this.internal = Factory.createClassStore();
+		this.external = Factory.createClassStore();
 	}
 
 	public IStatus run(IProgressMonitor monitor) {
@@ -151,8 +151,8 @@ public class Jars2UML {
 	}
 
 	private void exploreRelations() {
-		final JavaVisitorHandler<Void> javaRelationHandler = Factory.createJavaRelationHandler(
-				internal, external);
+		final JavaVisitorHandler<Void> javaRelationHandler = Factory.createJavaRelationHandler(internal,
+				external);
 		final JavaVisitor javaVisitor = Factory.createJavaVisitor(javaRelationHandler);
 
 		for (Class<?> javaItem : internal.getAllJavaClasses()) {
@@ -208,7 +208,7 @@ public class Jars2UML {
 		model.setName(modelName.replace(".uml", ""));
 		Utils.importPrimitiveTypes(model, UMLResource.JAVA_PRIMITIVE_TYPES_LIBRARY_URI);
 
-		ModelStore modelStore = new ModelStore(model);
+		ModelStore modelStore = Factory.createModelStore(model);
 
 		if (!external.getAllJavaItems().isEmpty()) {
 			Component createdComponent = UMLFactory.eINSTANCE.createComponent();
@@ -233,8 +233,7 @@ public class Jars2UML {
 
 	private static void handleElementRelations(Model model, ModelStore modelStore, Set<Element> internalElems) {
 
-		final JavaVisitorHandler<Void> modelRelationHandler = Factory
-				.createUMLRelationHandler(modelStore);
+		final JavaVisitorHandler<Void> modelRelationHandler = Factory.createUMLRelationHandler(modelStore);
 		final JavaVisitor javaVisitor = Factory.createJavaVisitor(modelRelationHandler);
 
 		for (Class<?> javaItem : modelStore.getJava2UMLBinding().keySet()) {
@@ -245,8 +244,8 @@ public class Jars2UML {
 
 	private static Set<Element> createModelElements(Component parent, ClassStore classStore,
 			ModelStore modelStore) {
-		final JavaVisitorHandler<Set<Element>> modelInitializer = Factory.createInitializerHandler(
-				parent, modelStore);
+		final JavaVisitorHandler<Set<Element>> modelInitializer = Factory.createInitializerHandler(parent,
+				modelStore);
 		final JavaVisitor javaVisitor = Factory.createJavaVisitor(modelInitializer);
 
 		for (Class<?> javaItem : classStore.getAllJavaItems()) {

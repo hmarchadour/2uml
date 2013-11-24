@@ -23,10 +23,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.obeonetwork.jar2uml.core.api.Utils;
+import org.obeonetwork.jar2uml.core.api.store.ClassStore;
 
 import com.google.common.base.Optional;
 
-public class ClassStore {
+public class ClassStoreImpl implements ClassStore {
 
 	private final Map<File, Set<Class<?>>> binding;
 
@@ -38,7 +39,7 @@ public class ClassStore {
 
 	private final Set<Class<?>> annotations;
 
-	public ClassStore() {
+	public ClassStoreImpl() {
 		binding = new HashMap<File, Set<Class<?>>>();
 		classes = new HashSet<Class<?>>();
 		interfaces = new HashSet<Class<?>>();
@@ -46,14 +47,26 @@ public class ClassStore {
 		annotations = new HashSet<Class<?>>();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Set<File> getFiles() {
 		return Collections.unmodifiableSet(binding.keySet());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Map<File, Set<Class<?>>> getFile2JavaItemsBinding() {
 		return Collections.unmodifiableMap(binding);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Optional<File> retrieveFile(Class<?> clazz) {
 		Optional<File> result = Optional.absent();
 		for (File file : binding.keySet()) {
@@ -66,6 +79,10 @@ public class ClassStore {
 		return result;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Set<Class<?>> getAllJavaItems() {
 		Set<Class<?>> result = new HashSet<Class<?>>();
 		result.addAll(classes);
@@ -75,22 +92,42 @@ public class ClassStore {
 		return Collections.unmodifiableSet(result);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Set<Class<?>> getAllJavaClasses() {
 		return Collections.unmodifiableSet(classes);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Set<Class<?>> getAllJavaInterfaces() {
 		return Collections.unmodifiableSet(interfaces);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Set<Class<?>> getAllJavaAnnotations() {
 		return Collections.unmodifiableSet(annotations);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Set<Class<?>> getAllJavaEnums() {
 		return Collections.unmodifiableSet(enums);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void add(File file, Class<?> clazz) {
 		// System.out.println("Add Java " + clazz.getSimpleName());
 		if (clazz.isArray()) {
@@ -110,6 +147,10 @@ public class ClassStore {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void addClass(File file, Class<?> clazz) {
 		if (!isClass(clazz)) {
 			throw new IllegalArgumentException("clazz is not a Java class");
@@ -118,6 +159,10 @@ public class ClassStore {
 		addBinding(file, clazz);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void addInterface(File file, Class<?> clazz) {
 		if (!isInterface(clazz)) {
 			throw new IllegalArgumentException("clazz is not a Java interface");
@@ -126,6 +171,10 @@ public class ClassStore {
 		addBinding(file, clazz);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void addAnnotation(File file, Class<?> clazz) {
 		if (!isAnnotation(clazz)) {
 			throw new IllegalArgumentException("clazz is not a Java annotation");
@@ -134,6 +183,10 @@ public class ClassStore {
 		addBinding(file, clazz);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void addEnum(File file, Class<?> clazz) {
 		if (!isEnum(clazz)) {
 			throw new IllegalArgumentException("clazz is not a Java enum");

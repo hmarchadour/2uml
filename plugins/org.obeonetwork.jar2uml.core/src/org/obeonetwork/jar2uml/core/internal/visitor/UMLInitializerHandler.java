@@ -21,8 +21,8 @@ import org.eclipse.uml2.uml.Element;
 import org.eclipse.uml2.uml.Enumeration;
 import org.eclipse.uml2.uml.Interface;
 import org.obeonetwork.jar2uml.core.api.Utils;
+import org.obeonetwork.jar2uml.core.api.store.ModelStore;
 import org.obeonetwork.jar2uml.core.api.visitor.JavaVisitorHandler;
-import org.obeonetwork.jar2uml.core.internal.store.ModelStore;
 
 public class UMLInitializerHandler implements JavaVisitorHandler<Set<Element>> {
 

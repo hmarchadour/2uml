@@ -14,8 +14,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import org.obeonetwork.jar2uml.core.api.Utils;
+import org.obeonetwork.jar2uml.core.api.store.ClassStore;
 import org.obeonetwork.jar2uml.core.api.visitor.JavaVisitorHandler;
-import org.obeonetwork.jar2uml.core.internal.store.ClassStore;
 
 public class JavaRelationHandler implements JavaVisitorHandler<Void> {
 
