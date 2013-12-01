@@ -1,4 +1,4 @@
-package org.obeonetwork.jar2uml.tests.api;
+package org.obeonetwork.jar2uml.core.tests.api;
 
 import java.io.File;
 import java.net.URI;

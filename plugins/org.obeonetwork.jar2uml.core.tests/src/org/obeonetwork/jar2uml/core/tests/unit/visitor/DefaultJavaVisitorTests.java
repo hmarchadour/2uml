@@ -1,4 +1,4 @@
-package org.obeonetwork.jar2uml.tests.unit.visitor;
+package org.obeonetwork.jar2uml.core.tests.unit.visitor;
 
 import static org.junit.Assert.*;
 

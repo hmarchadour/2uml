@@ -1,4 +1,4 @@
-package org.obeonetwork.jar2uml.tests.unit.store;
+package org.obeonetwork.jar2uml.core.tests.unit.store;
 
 import static org.junit.Assert.assertEquals;
 
