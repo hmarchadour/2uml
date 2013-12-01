@@ -5,7 +5,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({DefaultJavaVisitorTests.class, JavaRelationHandlerTests.class})
+@SuiteClasses({ DefaultJavaVisitorTests.class, JavaRelationHandlerFields.class })
 public class AllVisitorTests {
 
 }

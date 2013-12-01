@@ -36,7 +36,15 @@ public final class Utils {
 	}
 
 	public static boolean isPrimitive(Class<?> clazz) {
-		return clazz.isPrimitive();
+		if (clazz.isArray()) {
+			return isPrimitive(clazz.getComponentType());
+		} else {
+			return clazz.isPrimitive();
+		}
+	}
+
+	public static boolean isPrimitive(Field field) {
+		return isPrimitive(field.getType());
 	}
 
 	public static boolean isInterface(Class<?> clazz) {

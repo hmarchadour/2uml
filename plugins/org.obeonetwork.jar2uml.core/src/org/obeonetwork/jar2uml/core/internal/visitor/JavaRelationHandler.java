@@ -77,7 +77,7 @@ public class JavaRelationHandler implements JavaVisitorHandler<Void> {
 
 	@Override
 	public void caseField(Field aField) {
-		if (isExternal(aField.getType())) {
+		if (!Utils.isPrimitive(aField) && isExternal(aField.getType())) {
 			external.add(internal.retrieveFile(context).get(), aField.getType());
 		}
 	}
@@ -101,7 +101,11 @@ public class JavaRelationHandler implements JavaVisitorHandler<Void> {
 	}
 
 	private boolean isExternal(Class<?> clazz) {
-		return !internal.getAllJavaItems().contains(clazz);
+		if (clazz.isArray()) {
+			return isExternal(clazz.getComponentType());
+		} else {
+			return !internal.getAllJavaItems().contains(clazz);
+		}
 	}
 
 }
