@@ -132,12 +132,12 @@ public class ClassStoreImpl implements ClassStore {
 		// System.out.println("Add Java " + clazz.getSimpleName());
 		if (clazz.isArray()) {
 			add(file, clazz.getComponentType());
+		} else if (Utils.isAnnotation(clazz)) {
+			addAnnotation(file, clazz);
 		} else if (Utils.isInterface(clazz)) {
 			addInterface(file, clazz);
 		} else if (Utils.isEnum(clazz)) {
 			addEnum(file, clazz);
-		} else if (Utils.isAnnotation(clazz)) {
-			addAnnotation(file, clazz);
 		} else if (Utils.isClass(clazz)) {
 			addClass(file, clazz);
 		} else if (Utils.isPrimitive(clazz)) {

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.obeonetwork.jar2uml.core.api;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -68,6 +69,15 @@ public final class Utils {
 		}
 	}
 
+	public static List<Constructor<?>> findConstructors(Class<?> clazz) {
+		try {
+			return Arrays.asList(clazz.getDeclaredConstructors());
+		} catch (NoClassDefFoundError e) {
+			System.err.println("NoClassDefFoundError:findMethodes " + e.getMessage());
+			return Collections.<Constructor<?>> emptyList();
+		}
+	}
+
 	public static List<Field> findAttributes(Class<?> clazz) {
 		try {
 			return Arrays.asList(clazz.getFields());
@@ -79,7 +89,7 @@ public final class Utils {
 
 	public static List<Method> findMethodes(Class<?> clazz) {
 		try {
-			return Arrays.asList(clazz.getMethods());
+			return Arrays.asList(clazz.getDeclaredMethods());
 		} catch (NoClassDefFoundError e) {
 			System.err.println("NoClassDefFoundError:findMethodes " + e.getMessage());
 			return Collections.<Method> emptyList();
@@ -113,7 +123,7 @@ public final class Utils {
 				for (PackageableElement packageableElement : packagedElements) {
 					if (packageableElement instanceof org.eclipse.uml2.uml.Package) {
 						if (subpackage.equals(packageableElement.getName())) {
-							current = (org.eclipse.uml2.uml.Package)packageableElement;
+							current = (org.eclipse.uml2.uml.Package) packageableElement;
 							break;
 						}
 					}
@@ -137,6 +147,10 @@ public final class Utils {
 
 	public static boolean validJavaItem(Class<?> item) {
 		return item != null && item.getSimpleName() != null && item.getSimpleName().length() > 0;
+	}
+
+	public static boolean validJavaItem(Constructor constructor) {
+		return constructor != null;
 	}
 
 	public static boolean validJavaItem(Field item) {
@@ -176,8 +190,7 @@ public final class Utils {
 		final ResourceSet resourceSet = namespace.eResource().getResourceSet();
 		final Resource resource = resourceSet.getResource(URI.createURI(libraryUri), true);
 
-		final Package root = (Package)EcoreUtil.getObjectByType(resource.getContents(),
-				UMLPackage.Literals.PACKAGE);
+		final Package root = (Package) EcoreUtil.getObjectByType(resource.getContents(), UMLPackage.Literals.PACKAGE);
 		// We check if a package import already exists
 		if (!namespace.getImportedPackages().contains(root)) {
 			namespace.createPackageImport(root);

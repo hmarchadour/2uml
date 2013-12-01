@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.obeonetwork.jar2uml.core.internal.visitor;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -19,9 +20,9 @@ import org.obeonetwork.jar2uml.core.api.visitor.JavaVisitorHandler;
 
 public class JavaRelationHandler implements JavaVisitorHandler<Void> {
 
-	private ClassStore internal;
+	private final ClassStore internal;
 
-	private ClassStore external;
+	private final ClassStore external;
 
 	private Class<?> context;
 
@@ -67,6 +68,11 @@ public class JavaRelationHandler implements JavaVisitorHandler<Void> {
 	@Override
 	public void caseEnum(Class<?> anEnum) {
 		context = anEnum;
+	}
+
+	@Override
+	public void caseConstructor(Constructor<?> constructor) {
+		// TODO
 	}
 
 	@Override

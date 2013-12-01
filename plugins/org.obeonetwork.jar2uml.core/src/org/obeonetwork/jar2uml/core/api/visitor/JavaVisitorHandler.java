@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.obeonetwork.jar2uml.core.api.visitor;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -28,6 +29,8 @@ public interface JavaVisitorHandler<T> {
 	void caseAnnotation(Class<?> anAnnotation);
 
 	void caseEnum(Class<?> anEnum);
+
+	void caseConstructor(Constructor<?> constructor);
 
 	void caseField(Field aField);
 

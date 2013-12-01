@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.obeonetwork.jar2uml.core.internal.visitor;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -26,11 +27,11 @@ import org.obeonetwork.jar2uml.core.api.visitor.JavaVisitorHandler;
 
 public class UMLInitializerHandler implements JavaVisitorHandler<Set<Element>> {
 
-	private Component parent;
+	private final Component parent;
 
-	private ModelStore modelStore;
+	private final ModelStore modelStore;
 
-	private Set<Element> createdUMLElements;
+	private final Set<Element> createdUMLElements;
 
 	public UMLInitializerHandler(Component parent, ModelStore modelStore) {
 		this.parent = parent;
@@ -88,6 +89,11 @@ public class UMLInitializerHandler implements JavaVisitorHandler<Set<Element>> {
 		Enumeration createEnumeration = pack.createOwnedEnumeration(anEnum.getSimpleName());
 		createdUMLElements.add(createEnumeration);
 		modelStore.add(anEnum, createEnumeration);
+	}
+
+	@Override
+	public void caseConstructor(Constructor<?> constructor) {
+		// TODO
 	}
 
 	@Override

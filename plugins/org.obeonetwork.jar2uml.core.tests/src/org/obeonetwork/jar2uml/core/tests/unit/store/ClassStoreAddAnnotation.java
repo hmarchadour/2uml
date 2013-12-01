@@ -20,8 +20,9 @@ public class ClassStoreAddAnnotation extends ClassStoreHelper {
 	@Test
 	public void twoAnnotations() {
 		ClassStore classStore = Factory.createClassStore();
-		classStore.add(createMock(File.class), Override.class);
-		classStore.add(createMock(File.class), Deprecated.class);
+		File file = createMock(File.class);
+		classStore.add(file, Override.class);
+		classStore.add(file, Deprecated.class);
 		testStoreSize(classStore, 0, 0, 0, 2, 1);
 	}
 
