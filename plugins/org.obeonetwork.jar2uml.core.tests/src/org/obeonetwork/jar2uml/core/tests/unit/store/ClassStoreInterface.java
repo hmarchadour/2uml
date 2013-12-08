@@ -18,30 +18,30 @@ import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
 import org.obeonetwork.jar2uml.core.tests.api.Utils;
 
-public class ClassStoreAddAnnotation {
+public class ClassStoreInterface {
 
 	@Test
-	public void oneAnnotation() {
+	public void oneInterface() {
 		ClassStore classStore = Factory.createClassStore();
-		classStore.add(EasyMock.createMock(File.class), Override.class);
-		Utils.testStoreSize(classStore, 0, 0, 0, 1, 1);
+		classStore.add(EasyMock.createMock(File.class), Cloneable.class);
+		Utils.testStoreSize(classStore, 0, 1, 0, 0, 1);
 	}
 
 	@Test
-	public void twoAnnotations() {
+	public void twoInterfaces() {
 		ClassStore classStore = Factory.createClassStore();
 		File file = EasyMock.createMock(File.class);
-		classStore.add(file, Override.class);
-		classStore.add(file, Deprecated.class);
-		Utils.testStoreSize(classStore, 0, 0, 0, 2, 1);
+		classStore.add(file, Cloneable.class);
+		classStore.add(file, Comparable.class);
+		Utils.testStoreSize(classStore, 0, 2, 0, 0, 1);
 	}
 
 	@Test
-	public void twoAnnotationsInTwoFiles() {
+	public void twoInterfacesInTwoFiles() {
 		ClassStore classStore = Factory.createClassStore();
-		classStore.add(EasyMock.createMock(File.class), Override.class);
-		classStore.add(EasyMock.createMock(File.class), Deprecated.class);
-		Utils.testStoreSize(classStore, 0, 0, 0, 2, 2);
+		classStore.add(EasyMock.createMock(File.class), Cloneable.class);
+		classStore.add(EasyMock.createMock(File.class), Comparable.class);
+		Utils.testStoreSize(classStore, 0, 2, 0, 0, 2);
 	}
 
 }

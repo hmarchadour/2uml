@@ -11,7 +11,6 @@
 package org.obeonetwork.jar2uml.core.tests.unit.store;
 
 import java.io.File;
-import java.net.Proxy;
 
 import org.easymock.EasyMock;
 import org.junit.Test;
@@ -19,29 +18,22 @@ import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
 import org.obeonetwork.jar2uml.core.tests.api.Utils;
 
-public class ClassStoreAddEnum {
+public class ClassStoreCommon {
 
 	@Test
-	public void oneEnum() {
+	public void defaultConstructor() {
 		ClassStore classStore = Factory.createClassStore();
-		classStore.add(EasyMock.createMock(File.class), Thread.State.class);
-		Utils.testStoreSize(classStore, 0, 0, 1, 0, 1);
+		Utils.testStoreSize(classStore, 0, 0, 0, 0, 0);
 	}
 
 	@Test
-	public void twoEnums() {
+	public void oneOfEach() {
 		ClassStore classStore = Factory.createClassStore();
 		File file = EasyMock.createMock(File.class);
+		classStore.add(file, Class.class);
+		classStore.add(file, Override.class);
 		classStore.add(file, Thread.State.class);
-		classStore.add(file, Proxy.Type.class);
-		Utils.testStoreSize(classStore, 0, 0, 2, 0, 1);
-	}
-
-	@Test
-	public void twoEnumsInTwoFiles() {
-		ClassStore classStore = Factory.createClassStore();
-		classStore.add(EasyMock.createMock(File.class), Thread.State.class);
-		classStore.add(EasyMock.createMock(File.class), Proxy.Type.class);
-		Utils.testStoreSize(classStore, 0, 0, 2, 0, 2);
+		classStore.add(file, Cloneable.class);
+		Utils.testStoreSize(classStore, 1, 1, 1, 1, 1);
 	}
 }

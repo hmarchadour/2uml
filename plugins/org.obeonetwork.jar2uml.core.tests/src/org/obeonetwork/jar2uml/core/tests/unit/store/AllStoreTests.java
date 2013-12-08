@@ -18,8 +18,8 @@ import org.junit.runners.Suite.SuiteClasses;
  * This test suite regroup all unit tests about stores used in the core plugins.
  */
 @RunWith(Suite.class)
-@SuiteClasses({ClassStoreAddCommon.class, ClassStoreAddAnnotation.class, ClassStoreAddClass.class,
-		ClassStoreAddEnum.class, ClassStoreAddInterface.class})
+@SuiteClasses({ClassStoreCommon.class, ClassStoreAnnotation.class, ClassStoreClass.class,
+		ClassStoreEnum.class, ClassStoreInterface.class})
 public class AllStoreTests {
 
 }

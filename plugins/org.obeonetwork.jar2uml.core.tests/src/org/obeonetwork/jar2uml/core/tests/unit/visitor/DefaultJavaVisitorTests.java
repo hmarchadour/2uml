@@ -12,7 +12,6 @@ package org.obeonetwork.jar2uml.core.tests.unit.visitor;
 
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -44,79 +43,90 @@ public class DefaultJavaVisitorTests {
 		javaVisitor = Factory.createJavaVisitor(mockedVisitorHandler);
 	}
 
-	private void setDefaultMockClass(Class<?> clazz) {
-		mockedVisitorHandler.caseClass(clazz);
-		mockedVisitorHandler.caseSuperClass(Object.class);
-		assertEquals(1, clazz.getConstructors().length);
-		mockedVisitorHandler.caseConstructor(clazz.getConstructors()[0]);
+	@Test
+	public void visitFields() {
+		mockedVisitorHandler.caseClass(Fields.class);
+		mockedVisitorHandler.caseSuperClass(Fields.class.getSuperclass());
+		mockedVisitorHandler.caseConstructor(Fields.class.getConstructors()[0]);
+
+		Field[] fields = Fields.class.getFields();
+		for (Field field : fields) {
+			// we expect to visit all fields
+			mockedVisitorHandler.caseField(field);
+		}
+		launchVisitOn(Fields.class);
 	}
 
-	private void testJavaVisitor(Class<?> clazz) {
+	@Test
+	public void visitArrayFields() {
+		mockedVisitorHandler.caseClass(ArrayFields.class);
+		mockedVisitorHandler.caseSuperClass(ArrayFields.class.getSuperclass());
+		mockedVisitorHandler.caseConstructor(ArrayFields.class.getConstructors()[0]);
+
+		Field[] fields = ArrayFields.class.getFields();
+		for (Field field : fields) {
+			// we expect to visit all array fields
+			mockedVisitorHandler.caseField(field);
+		}
+		launchVisitOn(ArrayFields.class);
+	}
+
+	@Test
+	public void visitMethods() {
+		mockedVisitorHandler.caseClass(Methods.class);
+		mockedVisitorHandler.caseSuperClass(Methods.class.getSuperclass());
+		mockedVisitorHandler.caseConstructor(Methods.class.getConstructors()[0]);
+
+		Method[] methods = Methods.class.getDeclaredMethods();
+		for (Method method : methods) {
+			// we expect to visit all methods
+			mockedVisitorHandler.caseMethod(method);
+		}
+		launchVisitOn(Methods.class);
+	}
+
+	@Test
+	public void visitPublicConstructors() {
+		mockedVisitorHandler.caseClass(PublicConstructors.class);
+		mockedVisitorHandler.caseSuperClass(Object.class);
+
+		Constructor<?>[] constructors = PublicConstructors.class.getDeclaredConstructors();
+		for (Constructor constructor : constructors) {
+			// we expect to visit all constructors
+			mockedVisitorHandler.caseConstructor(constructor);
+		}
+		launchVisitOn(PublicConstructors.class);
+	}
+
+	@Test
+	public void visitProtectedConstructors() {
+		mockedVisitorHandler.caseClass(ProtectedConstructors.class);
+		mockedVisitorHandler.caseSuperClass(Object.class);
+
+		Constructor<?>[] constructors = ProtectedConstructors.class.getDeclaredConstructors();
+		for (Constructor constructor : constructors) {
+			// we expect to visit all constructors
+			mockedVisitorHandler.caseConstructor(constructor);
+		}
+		launchVisitOn(ProtectedConstructors.class);
+	}
+
+	@Test
+	public void visitPrivateConstructors() {
+		mockedVisitorHandler.caseClass(PrivateConstructors.class);
+		mockedVisitorHandler.caseSuperClass(Object.class);
+
+		Constructor<?>[] constructors = PrivateConstructors.class.getDeclaredConstructors();
+		for (Constructor constructor : constructors) {
+			// we expect to visit all constructors
+			mockedVisitorHandler.caseConstructor(constructor);
+		}
+		launchVisitOn(PrivateConstructors.class);
+	}
+
+	private void launchVisitOn(Class<?> clazz) {
 		replay(mockedVisitorHandler);
 		javaVisitor.visit(clazz);
 		verify(mockedVisitorHandler);
-	}
-
-	@Test
-	public void testFields() {
-		setDefaultMockClass(Fields.class);
-		Field[] fields = Fields.class.getFields();
-		for (Field field : fields) {
-			mockedVisitorHandler.caseField(field);
-		}
-		testJavaVisitor(Fields.class);
-	}
-
-	@Test
-	public void testArrayFields() {
-		setDefaultMockClass(ArrayFields.class);
-		Field[] fields = ArrayFields.class.getFields();
-		for (Field field : fields) {
-			mockedVisitorHandler.caseField(field);
-		}
-		testJavaVisitor(ArrayFields.class);
-	}
-
-	@Test
-	public void testMethods() {
-		setDefaultMockClass(Methods.class);
-		Method[] methods = Methods.class.getDeclaredMethods();
-		for (Method method : methods) {
-			mockedVisitorHandler.caseMethod(method);
-		}
-		testJavaVisitor(Methods.class);
-	}
-
-	@Test
-	public void testPublicConstructors() {
-		Constructor<?>[] constructors = PublicConstructors.class.getDeclaredConstructors();
-		mockedVisitorHandler.caseClass(PublicConstructors.class);
-		mockedVisitorHandler.caseSuperClass(Object.class);
-		for (Constructor constructor : constructors) {
-			mockedVisitorHandler.caseConstructor(constructor);
-		}
-		testJavaVisitor(PublicConstructors.class);
-	}
-
-	@Test
-	public void testProtectedConstructors() {
-		Constructor<?>[] constructors = ProtectedConstructors.class.getDeclaredConstructors();
-		mockedVisitorHandler.caseClass(ProtectedConstructors.class);
-		mockedVisitorHandler.caseSuperClass(Object.class);
-		for (Constructor constructor : constructors) {
-			mockedVisitorHandler.caseConstructor(constructor);
-		}
-		testJavaVisitor(ProtectedConstructors.class);
-	}
-
-	@Test
-	public void testPrivateConstructors() {
-		Constructor<?>[] constructors = PrivateConstructors.class.getDeclaredConstructors();
-		mockedVisitorHandler.caseClass(PrivateConstructors.class);
-		mockedVisitorHandler.caseSuperClass(Object.class);
-		for (Constructor constructor : constructors) {
-			mockedVisitorHandler.caseConstructor(constructor);
-		}
-		testJavaVisitor(PrivateConstructors.class);
 	}
 }

@@ -11,6 +11,7 @@
 package org.obeonetwork.jar2uml.core.tests.unit.store;
 
 import java.io.File;
+import java.net.Proxy;
 
 import org.easymock.EasyMock;
 import org.junit.Test;
@@ -18,33 +19,29 @@ import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
 import org.obeonetwork.jar2uml.core.tests.api.Utils;
 
-public class ClassStoreAddClass {
+public class ClassStoreEnum {
 
 	@Test
-	public void oneClass() {
+	public void oneEnum() {
 		ClassStore classStore = Factory.createClassStore();
-		File fileMock = EasyMock.createMock(File.class);
-		classStore.add(fileMock, Class.class);
-		Utils.testStoreSize(classStore, 1, 0, 0, 0, 1);
+		classStore.add(EasyMock.createMock(File.class), Thread.State.class);
+		Utils.testStoreSize(classStore, 0, 0, 1, 0, 1);
 	}
 
 	@Test
-	public void twoClasses() {
+	public void twoEnums() {
 		ClassStore classStore = Factory.createClassStore();
-		File fileMock = EasyMock.createMock(File.class);
-		classStore.add(fileMock, Class.class);
-		classStore.add(fileMock, Integer.class);
-		Utils.testStoreSize(classStore, 2, 0, 0, 0, 1);
+		File file = EasyMock.createMock(File.class);
+		classStore.add(file, Thread.State.class);
+		classStore.add(file, Proxy.Type.class);
+		Utils.testStoreSize(classStore, 0, 0, 2, 0, 1);
 	}
 
 	@Test
-	public void twoClassesInTwoFiles() {
+	public void twoEnumsInTwoFiles() {
 		ClassStore classStore = Factory.createClassStore();
-		File fileMock = EasyMock.createMock(File.class);
-		classStore.add(fileMock, Class.class);
-		File fileMock2 = EasyMock.createMock(File.class);
-		classStore.add(fileMock2, Integer.class);
-		Utils.testStoreSize(classStore, 2, 0, 0, 0, 2);
+		classStore.add(EasyMock.createMock(File.class), Thread.State.class);
+		classStore.add(EasyMock.createMock(File.class), Proxy.Type.class);
+		Utils.testStoreSize(classStore, 0, 0, 2, 0, 2);
 	}
-
 }

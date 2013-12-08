@@ -28,10 +28,10 @@ import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
 import org.obeonetwork.jar2uml.core.api.visitor.JavaVisitorHandler;
 
-import demo.Fields;
+import demo.ArrayFields;
 
 @RunWith(Parameterized.class)
-public class JavaRelationHandlerFields {
+public class JavaRelationHandlerArrayFields {
 
 	protected final Field fieldToUse;
 
@@ -57,8 +57,8 @@ public class JavaRelationHandlerFields {
 	 * @param internalToFind
 	 * @param externalToFind
 	 */
-	public JavaRelationHandlerFields(String testCaseName, Field fieldToUse, Class<?>[] internalItemsToFind,
-			Class<?>[] externalItemsToFind) {
+	public JavaRelationHandlerArrayFields(String testCaseName, Field fieldToUse,
+			Class<?>[] internalItemsToFind, Class<?>[] externalItemsToFind) {
 		this.fieldToUse = fieldToUse;
 		this.internalItemsToFind = internalItemsToFind;
 		this.externalItemsToFind = externalItemsToFind;
@@ -67,15 +67,16 @@ public class JavaRelationHandlerFields {
 	@Parameters(name = "#{index} {0}")
 	public static Collection<Object[]> params() {
 		HashSet<Object[]> params = new HashSet<Object[]>();
-		Field[] declaredFields = Fields.class.getDeclaredFields();
-		for (Field field : declaredFields) {
-			String testCaseName = field.getName();
-			if (field.getType().isPrimitive()) {
-				params.add(new Object[] {testCaseName, field, new Class<?>[] {field.getDeclaringClass()},
-						new Class<?>[] {}});
+		Field[] declaredArrayFields = ArrayFields.class.getDeclaredFields();
+		for (Field arrayField : declaredArrayFields) {
+			String testCaseName = arrayField.getName();
+			if (arrayField.getType().getComponentType().isPrimitive()) {
+				params.add(new Object[] {testCaseName, arrayField,
+						new Class<?>[] {arrayField.getDeclaringClass()}, new Class<?>[] {}});
 			} else {
-				params.add(new Object[] {testCaseName, field, new Class<?>[] {field.getDeclaringClass()},
-						new Class<?>[] {field.getType()}});
+				params.add(new Object[] {testCaseName, arrayField,
+						new Class<?>[] {arrayField.getDeclaringClass()},
+						new Class<?>[] {arrayField.getType().getComponentType()}});
 			}
 		}
 		return params;

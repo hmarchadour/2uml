@@ -18,30 +18,33 @@ import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
 import org.obeonetwork.jar2uml.core.tests.api.Utils;
 
-public class ClassStoreAddInterface {
+public class ClassStoreClass {
 
 	@Test
-	public void oneInterface() {
+	public void oneClass() {
 		ClassStore classStore = Factory.createClassStore();
-		classStore.add(EasyMock.createMock(File.class), Cloneable.class);
-		Utils.testStoreSize(classStore, 0, 1, 0, 0, 1);
+		File fileMock = EasyMock.createMock(File.class);
+		classStore.add(fileMock, Class.class);
+		Utils.testStoreSize(classStore, 1, 0, 0, 0, 1);
 	}
 
 	@Test
-	public void twoInterfaces() {
+	public void twoClasses() {
 		ClassStore classStore = Factory.createClassStore();
-		File file = EasyMock.createMock(File.class);
-		classStore.add(file, Cloneable.class);
-		classStore.add(file, Comparable.class);
-		Utils.testStoreSize(classStore, 0, 2, 0, 0, 1);
+		File fileMock = EasyMock.createMock(File.class);
+		classStore.add(fileMock, Class.class);
+		classStore.add(fileMock, Integer.class);
+		Utils.testStoreSize(classStore, 2, 0, 0, 0, 1);
 	}
 
 	@Test
-	public void twoInterfacesInTwoFiles() {
+	public void twoClassesInTwoFiles() {
 		ClassStore classStore = Factory.createClassStore();
-		classStore.add(EasyMock.createMock(File.class), Cloneable.class);
-		classStore.add(EasyMock.createMock(File.class), Comparable.class);
-		Utils.testStoreSize(classStore, 0, 2, 0, 0, 2);
+		File fileMock = EasyMock.createMock(File.class);
+		classStore.add(fileMock, Class.class);
+		File fileMock2 = EasyMock.createMock(File.class);
+		classStore.add(fileMock2, Integer.class);
+		Utils.testStoreSize(classStore, 2, 0, 0, 0, 2);
 	}
 
 }
