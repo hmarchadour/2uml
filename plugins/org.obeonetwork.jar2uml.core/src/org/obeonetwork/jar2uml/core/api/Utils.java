@@ -131,7 +131,7 @@ public final class Utils {
 				for (PackageableElement packageableElement : packagedElements) {
 					if (packageableElement instanceof org.eclipse.uml2.uml.Package) {
 						if (subpackage.equals(packageableElement.getName())) {
-							current = (org.eclipse.uml2.uml.Package) packageableElement;
+							current = (org.eclipse.uml2.uml.Package)packageableElement;
 							break;
 						}
 					}
@@ -169,6 +169,21 @@ public final class Utils {
 		return item != null;
 	}
 
+	private static final String[] JDK_PREFIXS = new String[] {"java.", "javax.", "com.sun", "sun"};
+
+	public static boolean comeFromTheJRE(Class<?> item) {
+		boolean result = false;
+		String name = item.getName();
+		if (name != null && name.length() > 0) {
+			for (String jdkPrefix : JDK_PREFIXS) {
+				if (jdkPrefix.startsWith(jdkPrefix)) {
+					result = true;
+				}
+			}
+		}
+		return result;
+	}
+
 	/**
 	 * Check if the given element's name match the given String.
 	 * 
@@ -198,7 +213,8 @@ public final class Utils {
 		final ResourceSet resourceSet = namespace.eResource().getResourceSet();
 		final Resource resource = resourceSet.getResource(URI.createURI(libraryUri), true);
 
-		final Package root = (Package) EcoreUtil.getObjectByType(resource.getContents(), UMLPackage.Literals.PACKAGE);
+		final Package root = (Package)EcoreUtil.getObjectByType(resource.getContents(),
+				UMLPackage.Literals.PACKAGE);
 		// We check if a package import already exists
 		if (!namespace.getImportedPackages().contains(root)) {
 			namespace.createPackageImport(root);
