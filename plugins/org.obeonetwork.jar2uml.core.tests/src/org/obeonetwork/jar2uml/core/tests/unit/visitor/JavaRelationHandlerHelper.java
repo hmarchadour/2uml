@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2013 Hugo Marchadour (Obeo).
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Hugo Marchadour - initial API and implementation and/or initial documentation
+ *******************************************************************************/
 package org.obeonetwork.jar2uml.core.tests.unit.visitor;
 
 import java.util.Collection;
@@ -17,10 +27,15 @@ import demo.ArrayFields;
 public abstract class JavaRelationHandlerHelper {
 
 	protected final Class<?> clazz;
+
 	protected final Class<?>[] internalToFind;
+
 	protected final Class<?>[] externalToFind;
+
 	protected ClassStore internal;
+
 	protected ClassStore external;
+
 	protected JavaVisitorHandler<Void> javaRelationHandler;
 
 	@Before
@@ -39,7 +54,7 @@ public abstract class JavaRelationHandlerHelper {
 	@Parameters
 	public static Collection<Object[]> params() {
 		HashSet<Object[]> params = new HashSet<Object[]>();
-		params.add(new Object[] { ArrayFields.class, new Class<?>[] {}, new Class<?>[] {} });
+		params.add(new Object[] {ArrayFields.class, new Class<?>[] {}, new Class<?>[] {}});
 		return params;
 	}
 
