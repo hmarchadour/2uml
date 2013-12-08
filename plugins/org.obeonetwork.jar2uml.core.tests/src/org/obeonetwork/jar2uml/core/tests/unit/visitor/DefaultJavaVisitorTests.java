@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.obeonetwork.jar2uml.core.tests.unit.visitor;
 
-import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
@@ -19,6 +18,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.obeonetwork.jar2uml.core.api.Factory;
@@ -40,7 +40,7 @@ public class DefaultJavaVisitorTests {
 
 	@Before
 	public void setUp() throws Exception {
-		mockedVisitorHandler = createMock(JavaVisitorHandler.class);
+		mockedVisitorHandler = EasyMock.createMock(JavaVisitorHandler.class);
 		javaVisitor = Factory.createJavaVisitor(mockedVisitorHandler);
 	}
 

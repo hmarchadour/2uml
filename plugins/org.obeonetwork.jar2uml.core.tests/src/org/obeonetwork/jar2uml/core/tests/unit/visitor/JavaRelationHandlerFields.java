@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.obeonetwork.jar2uml.core.tests.unit.visitor;
 
-import static org.easymock.EasyMock.createMock;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -18,6 +17,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,7 +74,7 @@ public class JavaRelationHandlerFields {
 
 	@Test
 	public void caseField() {
-		internal.add(createMock(File.class), fieldToUse.getDeclaringClass());
+		internal.add(EasyMock.createMock(File.class), fieldToUse.getDeclaringClass());
 		javaRelationHandler.caseClass(fieldToUse.getDeclaringClass());
 		javaRelationHandler.caseField(fieldToUse);
 		assertEquals(internalToFind.length, internal.getAllJavaItems().size());

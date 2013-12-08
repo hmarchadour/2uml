@@ -16,6 +16,9 @@ import org.junit.runners.Suite.SuiteClasses;
 import org.obeonetwork.jar2uml.core.tests.unit.store.AllStoreTests;
 import org.obeonetwork.jar2uml.core.tests.unit.visitor.AllVisitorTests;
 
+/**
+ * This test suite regroup all unit test suites.
+ */
 @RunWith(Suite.class)
 @SuiteClasses({AllStoreTests.class, AllVisitorTests.class})
 public class AllTests {

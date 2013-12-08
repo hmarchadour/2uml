@@ -14,6 +14,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+/**
+ * This test suite regroup all unit tests about visitors used in the core plugins.
+ */
 @RunWith(Suite.class)
 @SuiteClasses({DefaultJavaVisitorTests.class, JavaRelationHandlerFields.class})
 public class AllVisitorTests {
