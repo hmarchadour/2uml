@@ -13,6 +13,8 @@ package org.obeonetwork.jar2uml.core.internal.visitor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
 import org.obeonetwork.jar2uml.core.api.Utils;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
@@ -43,16 +45,12 @@ public class JavaRelationHandler implements JavaVisitorHandler<Void> {
 
 	@Override
 	public void caseSuperClass(Class<?> aSuperClass) {
-		if (isExternal(aSuperClass)) {
-			external.addClass(internal.retrieveFile(context).get(), aSuperClass);
-		}
+		handleClass(aSuperClass);
 	}
 
 	@Override
 	public void caseImplementedInterface(Class<?> anImplInterface) {
-		if (isExternal(anImplInterface)) {
-			external.addInterface(internal.retrieveFile(context).get(), anImplInterface);
-		}
+		handleClass(anImplInterface);
 	}
 
 	@Override
@@ -72,32 +70,38 @@ public class JavaRelationHandler implements JavaVisitorHandler<Void> {
 
 	@Override
 	public void caseConstructor(Constructor<?> constructor) {
-		// TODO
+		handleClasses(Arrays.asList(constructor.getParameterTypes()));
 	}
 
 	@Override
 	public void caseField(Field aField) {
-		if (!Utils.isPrimitive(aField) && isExternal(aField.getType())) {
-			external.add(internal.retrieveFile(context).get(), aField.getType());
+		if (!Utils.isPrimitive(aField)) {
+			handleClass(aField.getType());
 		}
 	}
 
 	@Override
 	public void caseMethod(Method method) {
 		Class<?> returnType = Utils.findMethodReturn(method);
-		if (returnType != null && isExternal(returnType)) {
-			external.add(internal.retrieveFile(context).get(), returnType);
-		}
-		for (Class<?> parameterType : Utils.findMethodParams(method)) {
-			if (isExternal(parameterType)) {
-				external.add(internal.retrieveFile(context).get(), parameterType);
-			}
-		}
+		handleClass(returnType);
+		handleClasses(Utils.findMethodParams(method));
 	}
 
 	@Override
 	public Void getResult() {
 		return null;
+	}
+
+	private void handleClasses(List<Class<?>> classes) {
+		for (Class<?> clazz : classes) {
+			handleClass(clazz);
+		}
+	}
+
+	private void handleClass(Class<?> clazz) {
+		if (clazz != null && isExternal(clazz)) {
+			external.add(internal.retrieveFile(context).get(), clazz);
+		}
 	}
 
 	private boolean isExternal(Class<?> clazz) {
