@@ -13,6 +13,7 @@ package org.obeonetwork.jar2uml.core.tests.unit.visitor;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -49,11 +50,12 @@ public class DefaultJavaVisitorTests {
 		mockedVisitorHandler.caseSuperClass(Fields.class.getSuperclass());
 		mockedVisitorHandler.caseConstructor(Fields.class.getConstructors()[0]);
 
-		Field[] fields = Fields.class.getFields();
+		Field[] fields = Fields.class.getDeclaredFields();
 		for (Field field : fields) {
 			// we expect to visit all fields
 			mockedVisitorHandler.caseField(field);
 		}
+
 		launchVisitOn(Fields.class);
 	}
 
@@ -63,11 +65,12 @@ public class DefaultJavaVisitorTests {
 		mockedVisitorHandler.caseSuperClass(ArrayFields.class.getSuperclass());
 		mockedVisitorHandler.caseConstructor(ArrayFields.class.getConstructors()[0]);
 
-		Field[] fields = ArrayFields.class.getFields();
+		Field[] fields = ArrayFields.class.getDeclaredFields();
 		for (Field field : fields) {
 			// we expect to visit all array fields
 			mockedVisitorHandler.caseField(field);
 		}
+
 		launchVisitOn(ArrayFields.class);
 	}
 
@@ -82,6 +85,7 @@ public class DefaultJavaVisitorTests {
 			// we expect to visit all methods
 			mockedVisitorHandler.caseMethod(method);
 		}
+
 		launchVisitOn(Methods.class);
 	}
 
@@ -95,6 +99,7 @@ public class DefaultJavaVisitorTests {
 			// we expect to visit all constructors
 			mockedVisitorHandler.caseConstructor(constructor);
 		}
+
 		launchVisitOn(PublicConstructors.class);
 	}
 
@@ -108,6 +113,7 @@ public class DefaultJavaVisitorTests {
 			// we expect to visit all constructors
 			mockedVisitorHandler.caseConstructor(constructor);
 		}
+
 		launchVisitOn(ProtectedConstructors.class);
 	}
 
@@ -121,7 +127,53 @@ public class DefaultJavaVisitorTests {
 			// we expect to visit all constructors
 			mockedVisitorHandler.caseConstructor(constructor);
 		}
+
 		launchVisitOn(PrivateConstructors.class);
+	}
+
+	@Test
+	public void visitAnnotation() {
+		mockedVisitorHandler.caseAnnotation(Override.class);
+		mockedVisitorHandler.caseImplementedInterface(Annotation.class);
+
+		launchVisitOn(Override.class);
+	}
+
+	enum TestEnum {
+		test
+	}
+
+	@Test
+	public void visitEnum() {
+		mockedVisitorHandler.caseEnum(TestEnum.class);
+		mockedVisitorHandler.caseSuperClass(Enum.class);
+		mockedVisitorHandler.caseConstructor(TestEnum.class.getDeclaredConstructors()[0]);
+		for (Field field : TestEnum.class.getDeclaredFields()) {
+			mockedVisitorHandler.caseField(field);
+		}
+		for (Method method : TestEnum.class.getDeclaredMethods()) {
+			mockedVisitorHandler.caseMethod(method);
+		}
+		launchVisitOn(TestEnum.class);
+	}
+
+	private interface CloneableImpl extends Cloneable {
+
+	}
+
+	@Test
+	public void visitImplementedInterface() {
+		mockedVisitorHandler.caseInterface(CloneableImpl.class);
+		mockedVisitorHandler.caseImplementedInterface(Cloneable.class);
+
+		launchVisitOn(CloneableImpl.class);
+	}
+
+	@Test
+	public void visitInterface() {
+		mockedVisitorHandler.caseInterface(Cloneable.class);
+
+		launchVisitOn(Cloneable.class);
 	}
 
 	private void launchVisitOn(Class<?> clazz) {

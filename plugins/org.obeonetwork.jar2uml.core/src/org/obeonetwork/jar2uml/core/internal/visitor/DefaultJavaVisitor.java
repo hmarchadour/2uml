@@ -35,12 +35,12 @@ public class DefaultJavaVisitor implements JavaVisitor {
 
 			if (Utils.isPrimitive(clazz)) {
 				visitInterface(clazz);
-			} else if (Utils.isInterface(clazz)) {
-				visitInterface(clazz);
 			} else if (Utils.isAnnotation(clazz)) {
 				visitAnnotation(clazz);
 			} else if (Utils.isEnum(clazz)) {
 				visitEnum(clazz);
+			} else if (Utils.isInterface(clazz)) {
+				visitInterface(clazz);
 			} else if (Utils.isClass(clazz)) {
 				visitClass(clazz);
 			}

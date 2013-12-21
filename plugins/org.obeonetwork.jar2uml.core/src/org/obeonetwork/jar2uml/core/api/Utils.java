@@ -88,7 +88,7 @@ public final class Utils {
 
 	public static List<Field> findAttributes(Class<?> clazz) {
 		try {
-			return Arrays.asList(clazz.getFields());
+			return Arrays.asList(clazz.getDeclaredFields());
 		} catch (NoClassDefFoundError e) {
 			System.err.println("NoClassDefFoundError:findAttributes " + e.getMessage());
 			return Collections.<Field> emptyList();
