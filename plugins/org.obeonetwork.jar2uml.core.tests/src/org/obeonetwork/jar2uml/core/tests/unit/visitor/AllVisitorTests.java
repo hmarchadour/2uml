@@ -19,7 +19,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({DefaultJavaVisitorTests.class, JavaRelationHandlerFields.class,
-		JavaRelationHandlerArrayFields.class})
+		JavaRelationHandlerArrayFields.class, JavaRelationHandlerMethods.class})
 public class AllVisitorTests {
 
 }

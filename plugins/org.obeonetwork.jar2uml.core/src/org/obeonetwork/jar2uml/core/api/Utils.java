@@ -154,7 +154,13 @@ public final class Utils {
 	}
 
 	public static boolean validJavaItem(Class<?> item) {
-		return item != null && item.getSimpleName() != null && item.getSimpleName().length() > 0;
+		boolean result = false;
+		try {
+			result = item != null && item.getSimpleName() != null && item.getSimpleName().length() > 0;
+		} catch (Exception e) {
+			System.err.println(e.getLocalizedMessage());
+		}
+		return result;
 	}
 
 	public static boolean validJavaItem(Constructor constructor) {
