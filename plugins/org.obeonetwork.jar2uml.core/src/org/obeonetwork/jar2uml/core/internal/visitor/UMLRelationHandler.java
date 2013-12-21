@@ -43,18 +43,12 @@ public class UMLRelationHandler implements JavaVisitorHandler<Void> {
 	}
 
 	@Override
-	public void casePrimitive(Class<?> aClass) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void caseSuperClass(Class<?> aSuperClass) {
 		if (context instanceof Classifier) {
-			Classifier classifier = (Classifier) context;
+			Classifier classifier = (Classifier)context;
 			Element superClassElement = searchInJavaIndex(aSuperClass);
 			if (superClassElement instanceof Classifier) {
-				classifier.createGeneralization((Classifier) superClassElement);
+				classifier.createGeneralization((Classifier)superClassElement);
 			}
 		}
 	}
@@ -62,11 +56,11 @@ public class UMLRelationHandler implements JavaVisitorHandler<Void> {
 	@Override
 	public void caseImplementedInterface(Class<?> anImplInterface) {
 		if (context instanceof BehavioredClassifier) {
-			BehavioredClassifier classifier = (BehavioredClassifier) context;
+			BehavioredClassifier classifier = (BehavioredClassifier)context;
 			Element interfaceElement = searchInJavaIndex(anImplInterface);
 			if (interfaceElement instanceof Interface) {
-				classifier.createInterfaceRealization(((Interface) interfaceElement).getName(),
-						(Interface) interfaceElement);
+				classifier.createInterfaceRealization(((Interface)interfaceElement).getName(),
+						(Interface)interfaceElement);
 			}
 		}
 	}
@@ -104,10 +98,11 @@ public class UMLRelationHandler implements JavaVisitorHandler<Void> {
 		if (fieldUMLType != null) {
 			if (fieldUMLType instanceof Type) {
 				if (context instanceof Interface) {
-					((Interface) context).createOwnedAttribute(aField.getName(), (Type) fieldUMLType, 0, cardianality);
+					((Interface)context).createOwnedAttribute(aField.getName(), (Type)fieldUMLType, 0,
+							cardianality);
 				} else if (context instanceof org.eclipse.uml2.uml.Class) {
-					((org.eclipse.uml2.uml.Class) context).createOwnedAttribute(aField.getName(), (Type) fieldUMLType,
-							0, cardianality);
+					((org.eclipse.uml2.uml.Class)context).createOwnedAttribute(aField.getName(),
+							(Type)fieldUMLType, 0, cardianality);
 				} else {
 					System.out.println("Not handled context:" + context);
 				}
@@ -120,28 +115,29 @@ public class UMLRelationHandler implements JavaVisitorHandler<Void> {
 	@Override
 	public void caseMethod(Method method) {
 		if (context instanceof Interface || context instanceof org.eclipse.uml2.uml.Class) {
-			Classifier classifier = (Classifier) context;
+			Classifier classifier = (Classifier)context;
 
 			Operation createOwnedOperation;
 			if (context instanceof Interface) {
-				createOwnedOperation = ((Interface) classifier).createOwnedOperation(method.getName(), null, null);
+				createOwnedOperation = ((Interface)classifier).createOwnedOperation(method.getName(), null,
+						null);
 			} else if (context instanceof org.eclipse.uml2.uml.Class) {
-				createOwnedOperation = ((org.eclipse.uml2.uml.Class) classifier).createOwnedOperation(method.getName(),
-						null, null);
+				createOwnedOperation = ((org.eclipse.uml2.uml.Class)classifier).createOwnedOperation(
+						method.getName(), null, null);
 			} else {
 				throw new IllegalStateException("Not handled context:" + context);
 			}
 			if (!"void".equals(method.getReturnType().getName())) {
 				Element returnType = searchInJavaIndex(method.getReturnType());
 				if (returnType != null) {
-					createOwnedOperation.createReturnResult("return", (Type) returnType);
+					createOwnedOperation.createReturnResult("return", (Type)returnType);
 				}
 			}
 			Class<?>[] parameterTypes = method.getParameterTypes();
 			for (Class<?> parameterType : parameterTypes) {
 				Element paramType = searchInJavaIndex(parameterType);
 				if (paramType != null) {
-					createOwnedOperation.createOwnedParameter("", (Type) paramType);
+					createOwnedOperation.createOwnedParameter("", (Type)paramType);
 				}
 			}
 		}

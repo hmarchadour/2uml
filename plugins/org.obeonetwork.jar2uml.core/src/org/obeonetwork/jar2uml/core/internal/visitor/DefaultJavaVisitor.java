@@ -89,10 +89,6 @@ public class DefaultJavaVisitor implements JavaVisitor {
 		handler.caseImplementedInterface(anImplInterface);
 	}
 
-	protected void visitPrimitive(Class<?> aClass) {
-		handler.casePrimitive(aClass);
-	}
-
 	protected void visitClass(Class<?> aClass) {
 		handler.caseClass(aClass);
 	}

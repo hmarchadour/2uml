@@ -45,12 +45,6 @@ public class UMLInitializerHandler implements JavaVisitorHandler<Set<Element>> {
 	}
 
 	@Override
-	public void casePrimitive(Class<?> aClass) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void caseClass(Class<?> aClass) {
 		org.eclipse.uml2.uml.Package pack = Utils.handlePackage(parent, aClass.getPackage());
 		org.eclipse.uml2.uml.Class createClass = pack.createOwnedClass(aClass.getSimpleName(),

@@ -18,8 +18,6 @@ public interface JavaVisitorHandler<T> {
 
 	void caseClass(Class<?> aClass);
 
-	void casePrimitive(Class<?> aClass);
-
 	void caseSuperClass(Class<?> aSuperClass);
 
 	void caseImplementedInterface(Class<?> anImplInterface);

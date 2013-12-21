@@ -39,11 +39,6 @@ public class JavaRelationHandler implements JavaVisitorHandler<Void> {
 	}
 
 	@Override
-	public void casePrimitive(Class<?> aClass) {
-		context = aClass;
-	}
-
-	@Override
 	public void caseSuperClass(Class<?> aSuperClass) {
 		handleClass(aSuperClass);
 	}
