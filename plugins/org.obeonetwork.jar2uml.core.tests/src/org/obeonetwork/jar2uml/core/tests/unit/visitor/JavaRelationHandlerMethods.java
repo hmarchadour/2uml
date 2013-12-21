@@ -88,7 +88,7 @@ public class JavaRelationHandlerMethods {
 
 	@Test
 	public void caseMethod() {
-		internal.add(EasyMock.createMock(File.class), methodToUse.getDeclaringClass());
+		internal.add(new File(""), methodToUse.getDeclaringClass());
 		// We need to visit the class owner before its field
 		javaRelationHandler.caseClass(methodToUse.getDeclaringClass());
 		javaRelationHandler.caseMethod(methodToUse);

@@ -8,6 +8,9 @@
 <unit id="org.eclipse.jdt.feature.group" version="3.9.1.v20130911-1000"/>
 <unit id="org.eclipse.uml2.sdk.feature.group" version="4.1.1.v20130902-0826"/>
 <unit id="com.google.guava" version="12.0.0.v201212092141"/>
+<unit id="org.easymock" version="2.4.0.v20090202-0900"/>
+<unit id="org.eclipse.acceleo.feature.group" version="3.4.1.201309031307"/>
+<unit id="org.eclipse.ocl.feature.group" version="3.3.0.v20130909-1552"/>
 <repository location="http://download.eclipse.org/releases/kepler"/>
 </location>
 </locations>

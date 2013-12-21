@@ -12,7 +12,6 @@ package org.obeonetwork.jar2uml.core.tests.unit.store;
 
 import java.io.File;
 
-import org.easymock.EasyMock;
 import org.junit.Test;
 import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
@@ -23,14 +22,14 @@ public class ClassStoreInterface {
 	@Test
 	public void oneInterface() {
 		ClassStore classStore = Factory.createClassStore();
-		classStore.add(EasyMock.createMock(File.class), Cloneable.class);
+		classStore.add(new File(""), Cloneable.class);
 		Utils.testStoreSize(classStore, 0, 1, 0, 0, 1);
 	}
 
 	@Test
 	public void twoInterfaces() {
 		ClassStore classStore = Factory.createClassStore();
-		File file = EasyMock.createMock(File.class);
+		File file = new File("");
 		classStore.add(file, Cloneable.class);
 		classStore.add(file, Comparable.class);
 		Utils.testStoreSize(classStore, 0, 2, 0, 0, 1);
@@ -39,8 +38,8 @@ public class ClassStoreInterface {
 	@Test
 	public void twoInterfacesInTwoFiles() {
 		ClassStore classStore = Factory.createClassStore();
-		classStore.add(EasyMock.createMock(File.class), Cloneable.class);
-		classStore.add(EasyMock.createMock(File.class), Comparable.class);
+		classStore.add(new File("fileMock1"), Cloneable.class);
+		classStore.add(new File("fileMock2"), Comparable.class);
 		Utils.testStoreSize(classStore, 0, 2, 0, 0, 2);
 	}
 

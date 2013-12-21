@@ -83,7 +83,7 @@ public class JavaRelationHandlerFields {
 
 	@Test
 	public void caseField() {
-		internal.add(EasyMock.createMock(File.class), fieldToUse.getDeclaringClass());
+		internal.add(new File(""), fieldToUse.getDeclaringClass());
 		// We need to visit the class owner before its field
 		javaRelationHandler.caseClass(fieldToUse.getDeclaringClass());
 		javaRelationHandler.caseField(fieldToUse);

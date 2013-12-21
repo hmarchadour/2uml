@@ -12,7 +12,6 @@ package org.obeonetwork.jar2uml.core.tests.unit.store;
 
 import java.io.File;
 
-import org.easymock.EasyMock;
 import org.junit.Test;
 import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
@@ -23,7 +22,7 @@ public class ClassStoreClass {
 	@Test
 	public void oneClass() {
 		ClassStore classStore = Factory.createClassStore();
-		File fileMock = EasyMock.createMock(File.class);
+		File fileMock = new File("");
 		classStore.add(fileMock, Class.class);
 		Utils.testStoreSize(classStore, 1, 0, 0, 0, 1);
 	}
@@ -31,7 +30,7 @@ public class ClassStoreClass {
 	@Test
 	public void twoClasses() {
 		ClassStore classStore = Factory.createClassStore();
-		File fileMock = EasyMock.createMock(File.class);
+		File fileMock = new File("");
 		classStore.add(fileMock, Class.class);
 		classStore.add(fileMock, Integer.class);
 		Utils.testStoreSize(classStore, 2, 0, 0, 0, 1);
@@ -40,9 +39,9 @@ public class ClassStoreClass {
 	@Test
 	public void twoClassesInTwoFiles() {
 		ClassStore classStore = Factory.createClassStore();
-		File fileMock = EasyMock.createMock(File.class);
+		File fileMock = new File("fileMock");
 		classStore.add(fileMock, Class.class);
-		File fileMock2 = EasyMock.createMock(File.class);
+		File fileMock2 = new File("fileMock2");
 		classStore.add(fileMock2, Integer.class);
 		Utils.testStoreSize(classStore, 2, 0, 0, 0, 2);
 	}

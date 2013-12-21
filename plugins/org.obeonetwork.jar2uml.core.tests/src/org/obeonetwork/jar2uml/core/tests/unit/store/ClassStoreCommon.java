@@ -12,7 +12,6 @@ package org.obeonetwork.jar2uml.core.tests.unit.store;
 
 import java.io.File;
 
-import org.easymock.EasyMock;
 import org.junit.Test;
 import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
@@ -29,7 +28,7 @@ public class ClassStoreCommon {
 	@Test
 	public void oneOfEach() {
 		ClassStore classStore = Factory.createClassStore();
-		File file = EasyMock.createMock(File.class);
+		File file = new File("");
 		classStore.add(file, Class.class);
 		classStore.add(file, Override.class);
 		classStore.add(file, Thread.State.class);

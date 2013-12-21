@@ -18,7 +18,6 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -87,8 +86,8 @@ public class JavaRelationHandlerFunctions {
 	}
 
 	@Test
-	public void caseFunctions() {
-		internal.add(EasyMock.createMock(File.class), methodToUse.getDeclaringClass());
+	public void caseFunction() {
+		internal.add(new File(""), methodToUse.getDeclaringClass());
 		// We need to visit the class owner before its field
 		javaRelationHandler.caseClass(methodToUse.getDeclaringClass());
 		javaRelationHandler.caseMethod(methodToUse);
