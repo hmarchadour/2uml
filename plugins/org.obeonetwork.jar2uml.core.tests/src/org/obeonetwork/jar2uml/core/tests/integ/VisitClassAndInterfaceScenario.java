@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.obeonetwork.jar2uml.core.tests.integ;
 
-import java.io.File;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.obeonetwork.jar2uml.core.api.Factory;
@@ -36,9 +34,8 @@ public class VisitClassAndInterfaceScenario {
 
 	private void test(Class<?> classUnderTest, Class<?>[] internalClassesToFind,
 			Class<?>[] externalClassesToFind) {
-		File file = new File("");
 		for (Class<?> internalClassToFind : internalClassesToFind) {
-			internal.add(file, classUnderTest);
+			internal.add(internalClassToFind);
 		}
 		javaVisitor.visit(classUnderTest);
 		TestUtils.checkStores(internal, external, internalClassesToFind, externalClassesToFind);

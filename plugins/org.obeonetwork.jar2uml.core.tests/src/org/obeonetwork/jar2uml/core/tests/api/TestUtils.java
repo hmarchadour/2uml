@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
+import org.obeonetwork.jar2uml.core.api.store.JarStore;
 
 public final class TestUtils {
 
@@ -45,7 +46,7 @@ public final class TestUtils {
 	/**
 	 * This function test the store size.
 	 * 
-	 * @param classStore
+	 * @param jarStore
 	 *            the store under test
 	 * @param nbClass
 	 *            the expected number of classes
@@ -58,23 +59,84 @@ public final class TestUtils {
 	 * @param nbFile
 	 *            the expected number of files
 	 */
-	public static void testStoreSize(ClassStore classStore, int nbClass, int nbInterface, int nbEnum,
-			int nbAnnotation, int nbFile) {
+	public static void testStoreSize(ClassStore jarStore, int nbClass, int nbInterface, int nbEnum,
+			int nbAnnotation) {
 		int sum = nbClass + nbInterface + nbEnum + nbAnnotation;
-		assertEquals("Java items", sum, classStore.getAllJavaItems().size());
+		assertEquals("Java items", sum, jarStore.getAllJavaItems().size());
 
 		int count = 0;
-		for (Entry<File, Set<Class<?>>> entry : classStore.getFile2JavaItemsBinding().entrySet()) {
+		assertEquals("Java items", sum, count);
+
+		assertEquals("Class items", nbClass, jarStore.getAllJavaClasses().size());
+		assertEquals("Interface items", nbInterface, jarStore.getAllJavaInterfaces().size());
+		assertEquals("Enum items", nbEnum, jarStore.getAllJavaEnums().size());
+		assertEquals("Annotation items", nbAnnotation, jarStore.getAllJavaAnnotations().size());
+	}
+
+	/**
+	 * This function test the store size.
+	 * 
+	 * @param jarStore
+	 *            the store under test
+	 * @param nbClass
+	 *            the expected number of classes
+	 * @param nbInterface
+	 *            the expected number of interface
+	 * @param nbEnum
+	 *            the expected number of enums
+	 * @param nbAnnotation
+	 *            the expected number of annotations
+	 * @param nbFile
+	 *            the expected number of files
+	 */
+	public static void testStoreSize(JarStore jarStore, int nbClass, int nbInterface, int nbEnum,
+			int nbAnnotation, int nbFile) {
+		int sum = nbClass + nbInterface + nbEnum + nbAnnotation;
+		assertEquals("Java items", sum, jarStore.getAllJavaItems().size());
+
+		int count = 0;
+		for (Entry<File, Set<Class<?>>> entry : jarStore.getFile2JavaItemsBinding().entrySet()) {
 			count += entry.getValue().size();
 		}
 		assertEquals("Java items", sum, count);
 
-		assertEquals("Class items", nbClass, classStore.getAllJavaClasses().size());
-		assertEquals("Interface items", nbInterface, classStore.getAllJavaInterfaces().size());
-		assertEquals("Enum items", nbEnum, classStore.getAllJavaEnums().size());
-		assertEquals("Annotation items", nbAnnotation, classStore.getAllJavaAnnotations().size());
-		assertEquals("File items", nbFile, classStore.getFiles().size());
-		assertEquals("File items", nbFile, classStore.getFile2JavaItemsBinding().keySet().size());
+		assertEquals("Class items", nbClass, jarStore.getAllJavaClasses().size());
+		assertEquals("Interface items", nbInterface, jarStore.getAllJavaInterfaces().size());
+		assertEquals("Enum items", nbEnum, jarStore.getAllJavaEnums().size());
+		assertEquals("Annotation items", nbAnnotation, jarStore.getAllJavaAnnotations().size());
+		assertEquals("File items", nbFile, jarStore.getFiles().size());
+		assertEquals("File items", nbFile, jarStore.getFile2JavaItemsBinding().keySet().size());
+	}
+
+	/**
+	 * Check that stores contain expected items
+	 * 
+	 * @param internal
+	 *            internal store
+	 * @param external
+	 *            external store
+	 * @param internalItemsToFind
+	 *            internal items to find
+	 * @param externalItemsToFind
+	 *            external items to find
+	 */
+	public static void checkStores(JarStore internal, JarStore external, Class<?>[] internalItemsToFind,
+			Class<?>[] externalItemsToFind) {
+		for (Class<?> internalClassToFind : internalItemsToFind) {
+			assertTrue(internalClassToFind.getName() + TestUtils.NOT_RETRIEVE_IN_INTERNAL, internal
+					.getAllJavaItems().contains(internalClassToFind));
+		}
+		// Internal checks
+		assertEquals(TestUtils.INVALID_INTERNAL_CTX, internalItemsToFind.length, internal.getAllJavaItems()
+				.size());
+
+		for (Class<?> externalClassToFind : externalItemsToFind) {
+			assertTrue(externalClassToFind.getName() + TestUtils.NOT_RETRIEVE_IN_EXTERNAL, external
+					.getAllJavaItems().contains(externalClassToFind));
+		}
+		// External checks
+		assertEquals(TestUtils.INVALID_EXTERNAL_CTX, externalItemsToFind.length, external.getAllJavaItems()
+				.size());
 	}
 
 	/**

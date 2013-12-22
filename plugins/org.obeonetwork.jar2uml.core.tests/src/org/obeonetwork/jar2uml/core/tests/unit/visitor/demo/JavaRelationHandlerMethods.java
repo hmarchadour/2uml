@@ -13,7 +13,6 @@ package org.obeonetwork.jar2uml.core.tests.unit.visitor.demo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
@@ -102,7 +101,7 @@ public class JavaRelationHandlerMethods {
 
 	@Test
 	public void caseMethod() {
-		internal.add(new File(""), methodToUse.getDeclaringClass());
+		internal.add(methodToUse.getDeclaringClass());
 		// We need to visit the class owner before its field
 		javaRelationHandler.caseClass(methodToUse.getDeclaringClass());
 		javaRelationHandler.caseMethod(methodToUse);

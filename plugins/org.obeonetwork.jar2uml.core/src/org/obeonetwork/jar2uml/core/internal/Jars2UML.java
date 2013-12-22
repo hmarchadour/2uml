@@ -41,7 +41,8 @@ import org.eclipse.uml2.uml.UMLFactory;
 import org.eclipse.uml2.uml.resource.UMLResource;
 import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.Utils;
-import org.obeonetwork.jar2uml.core.api.store.ClassStore;
+import org.obeonetwork.jar2uml.core.api.store.JarStore;
+import org.obeonetwork.jar2uml.core.api.store.JavaStore;
 import org.obeonetwork.jar2uml.core.api.store.ModelStore;
 import org.obeonetwork.jar2uml.core.api.visitor.JavaVisitor;
 import org.obeonetwork.jar2uml.core.api.visitor.JavaVisitorHandler;
@@ -58,9 +59,9 @@ public class Jars2UML {
 
 	private ClassLoader classLoader;
 
-	private ClassStore internal;
+	private JarStore internal;
 
-	private ClassStore external;
+	private JarStore external;
 
 	/**
 	 * 
@@ -68,8 +69,8 @@ public class Jars2UML {
 	public Jars2UML(IProject project, Set<File> jarFiles) {
 		this.project = project;
 		this.jarFiles = jarFiles;
-		this.internal = Factory.createClassStore();
-		this.external = Factory.createClassStore();
+		this.internal = Factory.createJarStore();
+		this.external = Factory.createJarStore();
 	}
 
 	public IStatus run(IProgressMonitor monitor) {
@@ -151,8 +152,8 @@ public class Jars2UML {
 	}
 
 	private void exploreRelations() {
-		final JavaVisitorHandler<Void> javaRelationHandler = Factory.createJavaRelationHandler(internal,
-				external);
+		final JavaVisitorHandler<Void> javaRelationHandler = Factory.createJavaRelationHandler(
+				internal.toClassStore(), external.toClassStore());
 		final JavaVisitor javaVisitor = Factory.createJavaVisitor(javaRelationHandler);
 
 		for (Class<?> javaItem : internal.getAllJavaClasses()) {
@@ -242,13 +243,13 @@ public class Jars2UML {
 
 	}
 
-	private static Set<Element> createModelElements(Component parent, ClassStore classStore,
+	private static Set<Element> createModelElements(Component parent, JavaStore jarStore,
 			ModelStore modelStore) {
 		final JavaVisitorHandler<Set<Element>> modelInitializer = Factory.createInitializerHandler(parent,
 				modelStore);
 		final JavaVisitor javaVisitor = Factory.createJavaVisitor(modelInitializer);
 
-		for (Class<?> javaItem : classStore.getAllJavaItems()) {
+		for (Class<?> javaItem : jarStore.getAllJavaItems()) {
 			javaVisitor.visit(javaItem);
 		}
 

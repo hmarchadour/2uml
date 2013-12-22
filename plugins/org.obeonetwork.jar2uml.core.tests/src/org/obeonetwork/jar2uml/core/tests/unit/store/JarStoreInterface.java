@@ -11,36 +11,36 @@
 package org.obeonetwork.jar2uml.core.tests.unit.store;
 
 import java.io.File;
-import java.net.Proxy;
 
 import org.junit.Test;
 import org.obeonetwork.jar2uml.core.api.Factory;
-import org.obeonetwork.jar2uml.core.api.store.ClassStore;
+import org.obeonetwork.jar2uml.core.api.store.JarStore;
 import org.obeonetwork.jar2uml.core.tests.api.TestUtils;
 
-public class ClassStoreEnum {
+public class JarStoreInterface {
 
 	@Test
-	public void oneEnum() {
-		ClassStore classStore = Factory.createClassStore();
-		classStore.add(new File(""), Thread.State.class);
-		TestUtils.testStoreSize(classStore, 0, 0, 1, 0, 1);
+	public void oneInterface() {
+		JarStore jarStore = Factory.createJarStore();
+		jarStore.add(new File(""), Cloneable.class);
+		TestUtils.testStoreSize(jarStore, 0, 1, 0, 0, 1);
 	}
 
 	@Test
-	public void twoEnums() {
-		ClassStore classStore = Factory.createClassStore();
+	public void twoInterfaces() {
+		JarStore jarStore = Factory.createJarStore();
 		File file = new File("");
-		classStore.add(file, Thread.State.class);
-		classStore.add(file, Proxy.Type.class);
-		TestUtils.testStoreSize(classStore, 0, 0, 2, 0, 1);
+		jarStore.add(file, Cloneable.class);
+		jarStore.add(file, Comparable.class);
+		TestUtils.testStoreSize(jarStore, 0, 2, 0, 0, 1);
 	}
 
 	@Test
-	public void twoEnumsInTwoFiles() {
-		ClassStore classStore = Factory.createClassStore();
-		classStore.add(new File("fileMock1"), Thread.State.class);
-		classStore.add(new File("fileMock2"), Proxy.Type.class);
-		TestUtils.testStoreSize(classStore, 0, 0, 2, 0, 2);
+	public void twoInterfacesInTwoFiles() {
+		JarStore jarStore = Factory.createJarStore();
+		jarStore.add(new File("fileMock1"), Cloneable.class);
+		jarStore.add(new File("fileMock2"), Comparable.class);
+		TestUtils.testStoreSize(jarStore, 0, 2, 0, 0, 2);
 	}
+
 }

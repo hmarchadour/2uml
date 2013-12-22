@@ -10,21 +10,17 @@
  *******************************************************************************/
 package org.obeonetwork.jar2uml.core.api.store;
 
-import java.util.Map;
+import java.util.Set;
 
-import org.eclipse.uml2.uml.Element;
-import org.eclipse.uml2.uml.Model;
+public interface JavaStore {
 
-public interface ModelStore {
+	Set<Class<?>> getAllJavaItems();
 
-	Model getModel();
+	Set<Class<?>> getAllJavaClasses();
 
-	void add(Class<?> clazz, Element elem);
+	Set<Class<?>> getAllJavaInterfaces();
 
-	void addAll(Map<Element, Class<?>> map);
+	Set<Class<?>> getAllJavaAnnotations();
 
-	Map<Element, Class<?>> getUML2JavaBinding();
-
-	Map<Class<?>, Element> getJava2UMLBinding();
-
+	Set<Class<?>> getAllJavaEnums();
 }

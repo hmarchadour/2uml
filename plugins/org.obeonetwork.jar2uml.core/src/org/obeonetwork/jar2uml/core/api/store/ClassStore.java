@@ -1,37 +1,25 @@
+/*******************************************************************************
+ * Copyright (c) 2013 Hugo Marchadour (Obeo).
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Hugo Marchadour - initial API and implementation and/or initial documentation
+ *******************************************************************************/
 package org.obeonetwork.jar2uml.core.api.store;
 
-import java.io.File;
-import java.util.Map;
-import java.util.Set;
+public interface ClassStore extends JavaStore {
 
-import com.google.common.base.Optional;
+	void add(Class<?> clazz);
 
-public interface ClassStore {
+	void addClass(Class<?> clazz);
 
-	Set<File> getFiles();
+	void addInterface(Class<?> clazz);
 
-	Map<File, Set<Class<?>>> getFile2JavaItemsBinding();
+	void addAnnotation(Class<?> clazz);
 
-	Optional<File> retrieveFile(Class<?> clazz);
-
-	Set<Class<?>> getAllJavaItems();
-
-	Set<Class<?>> getAllJavaClasses();
-
-	Set<Class<?>> getAllJavaInterfaces();
-
-	Set<Class<?>> getAllJavaAnnotations();
-
-	Set<Class<?>> getAllJavaEnums();
-
-	void add(File file, Class<?> clazz);
-
-	void addClass(File file, Class<?> clazz);
-
-	void addInterface(File file, Class<?> clazz);
-
-	void addAnnotation(File file, Class<?> clazz);
-
-	void addEnum(File file, Class<?> clazz);
+	void addEnum(Class<?> clazz);
 
 }

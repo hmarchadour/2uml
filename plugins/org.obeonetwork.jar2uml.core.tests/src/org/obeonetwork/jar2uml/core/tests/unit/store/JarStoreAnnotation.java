@@ -14,33 +14,33 @@ import java.io.File;
 
 import org.junit.Test;
 import org.obeonetwork.jar2uml.core.api.Factory;
-import org.obeonetwork.jar2uml.core.api.store.ClassStore;
+import org.obeonetwork.jar2uml.core.api.store.JarStore;
 import org.obeonetwork.jar2uml.core.tests.api.TestUtils;
 
-public class ClassStoreInterface {
+public class JarStoreAnnotation {
 
 	@Test
-	public void oneInterface() {
-		ClassStore classStore = Factory.createClassStore();
-		classStore.add(new File(""), Cloneable.class);
-		TestUtils.testStoreSize(classStore, 0, 1, 0, 0, 1);
+	public void oneAnnotationInOneFile() {
+		JarStore jarStore = Factory.createJarStore();
+		jarStore.add(new File(""), Override.class);
+		TestUtils.testStoreSize(jarStore, 0, 0, 0, 1, 1);
 	}
 
 	@Test
-	public void twoInterfaces() {
-		ClassStore classStore = Factory.createClassStore();
+	public void twoAnnotationsInOneFile() {
+		JarStore jarStore = Factory.createJarStore();
 		File file = new File("");
-		classStore.add(file, Cloneable.class);
-		classStore.add(file, Comparable.class);
-		TestUtils.testStoreSize(classStore, 0, 2, 0, 0, 1);
+		jarStore.add(file, Override.class);
+		jarStore.add(file, Deprecated.class);
+		TestUtils.testStoreSize(jarStore, 0, 0, 0, 2, 1);
 	}
 
 	@Test
-	public void twoInterfacesInTwoFiles() {
-		ClassStore classStore = Factory.createClassStore();
-		classStore.add(new File("fileMock1"), Cloneable.class);
-		classStore.add(new File("fileMock2"), Comparable.class);
-		TestUtils.testStoreSize(classStore, 0, 2, 0, 0, 2);
+	public void twoAnnotationsInOneFileInTwoFiles() {
+		JarStore jarStore = Factory.createJarStore();
+		jarStore.add(new File(""), Override.class);
+		jarStore.add(new File(""), Deprecated.class);
+		TestUtils.testStoreSize(jarStore, 0, 0, 0, 2, 1);
 	}
 
 }

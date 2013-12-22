@@ -14,36 +14,36 @@ import java.io.File;
 
 import org.junit.Test;
 import org.obeonetwork.jar2uml.core.api.Factory;
-import org.obeonetwork.jar2uml.core.api.store.ClassStore;
+import org.obeonetwork.jar2uml.core.api.store.JarStore;
 import org.obeonetwork.jar2uml.core.tests.api.TestUtils;
 
-public class ClassStoreClass {
+public class JarStoreClass {
 
 	@Test
 	public void oneClass() {
-		ClassStore classStore = Factory.createClassStore();
+		JarStore jarStore = Factory.createJarStore();
 		File fileMock = new File("");
-		classStore.add(fileMock, Class.class);
-		TestUtils.testStoreSize(classStore, 1, 0, 0, 0, 1);
+		jarStore.add(fileMock, Class.class);
+		TestUtils.testStoreSize(jarStore, 1, 0, 0, 0, 1);
 	}
 
 	@Test
 	public void twoClasses() {
-		ClassStore classStore = Factory.createClassStore();
+		JarStore jarStore = Factory.createJarStore();
 		File fileMock = new File("");
-		classStore.add(fileMock, Class.class);
-		classStore.add(fileMock, Integer.class);
-		TestUtils.testStoreSize(classStore, 2, 0, 0, 0, 1);
+		jarStore.add(fileMock, Class.class);
+		jarStore.add(fileMock, Integer.class);
+		TestUtils.testStoreSize(jarStore, 2, 0, 0, 0, 1);
 	}
 
 	@Test
 	public void twoClassesInTwoFiles() {
-		ClassStore classStore = Factory.createClassStore();
+		JarStore jarStore = Factory.createJarStore();
 		File fileMock = new File("fileMock");
-		classStore.add(fileMock, Class.class);
+		jarStore.add(fileMock, Class.class);
 		File fileMock2 = new File("fileMock2");
-		classStore.add(fileMock2, Integer.class);
-		TestUtils.testStoreSize(classStore, 2, 0, 0, 0, 2);
+		jarStore.add(fileMock2, Integer.class);
+		TestUtils.testStoreSize(jarStore, 2, 0, 0, 0, 2);
 	}
 
 }

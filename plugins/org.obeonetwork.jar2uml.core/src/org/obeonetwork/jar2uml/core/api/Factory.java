@@ -16,10 +16,12 @@ import org.eclipse.uml2.uml.Component;
 import org.eclipse.uml2.uml.Element;
 import org.eclipse.uml2.uml.Model;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
+import org.obeonetwork.jar2uml.core.api.store.JarStore;
 import org.obeonetwork.jar2uml.core.api.store.ModelStore;
 import org.obeonetwork.jar2uml.core.api.visitor.JavaVisitor;
 import org.obeonetwork.jar2uml.core.api.visitor.JavaVisitorHandler;
 import org.obeonetwork.jar2uml.core.internal.store.ClassStoreImpl;
+import org.obeonetwork.jar2uml.core.internal.store.JarStoreImpl;
 import org.obeonetwork.jar2uml.core.internal.store.ModelStoreImpl;
 import org.obeonetwork.jar2uml.core.internal.visitor.DefaultJavaVisitor;
 import org.obeonetwork.jar2uml.core.internal.visitor.JavaRelationHandler;
@@ -43,6 +45,10 @@ public final class Factory {
 
 	public static JavaVisitor createJavaVisitor(JavaVisitorHandler<?> handler) {
 		return new DefaultJavaVisitor(handler);
+	}
+
+	public static JarStore createJarStore() {
+		return new JarStoreImpl();
 	}
 
 	public static ClassStore createClassStore() {

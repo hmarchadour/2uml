@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.obeonetwork.jar2uml.core.tests.unit.visitor.demo;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
@@ -93,7 +92,7 @@ public class JavaRelationHandlerFields {
 
 	@Test
 	public void caseField() {
-		internal.add(new File(""), fieldToUse.getDeclaringClass());
+		internal.add(fieldToUse.getDeclaringClass());
 		// We need to visit the class owner before its field
 		javaRelationHandler.caseClass(fieldToUse.getDeclaringClass());
 		javaRelationHandler.caseField(fieldToUse);

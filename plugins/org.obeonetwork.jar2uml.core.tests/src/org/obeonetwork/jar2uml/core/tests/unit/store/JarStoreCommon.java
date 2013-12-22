@@ -14,25 +14,25 @@ import java.io.File;
 
 import org.junit.Test;
 import org.obeonetwork.jar2uml.core.api.Factory;
-import org.obeonetwork.jar2uml.core.api.store.ClassStore;
+import org.obeonetwork.jar2uml.core.api.store.JarStore;
 import org.obeonetwork.jar2uml.core.tests.api.TestUtils;
 
-public class ClassStoreCommon {
+public class JarStoreCommon {
 
 	@Test
 	public void defaultConstructor() {
-		ClassStore classStore = Factory.createClassStore();
-		TestUtils.testStoreSize(classStore, 0, 0, 0, 0, 0);
+		JarStore jarStore = Factory.createJarStore();
+		TestUtils.testStoreSize(jarStore, 0, 0, 0, 0, 0);
 	}
 
 	@Test
 	public void oneOfEach() {
-		ClassStore classStore = Factory.createClassStore();
+		JarStore jarStore = Factory.createJarStore();
 		File file = new File("");
-		classStore.add(file, Class.class);
-		classStore.add(file, Override.class);
-		classStore.add(file, Thread.State.class);
-		classStore.add(file, Cloneable.class);
-		TestUtils.testStoreSize(classStore, 1, 1, 1, 1, 1);
+		jarStore.add(file, Class.class);
+		jarStore.add(file, Override.class);
+		jarStore.add(file, Thread.State.class);
+		jarStore.add(file, Cloneable.class);
+		TestUtils.testStoreSize(jarStore, 1, 1, 1, 1, 1);
 	}
 }

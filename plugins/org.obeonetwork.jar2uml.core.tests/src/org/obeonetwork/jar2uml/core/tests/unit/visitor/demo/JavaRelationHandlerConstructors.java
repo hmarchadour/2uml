@@ -12,7 +12,6 @@ package org.obeonetwork.jar2uml.core.tests.unit.visitor.demo;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.HashSet;
@@ -99,7 +98,7 @@ public class JavaRelationHandlerConstructors {
 
 	@Test
 	public void caseConstructor() {
-		internal.add(new File(""), constructorToUse.getDeclaringClass());
+		internal.add(constructorToUse.getDeclaringClass());
 		// We need to visit the class owner before its field
 		javaRelationHandler.caseClass(constructorToUse.getDeclaringClass());
 		javaRelationHandler.caseConstructor(constructorToUse);

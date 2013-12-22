@@ -10,21 +10,29 @@
  *******************************************************************************/
 package org.obeonetwork.jar2uml.core.api.store;
 
+import java.io.File;
 import java.util.Map;
+import java.util.Set;
 
-import org.eclipse.uml2.uml.Element;
-import org.eclipse.uml2.uml.Model;
+import com.google.common.base.Optional;
 
-public interface ModelStore {
+public interface JarStore extends JavaStore {
 
-	Model getModel();
+	Set<File> getFiles();
 
-	void add(Class<?> clazz, Element elem);
+	Map<File, Set<Class<?>>> getFile2JavaItemsBinding();
 
-	void addAll(Map<Element, Class<?>> map);
+	Optional<File> retrieveFile(Class<?> clazz);
 
-	Map<Element, Class<?>> getUML2JavaBinding();
+	void add(File file, Class<?> clazz);
 
-	Map<Class<?>, Element> getJava2UMLBinding();
+	void addClass(File file, Class<?> clazz);
 
+	void addInterface(File file, Class<?> clazz);
+
+	void addAnnotation(File file, Class<?> clazz);
+
+	void addEnum(File file, Class<?> clazz);
+
+	ClassStore toClassStore();
 }

@@ -15,14 +15,23 @@ import static org.obeonetwork.jar2uml.core.api.Utils.isClass;
 import static org.obeonetwork.jar2uml.core.api.Utils.isEnum;
 import static org.obeonetwork.jar2uml.core.api.Utils.isInterface;
 
+import java.io.File;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.Utils;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
+import org.obeonetwork.jar2uml.core.api.store.JarStore;
 
-public class ClassStoreImpl implements ClassStore {
+import com.google.common.base.Optional;
+
+public class JarStoreImpl implements JarStore {
+
+	private final Map<File, Set<Class<?>>> binding;
 
 	private final Set<Class<?>> interfaces;
 
@@ -32,11 +41,44 @@ public class ClassStoreImpl implements ClassStore {
 
 	private final Set<Class<?>> annotations;
 
-	public ClassStoreImpl() {
+	public JarStoreImpl() {
+		binding = new HashMap<File, Set<Class<?>>>();
 		classes = new HashSet<Class<?>>();
 		interfaces = new HashSet<Class<?>>();
 		enums = new HashSet<Class<?>>();
 		annotations = new HashSet<Class<?>>();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Set<File> getFiles() {
+		return Collections.unmodifiableSet(binding.keySet());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Map<File, Set<Class<?>>> getFile2JavaItemsBinding() {
+		return Collections.unmodifiableMap(binding);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Optional<File> retrieveFile(Class<?> clazz) {
+		Optional<File> result = Optional.absent();
+		for (File file : binding.keySet()) {
+			Set<Class<?>> classes = binding.get(file);
+			if (classes.contains(clazz)) {
+				result = Optional.of(file);
+				break;
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -88,18 +130,18 @@ public class ClassStoreImpl implements ClassStore {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void add(Class<?> clazz) {
+	public void add(File file, Class<?> clazz) {
 		// System.out.println("Add Java " + clazz.getSimpleName());
 		if (clazz.isArray()) {
-			add(clazz.getComponentType());
+			add(file, clazz.getComponentType());
 		} else if (Utils.isAnnotation(clazz)) {
-			addAnnotation(clazz);
+			addAnnotation(file, clazz);
 		} else if (Utils.isInterface(clazz)) {
-			addInterface(clazz);
+			addInterface(file, clazz);
 		} else if (Utils.isEnum(clazz)) {
-			addEnum(clazz);
+			addEnum(file, clazz);
 		} else if (Utils.isClass(clazz)) {
-			addClass(clazz);
+			addClass(file, clazz);
 		} else if (Utils.isPrimitive(clazz)) {
 			// Primitive types are not kept
 		} else {
@@ -111,44 +153,67 @@ public class ClassStoreImpl implements ClassStore {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void addClass(Class<?> clazz) {
+	public void addClass(File file, Class<?> clazz) {
 		if (!isClass(clazz)) {
 			throw new IllegalArgumentException("clazz is not a Java class");
 		}
 		classes.add(clazz);
+		addBinding(file, clazz);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void addInterface(Class<?> clazz) {
+	public void addInterface(File file, Class<?> clazz) {
 		if (!isInterface(clazz)) {
 			throw new IllegalArgumentException("clazz is not a Java interface");
 		}
 		interfaces.add(clazz);
+		addBinding(file, clazz);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void addAnnotation(Class<?> clazz) {
+	public void addAnnotation(File file, Class<?> clazz) {
 		if (!isAnnotation(clazz)) {
 			throw new IllegalArgumentException("clazz is not a Java annotation");
 		}
 		annotations.add(clazz);
+		addBinding(file, clazz);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void addEnum(Class<?> clazz) {
+	public void addEnum(File file, Class<?> clazz) {
 		if (!isEnum(clazz)) {
 			throw new IllegalArgumentException("clazz is not a Java enum");
 		}
 		enums.add(clazz);
+		addBinding(file, clazz);
 	}
 
+	protected void addBinding(File file, Class<?> clazz) {
+		if (binding.containsKey(file)) {
+			Set<Class<?>> classes = binding.get(file);
+			classes.add(clazz);
+		} else {
+			HashSet<Class<?>> classes = new HashSet<Class<?>>();
+			classes.add(clazz);
+			binding.put(file, classes);
+		}
+	}
+
+	@Override
+	public ClassStore toClassStore() {
+		ClassStore jarStore = Factory.createClassStore();
+		for (Class<?> item : getAllJavaItems()) {
+			jarStore.add(item);
+		}
+		return jarStore;
+	}
 }
