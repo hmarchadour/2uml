@@ -8,19 +8,17 @@
  * Contributors:
  *    Hugo Marchadour - initial API and implementation and/or initial documentation
  *******************************************************************************/
-package org.obeonetwork.jar2uml.core.tests.unit.visitor;
+package org.obeonetwork.jar2uml.core.tests.integ;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * This test suite regroup all unit tests about visitors used in the core plugins.
+ * This test suite regroup all integration test suites.
  */
 @RunWith(Suite.class)
-@SuiteClasses({DefaultJavaVisitorTests.class, JavaRelationHandlerFields.class,
-		JavaRelationHandlerArrayFields.class, JavaRelationHandlerMethods.class,
-		JavaRelationHandlerConstructors.class})
-public class AllVisitorTests {
+@SuiteClasses({VisitClassAndInterfaceScenario.class})
+public class AllIntegTests {
 
 }

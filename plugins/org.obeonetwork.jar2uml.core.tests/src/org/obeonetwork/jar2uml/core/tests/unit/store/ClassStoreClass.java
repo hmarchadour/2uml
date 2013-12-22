@@ -15,7 +15,7 @@ import java.io.File;
 import org.junit.Test;
 import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
-import org.obeonetwork.jar2uml.core.tests.api.Utils;
+import org.obeonetwork.jar2uml.core.tests.api.TestUtils;
 
 public class ClassStoreClass {
 
@@ -24,7 +24,7 @@ public class ClassStoreClass {
 		ClassStore classStore = Factory.createClassStore();
 		File fileMock = new File("");
 		classStore.add(fileMock, Class.class);
-		Utils.testStoreSize(classStore, 1, 0, 0, 0, 1);
+		TestUtils.testStoreSize(classStore, 1, 0, 0, 0, 1);
 	}
 
 	@Test
@@ -33,7 +33,7 @@ public class ClassStoreClass {
 		File fileMock = new File("");
 		classStore.add(fileMock, Class.class);
 		classStore.add(fileMock, Integer.class);
-		Utils.testStoreSize(classStore, 2, 0, 0, 0, 1);
+		TestUtils.testStoreSize(classStore, 2, 0, 0, 0, 1);
 	}
 
 	@Test
@@ -43,7 +43,7 @@ public class ClassStoreClass {
 		classStore.add(fileMock, Class.class);
 		File fileMock2 = new File("fileMock2");
 		classStore.add(fileMock2, Integer.class);
-		Utils.testStoreSize(classStore, 2, 0, 0, 0, 2);
+		TestUtils.testStoreSize(classStore, 2, 0, 0, 0, 2);
 	}
 
 }

@@ -15,14 +15,14 @@ import java.io.File;
 import org.junit.Test;
 import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
-import org.obeonetwork.jar2uml.core.tests.api.Utils;
+import org.obeonetwork.jar2uml.core.tests.api.TestUtils;
 
 public class ClassStoreCommon {
 
 	@Test
 	public void defaultConstructor() {
 		ClassStore classStore = Factory.createClassStore();
-		Utils.testStoreSize(classStore, 0, 0, 0, 0, 0);
+		TestUtils.testStoreSize(classStore, 0, 0, 0, 0, 0);
 	}
 
 	@Test
@@ -33,6 +33,6 @@ public class ClassStoreCommon {
 		classStore.add(file, Override.class);
 		classStore.add(file, Thread.State.class);
 		classStore.add(file, Cloneable.class);
-		Utils.testStoreSize(classStore, 1, 1, 1, 1, 1);
+		TestUtils.testStoreSize(classStore, 1, 1, 1, 1, 1);
 	}
 }

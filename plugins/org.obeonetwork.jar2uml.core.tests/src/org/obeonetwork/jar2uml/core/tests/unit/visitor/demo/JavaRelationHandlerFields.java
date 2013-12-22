@@ -8,17 +8,15 @@
  * Contributors:
  *    Hugo Marchadour - initial API and implementation and/or initial documentation
  *******************************************************************************/
-package org.obeonetwork.jar2uml.core.tests.unit.visitor;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+package org.obeonetwork.jar2uml.core.tests.unit.visitor.demo;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
-import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,9 +25,15 @@ import org.junit.runners.Parameterized.Parameters;
 import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
 import org.obeonetwork.jar2uml.core.api.visitor.JavaVisitorHandler;
+import org.obeonetwork.jar2uml.core.tests.api.TestUtils;
 
+import demo.ArrayFields;
 import demo.Fields;
 
+/**
+ * In this testCase, we have already visited the internal classes. We will handle external links and internal
+ * links.
+ */
 @RunWith(Parameterized.class)
 public class JavaRelationHandlerFields {
 
@@ -52,11 +56,6 @@ public class JavaRelationHandlerFields {
 		javaRelationHandler = Factory.createJavaRelationHandler(internal, external);
 	}
 
-	/**
-	 * @param clazzToUse
-	 * @param internalToFind
-	 * @param externalToFind
-	 */
 	public JavaRelationHandlerFields(String testCaseName, Field fieldToUse, Class<?>[] internalItemsToFind,
 			Class<?>[] externalItemsToFind) {
 		this.fieldToUse = fieldToUse;
@@ -67,15 +66,26 @@ public class JavaRelationHandlerFields {
 	@Parameters(name = "#{index} {0}")
 	public static Collection<Object[]> params() {
 		HashSet<Object[]> params = new HashSet<Object[]>();
-		Field[] declaredFields = Fields.class.getDeclaredFields();
-		for (Field field : declaredFields) {
-			String testCaseName = field.getName();
-			if (field.getType().isPrimitive()) {
-				params.add(new Object[] {testCaseName, field, new Class<?>[] {field.getDeclaringClass()},
-						new Class<?>[] {}});
+
+		Set<Field> fieldsToTest = new HashSet<Field>();
+
+		fieldsToTest.addAll(Arrays.asList(Fields.class.getDeclaredFields()));
+		fieldsToTest.addAll(Arrays.asList(ArrayFields.class.getDeclaredFields()));
+
+		for (Field fieldToTest : fieldsToTest) {
+
+			String testCaseName = fieldToTest.getName();
+			Class<?> fieldType = fieldToTest.getType();
+			if (fieldType.isArray()) {
+				fieldType = fieldToTest.getType().getComponentType();
+			}
+
+			if (fieldType.isPrimitive()) {
+				params.add(new Object[] {testCaseName, fieldToTest,
+						new Class<?>[] {fieldToTest.getDeclaringClass()}, new Class<?>[] {}});
 			} else {
-				params.add(new Object[] {testCaseName, field, new Class<?>[] {field.getDeclaringClass()},
-						new Class<?>[] {field.getType()}});
+				params.add(new Object[] {testCaseName, fieldToTest,
+						new Class<?>[] {fieldToTest.getDeclaringClass()}, new Class<?>[] {fieldType}});
 			}
 		}
 		return params;
@@ -88,21 +98,7 @@ public class JavaRelationHandlerFields {
 		javaRelationHandler.caseClass(fieldToUse.getDeclaringClass());
 		javaRelationHandler.caseField(fieldToUse);
 
-		// Internal checks
-		assertEquals("Invalid internal context", internalItemsToFind.length, internal.getAllJavaItems()
-				.size());
-		for (Class<?> internalClassToFind : internalItemsToFind) {
-			assertTrue(internalClassToFind.getName() + " not retrieve in internal items", internal
-					.getAllJavaItems().contains(internalClassToFind));
-		}
-
-		// External checks
-		assertEquals("Invalid external context", externalItemsToFind.length, external.getAllJavaItems()
-				.size());
-		for (Class<?> externalClassToFind : externalItemsToFind) {
-			assertTrue(externalClassToFind.getName() + " not retrieve in internal items", external
-					.getAllJavaItems().contains(externalClassToFind));
-		}
+		TestUtils.checkStores(internal, external, internalItemsToFind, externalItemsToFind);
 	}
 
 }

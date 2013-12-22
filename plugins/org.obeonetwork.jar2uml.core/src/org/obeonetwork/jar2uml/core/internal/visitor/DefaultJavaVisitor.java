@@ -49,12 +49,18 @@ public class DefaultJavaVisitor implements JavaVisitor {
 			Class<?> superclass = Utils.findSuperclass(clazz);
 			if (Utils.validJavaItem(superclass)) {
 				visitSuperClass(superclass);
+				if (!Utils.comeFromTheJRE(superclass)) {
+					visit(superclass);
+				}
 			}
 
 			// Implemented interface
 			for (Class<?> implementedInterface : Utils.findInterfaces(clazz)) {
 				if (Utils.validJavaItem(implementedInterface)) {
 					visitImplementedInterface(implementedInterface);
+					if (!Utils.comeFromTheJRE(implementedInterface)) {
+						visit(implementedInterface);
+					}
 				}
 			}
 

@@ -15,7 +15,7 @@ import java.io.File;
 import org.junit.Test;
 import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
-import org.obeonetwork.jar2uml.core.tests.api.Utils;
+import org.obeonetwork.jar2uml.core.tests.api.TestUtils;
 
 public class ClassStoreInterface {
 
@@ -23,7 +23,7 @@ public class ClassStoreInterface {
 	public void oneInterface() {
 		ClassStore classStore = Factory.createClassStore();
 		classStore.add(new File(""), Cloneable.class);
-		Utils.testStoreSize(classStore, 0, 1, 0, 0, 1);
+		TestUtils.testStoreSize(classStore, 0, 1, 0, 0, 1);
 	}
 
 	@Test
@@ -32,7 +32,7 @@ public class ClassStoreInterface {
 		File file = new File("");
 		classStore.add(file, Cloneable.class);
 		classStore.add(file, Comparable.class);
-		Utils.testStoreSize(classStore, 0, 2, 0, 0, 1);
+		TestUtils.testStoreSize(classStore, 0, 2, 0, 0, 1);
 	}
 
 	@Test
@@ -40,7 +40,7 @@ public class ClassStoreInterface {
 		ClassStore classStore = Factory.createClassStore();
 		classStore.add(new File("fileMock1"), Cloneable.class);
 		classStore.add(new File("fileMock2"), Comparable.class);
-		Utils.testStoreSize(classStore, 0, 2, 0, 0, 2);
+		TestUtils.testStoreSize(classStore, 0, 2, 0, 0, 2);
 	}
 
 }

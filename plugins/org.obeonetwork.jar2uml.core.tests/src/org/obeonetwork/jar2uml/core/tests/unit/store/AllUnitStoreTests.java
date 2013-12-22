@@ -20,6 +20,6 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({ClassStoreCommon.class, ClassStoreAnnotation.class, ClassStoreClass.class,
 		ClassStoreEnum.class, ClassStoreInterface.class})
-public class AllStoreTests {
+public class AllUnitStoreTests {
 
 }

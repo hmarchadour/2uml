@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.obeonetwork.jar2uml.core.internal.visitor;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -28,6 +29,8 @@ public class JavaRelationHandler implements JavaVisitorHandler<Void> {
 
 	private Class<?> context;
 
+	private File fileContext;
+
 	public JavaRelationHandler(ClassStore internal, ClassStore external) {
 		this.internal = internal;
 		this.external = external;
@@ -36,11 +39,13 @@ public class JavaRelationHandler implements JavaVisitorHandler<Void> {
 	@Override
 	public void casePrimitive(Class<?> aClass) {
 		context = aClass;
+		updateFileContext();
 	}
 
 	@Override
 	public void caseClass(Class<?> aClass) {
 		context = aClass;
+		updateFileContext();
 	}
 
 	@Override
@@ -56,16 +61,19 @@ public class JavaRelationHandler implements JavaVisitorHandler<Void> {
 	@Override
 	public void caseInterface(Class<?> anInterface) {
 		context = anInterface;
+		updateFileContext();
 	}
 
 	@Override
 	public void caseAnnotation(Class<?> anAnnotation) {
 		context = anAnnotation;
+		updateFileContext();
 	}
 
 	@Override
 	public void caseEnum(Class<?> anEnum) {
 		context = anEnum;
+		updateFileContext();
 	}
 
 	@Override
@@ -98,9 +106,17 @@ public class JavaRelationHandler implements JavaVisitorHandler<Void> {
 		}
 	}
 
+	private void updateFileContext() {
+
+		if (internal.retrieveFile(context).isPresent()) {
+			fileContext = internal.retrieveFile(context).get();
+		}
+
+	}
+
 	private void handleClass(Class<?> clazz) {
 		if (clazz != null && isExternal(clazz)) {
-			external.add(internal.retrieveFile(context).get(), clazz);
+			external.add(fileContext, clazz);
 		}
 	}
 

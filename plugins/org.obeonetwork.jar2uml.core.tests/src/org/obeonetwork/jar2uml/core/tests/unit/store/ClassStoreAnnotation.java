@@ -15,7 +15,7 @@ import java.io.File;
 import org.junit.Test;
 import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
-import org.obeonetwork.jar2uml.core.tests.api.Utils;
+import org.obeonetwork.jar2uml.core.tests.api.TestUtils;
 
 public class ClassStoreAnnotation {
 
@@ -23,7 +23,7 @@ public class ClassStoreAnnotation {
 	public void oneAnnotationInOneFile() {
 		ClassStore classStore = Factory.createClassStore();
 		classStore.add(new File(""), Override.class);
-		Utils.testStoreSize(classStore, 0, 0, 0, 1, 1);
+		TestUtils.testStoreSize(classStore, 0, 0, 0, 1, 1);
 	}
 
 	@Test
@@ -32,7 +32,7 @@ public class ClassStoreAnnotation {
 		File file = new File("");
 		classStore.add(file, Override.class);
 		classStore.add(file, Deprecated.class);
-		Utils.testStoreSize(classStore, 0, 0, 0, 2, 1);
+		TestUtils.testStoreSize(classStore, 0, 0, 0, 2, 1);
 	}
 
 	@Test
@@ -40,7 +40,7 @@ public class ClassStoreAnnotation {
 		ClassStore classStore = Factory.createClassStore();
 		classStore.add(new File(""), Override.class);
 		classStore.add(new File(""), Deprecated.class);
-		Utils.testStoreSize(classStore, 0, 0, 0, 2, 1);
+		TestUtils.testStoreSize(classStore, 0, 0, 0, 2, 1);
 	}
 
 }

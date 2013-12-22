@@ -45,6 +45,17 @@ public class DefaultJavaVisitorTests {
 	}
 
 	@Test
+	public void visitNull() {
+		launchVisitOn(null);
+	}
+
+	@Test
+	public void visitPrimitive() {
+		mockedVisitorHandler.casePrimitive(int.class);
+		launchVisitOn(int.class);
+	}
+
+	@Test
 	public void visitFields() {
 		mockedVisitorHandler.caseClass(Fields.class);
 		mockedVisitorHandler.caseSuperClass(Fields.class.getSuperclass());
@@ -94,8 +105,7 @@ public class DefaultJavaVisitorTests {
 		mockedVisitorHandler.caseClass(PublicConstructors.class);
 		mockedVisitorHandler.caseSuperClass(Object.class);
 
-		Constructor<?>[] constructors = PublicConstructors.class.getDeclaredConstructors();
-		for (Constructor constructor : constructors) {
+		for (Constructor constructor : PublicConstructors.class.getDeclaredConstructors()) {
 			// we expect to visit all constructors
 			mockedVisitorHandler.caseConstructor(constructor);
 		}
@@ -108,8 +118,7 @@ public class DefaultJavaVisitorTests {
 		mockedVisitorHandler.caseClass(ProtectedConstructors.class);
 		mockedVisitorHandler.caseSuperClass(Object.class);
 
-		Constructor<?>[] constructors = ProtectedConstructors.class.getDeclaredConstructors();
-		for (Constructor constructor : constructors) {
+		for (Constructor constructor : ProtectedConstructors.class.getDeclaredConstructors()) {
 			// we expect to visit all constructors
 			mockedVisitorHandler.caseConstructor(constructor);
 		}
@@ -122,8 +131,7 @@ public class DefaultJavaVisitorTests {
 		mockedVisitorHandler.caseClass(PrivateConstructors.class);
 		mockedVisitorHandler.caseSuperClass(Object.class);
 
-		Constructor<?>[] constructors = PrivateConstructors.class.getDeclaredConstructors();
-		for (Constructor constructor : constructors) {
+		for (Constructor constructor : PrivateConstructors.class.getDeclaredConstructors()) {
 			// we expect to visit all constructors
 			mockedVisitorHandler.caseConstructor(constructor);
 		}
@@ -135,10 +143,12 @@ public class DefaultJavaVisitorTests {
 	public void visitAnnotation() {
 		mockedVisitorHandler.caseAnnotation(Override.class);
 		mockedVisitorHandler.caseImplementedInterface(Annotation.class);
-
 		launchVisitOn(Override.class);
 	}
 
+	/**
+	 * TestEnum is only here to visitEnum()
+	 **/
 	enum TestEnum {
 		test
 	}
@@ -157,16 +167,18 @@ public class DefaultJavaVisitorTests {
 		launchVisitOn(TestEnum.class);
 	}
 
-	private interface CloneableImpl extends Cloneable {
-
+	/**
+	 * TestImplementedInterface is only here to visitImplementedInterface()
+	 **/
+	private interface TestImplementedInterface extends Cloneable {
 	}
 
 	@Test
 	public void visitImplementedInterface() {
-		mockedVisitorHandler.caseInterface(CloneableImpl.class);
+		mockedVisitorHandler.caseInterface(TestImplementedInterface.class);
 		mockedVisitorHandler.caseImplementedInterface(Cloneable.class);
 
-		launchVisitOn(CloneableImpl.class);
+		launchVisitOn(TestImplementedInterface.class);
 	}
 
 	@Test

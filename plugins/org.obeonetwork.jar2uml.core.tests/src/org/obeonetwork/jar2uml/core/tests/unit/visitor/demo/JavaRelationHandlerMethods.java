@@ -8,10 +8,10 @@
  * Contributors:
  *    Hugo Marchadour - initial API and implementation and/or initial documentation
  *******************************************************************************/
-package org.obeonetwork.jar2uml.core.tests.unit.visitor;
+package org.obeonetwork.jar2uml.core.tests.unit.visitor.demo;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -26,11 +26,13 @@ import org.junit.runners.Parameterized.Parameters;
 import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
 import org.obeonetwork.jar2uml.core.api.visitor.JavaVisitorHandler;
+import org.obeonetwork.jar2uml.core.tests.api.TestUtils;
 
+import demo.Functions;
 import demo.Methods;
 
 @RunWith(Parameterized.class)
-public class JavaRelationHandlerFunctions {
+public class JavaRelationHandlerMethods {
 
 	protected final Method methodToUse;
 
@@ -51,12 +53,7 @@ public class JavaRelationHandlerFunctions {
 		javaRelationHandler = Factory.createJavaRelationHandler(internal, external);
 	}
 
-	/**
-	 * @param clazzToUse
-	 * @param internalToFind
-	 * @param externalToFind
-	 */
-	public JavaRelationHandlerFunctions(String testCaseName, Method methodToUse,
+	public JavaRelationHandlerMethods(String testCaseName, Method methodToUse,
 			Class<?>[] internalItemsToFind, Class<?>[] externalItemsToFind) {
 		this.methodToUse = methodToUse;
 		this.internalItemsToFind = internalItemsToFind;
@@ -66,6 +63,7 @@ public class JavaRelationHandlerFunctions {
 	@Parameters(name = "#{index} {0}")
 	public static Collection<Object[]> params() {
 		HashSet<Object[]> params = new HashSet<Object[]>();
+
 		for (Method method : Methods.class.getDeclaredMethods()) {
 			String testCaseName = method.getName();
 			Class<?>[] parameterTypes = method.getParameterTypes();
@@ -82,31 +80,33 @@ public class JavaRelationHandlerFunctions {
 						new Class<?>[] {paramClass}});
 			}
 		}
+
+		for (Method function : Functions.class.getDeclaredMethods()) {
+
+			String testCaseName = function.getName();
+			Class<?> returnType = function.getReturnType();
+			assertNotNull("We have a return type by function", returnType);
+			if (returnType.isArray()) {
+				returnType = returnType.getComponentType();
+			}
+			if (returnType.isPrimitive()) {
+				params.add(new Object[] {testCaseName, function,
+						new Class<?>[] {function.getDeclaringClass()}, new Class<?>[] {}});
+			} else {
+				params.add(new Object[] {testCaseName, function,
+						new Class<?>[] {function.getDeclaringClass()}, new Class<?>[] {returnType}});
+			}
+		}
 		return params;
 	}
 
 	@Test
-	public void caseFunction() {
+	public void caseMethod() {
 		internal.add(new File(""), methodToUse.getDeclaringClass());
 		// We need to visit the class owner before its field
 		javaRelationHandler.caseClass(methodToUse.getDeclaringClass());
 		javaRelationHandler.caseMethod(methodToUse);
-
-		// Internal checks
-		assertEquals("Invalid internal context", internalItemsToFind.length, internal.getAllJavaItems()
-				.size());
-		for (Class<?> internalClassToFind : internalItemsToFind) {
-			assertTrue(internalClassToFind.getName() + " not retrieve in internal items", internal
-					.getAllJavaItems().contains(internalClassToFind));
-		}
-
-		// External checks
-		assertEquals("Invalid external context", externalItemsToFind.length, external.getAllJavaItems()
-				.size());
-		for (Class<?> externalClassToFind : externalItemsToFind) {
-			assertTrue(externalClassToFind.getName() + " not retrieve in internal items", external
-					.getAllJavaItems().contains(externalClassToFind));
-		}
+		TestUtils.checkStores(internal, external, internalItemsToFind, externalItemsToFind);
 	}
 
 }

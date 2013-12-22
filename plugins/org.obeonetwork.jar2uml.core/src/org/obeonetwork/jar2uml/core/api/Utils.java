@@ -182,7 +182,7 @@ public final class Utils {
 		String name = item.getName();
 		if (name != null && name.length() > 0) {
 			for (String jdkPrefix : JDK_PREFIXS) {
-				if (jdkPrefix.startsWith(jdkPrefix)) {
+				if (name.startsWith(jdkPrefix)) {
 					result = true;
 				}
 			}

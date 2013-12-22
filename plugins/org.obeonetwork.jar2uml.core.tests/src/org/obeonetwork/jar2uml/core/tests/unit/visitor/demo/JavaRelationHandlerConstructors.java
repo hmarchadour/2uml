@@ -8,10 +8,9 @@
  * Contributors:
  *    Hugo Marchadour - initial API and implementation and/or initial documentation
  *******************************************************************************/
-package org.obeonetwork.jar2uml.core.tests.unit.visitor;
+package org.obeonetwork.jar2uml.core.tests.unit.visitor.demo;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -26,6 +25,7 @@ import org.junit.runners.Parameterized.Parameters;
 import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
 import org.obeonetwork.jar2uml.core.api.visitor.JavaVisitorHandler;
+import org.obeonetwork.jar2uml.core.tests.api.TestUtils;
 
 import demo.PrivateConstructors;
 import demo.ProtectedConstructors;
@@ -53,11 +53,6 @@ public class JavaRelationHandlerConstructors {
 		javaRelationHandler = Factory.createJavaRelationHandler(internal, external);
 	}
 
-	/**
-	 * @param clazzToUse
-	 * @param internalToFind
-	 * @param externalToFind
-	 */
 	public JavaRelationHandlerConstructors(String testCaseName, Constructor constructorToUse,
 			Class<?>[] internalItemsToFind, Class<?>[] externalItemsToFind) {
 		this.constructorToUse = constructorToUse;
@@ -72,26 +67,30 @@ public class JavaRelationHandlerConstructors {
 				ProtectedConstructors.class, PrivateConstructors.class};
 		for (Class<?> constructorClass : constructorClasses) {
 			for (Constructor constructor : constructorClass.getDeclaredConstructors()) {
+
 				String testCaseName;
 				Class<?>[] parameterTypes = constructor.getParameterTypes();
-				if (parameterTypes.length == 0) {
-					testCaseName = constructorClass.getSimpleName() + " No arg";
-					params.add(new Object[] {testCaseName, constructor,
-							new Class<?>[] {constructor.getDeclaringClass()}, new Class<?>[] {}});
-				} else {
-					assertEquals("We have on parameter by constructor", 1, parameterTypes.length);
-					Class<?> paramClass = parameterTypes[0];
+
+				Class<?> paramClass = null;
+				if (parameterTypes.length > 0) {
+					assertEquals("We cannot have more that one parameter by constructor", 1,
+							parameterTypes.length);
+
+					paramClass = parameterTypes[0];
 					if (paramClass.isArray()) {
 						paramClass = paramClass.getComponentType();
 					}
 					testCaseName = constructorClass.getSimpleName() + " " + paramClass.toString();
-					if (paramClass.isPrimitive()) {
-						params.add(new Object[] {testCaseName, constructor,
-								new Class<?>[] {constructor.getDeclaringClass()}, new Class<?>[] {}});
-					} else {
-						params.add(new Object[] {testCaseName, constructor,
-								new Class<?>[] {constructor.getDeclaringClass()}, new Class<?>[] {paramClass}});
-					}
+				} else {
+					testCaseName = constructorClass.getSimpleName() + " No arg";
+				}
+
+				if (paramClass == null || paramClass.isPrimitive()) {
+					params.add(new Object[] {testCaseName, constructor,
+							new Class<?>[] {constructor.getDeclaringClass()}, new Class<?>[] {}});
+				} else {
+					params.add(new Object[] {testCaseName, constructor,
+							new Class<?>[] {constructor.getDeclaringClass()}, new Class<?>[] {paramClass}});
 				}
 			}
 		}
@@ -105,21 +104,7 @@ public class JavaRelationHandlerConstructors {
 		javaRelationHandler.caseClass(constructorToUse.getDeclaringClass());
 		javaRelationHandler.caseConstructor(constructorToUse);
 
-		// Internal checks
-		assertEquals("Invalid internal context", internalItemsToFind.length, internal.getAllJavaItems()
-				.size());
-		for (Class<?> internalClassToFind : internalItemsToFind) {
-			assertTrue(internalClassToFind.getName() + " not retrieve in internal items", internal
-					.getAllJavaItems().contains(internalClassToFind));
-		}
-
-		// External checks
-		assertEquals("Invalid external context", externalItemsToFind.length, external.getAllJavaItems()
-				.size());
-		for (Class<?> externalClassToFind : externalItemsToFind) {
-			assertTrue(externalClassToFind.getName() + " not retrieve in internal items", external
-					.getAllJavaItems().contains(externalClassToFind));
-		}
+		TestUtils.checkStores(internal, external, internalItemsToFind, externalItemsToFind);
 	}
 
 }

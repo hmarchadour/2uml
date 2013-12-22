@@ -16,7 +16,7 @@ import java.net.Proxy;
 import org.junit.Test;
 import org.obeonetwork.jar2uml.core.api.Factory;
 import org.obeonetwork.jar2uml.core.api.store.ClassStore;
-import org.obeonetwork.jar2uml.core.tests.api.Utils;
+import org.obeonetwork.jar2uml.core.tests.api.TestUtils;
 
 public class ClassStoreEnum {
 
@@ -24,7 +24,7 @@ public class ClassStoreEnum {
 	public void oneEnum() {
 		ClassStore classStore = Factory.createClassStore();
 		classStore.add(new File(""), Thread.State.class);
-		Utils.testStoreSize(classStore, 0, 0, 1, 0, 1);
+		TestUtils.testStoreSize(classStore, 0, 0, 1, 0, 1);
 	}
 
 	@Test
@@ -33,7 +33,7 @@ public class ClassStoreEnum {
 		File file = new File("");
 		classStore.add(file, Thread.State.class);
 		classStore.add(file, Proxy.Type.class);
-		Utils.testStoreSize(classStore, 0, 0, 2, 0, 1);
+		TestUtils.testStoreSize(classStore, 0, 0, 2, 0, 1);
 	}
 
 	@Test
@@ -41,6 +41,6 @@ public class ClassStoreEnum {
 		ClassStore classStore = Factory.createClassStore();
 		classStore.add(new File("fileMock1"), Thread.State.class);
 		classStore.add(new File("fileMock2"), Proxy.Type.class);
-		Utils.testStoreSize(classStore, 0, 0, 2, 0, 2);
+		TestUtils.testStoreSize(classStore, 0, 0, 2, 0, 2);
 	}
 }
