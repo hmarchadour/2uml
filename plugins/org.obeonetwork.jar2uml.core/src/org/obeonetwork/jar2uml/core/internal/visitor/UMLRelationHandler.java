@@ -38,6 +38,11 @@ public class UMLRelationHandler implements JavaVisitorHandler<Void> {
 	}
 
 	@Override
+	public void casePrimitive(Class<?> aClass) {
+		// Nothing
+	}
+
+	@Override
 	public void caseClass(Class<?> aClass) {
 		context = searchInJavaIndex(aClass);
 	}

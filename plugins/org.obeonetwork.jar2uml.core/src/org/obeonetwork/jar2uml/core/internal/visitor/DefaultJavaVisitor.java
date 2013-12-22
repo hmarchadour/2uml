@@ -34,7 +34,7 @@ public class DefaultJavaVisitor implements JavaVisitor {
 		if (Utils.validJavaItem(clazz)) {
 
 			if (Utils.isPrimitive(clazz)) {
-				visitInterface(clazz);
+				visitPrimitive(clazz);
 			} else if (Utils.isAnnotation(clazz)) {
 				visitAnnotation(clazz);
 			} else if (Utils.isEnum(clazz)) {
@@ -87,6 +87,10 @@ public class DefaultJavaVisitor implements JavaVisitor {
 
 	protected void visitImplementedInterface(Class<?> anImplInterface) {
 		handler.caseImplementedInterface(anImplInterface);
+	}
+
+	protected void visitPrimitive(Class<?> aClass) {
+		handler.casePrimitive(aClass);
 	}
 
 	protected void visitClass(Class<?> aClass) {

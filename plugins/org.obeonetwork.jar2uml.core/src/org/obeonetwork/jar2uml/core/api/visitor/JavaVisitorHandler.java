@@ -16,6 +16,8 @@ import java.lang.reflect.Method;
 
 public interface JavaVisitorHandler<T> {
 
+	void casePrimitive(Class<?> aClass);
+
 	void caseClass(Class<?> aClass);
 
 	void caseSuperClass(Class<?> aSuperClass);
