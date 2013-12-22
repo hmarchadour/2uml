@@ -4,6 +4,8 @@ target "kepler"
 location "http://download.eclipse.org/releases/kepler" {
 	with source, requirements
 	org.eclipse.platform.feature.group
+	org.eclipse.pde.feature.group
+	org.eclipse.rcp.feature.group
 	org.eclipse.jdt.feature.group
 	org.eclipse.uml2.sdk.feature.group
 	com.google.guava
