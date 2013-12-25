@@ -56,7 +56,7 @@ public class JarFileHandler extends AbstractHandler {
 							}
 						}
 					}
-					Job jars2uml = new ConverterJob(project, files);
+					Job jars2uml = new ConverterJob(project, "model", files);
 					jars2uml.schedule();
 				}
 			}

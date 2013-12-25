@@ -60,7 +60,7 @@ public class JDTJarArtifactHandler extends AbstractHandler {
 							files.add(jarFrag.getPath().toFile());
 						}
 					}
-					Job jars2uml = new ConverterJob(project, files);
+					Job jars2uml = new ConverterJob(project, "model", files);
 					jars2uml.schedule();
 				}
 			}
