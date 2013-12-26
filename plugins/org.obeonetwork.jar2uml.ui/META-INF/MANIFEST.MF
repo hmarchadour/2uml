@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: jar2uml
+Bundle-Name: jar2uml UI
 Bundle-SymbolicName: org.obeonetwork.jar2uml.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.obeonetwork.jar2uml.ui.Jar2UMLUIActivator

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Hugo Marchadour (Obeo).
+ * Copyright (c) 2014 Hugo Marchadour (Obeo).
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,11 +25,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.obeonetwork.jar2uml.core.api.ConverterJob;
+import org.obeonetwork.jar2uml.core.api.JarConverterJob;
 
-/**
- * @author <a href="mailto:hugo.marchadour@obeo.fr">Hugo Marchadour</a>
- */
 public class JDTJarArtifactHandler extends AbstractHandler {
 
 	/**
@@ -60,7 +57,7 @@ public class JDTJarArtifactHandler extends AbstractHandler {
 							files.add(jarFrag.getPath().toFile());
 						}
 					}
-					Job jars2uml = new ConverterJob(project, "model", files);
+					Job jars2uml = new JarConverterJob(project, "model", files);
 					jars2uml.schedule();
 				}
 			}

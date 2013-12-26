@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Hugo Marchadour (Obeo).
+ * Copyright (c) 2014 Hugo Marchadour (Obeo).
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,7 @@ import org.osgi.framework.BundleContext;
 public class Jar2UMLUIActivator extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "org.obeonetwork.jar2uml"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "org.obeonetwork.jar2uml.ui"; //$NON-NLS-1$
 
 	// The shared instance
 	private static Jar2UMLUIActivator plugin;
@@ -32,7 +32,6 @@ public class Jar2UMLUIActivator extends AbstractUIPlugin {
 
 	/*
 	 * (non-Javadoc)
-	 * 
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	@Override
@@ -43,7 +42,6 @@ public class Jar2UMLUIActivator extends AbstractUIPlugin {
 
 	/*
 	 * (non-Javadoc)
-	 * 
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	@Override
