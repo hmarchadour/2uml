@@ -1,7 +1,5 @@
 package org.obeonetwork.jdt2uml.core.tests.unit.visitor;
 
-import static org.junit.Assert.assertEquals;
-
 import org.easymock.EasyMock;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
@@ -30,13 +28,13 @@ import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitorHandler;
 
 public class BasicJDTVisitorHandler {
 
-	private JDTVisitorHandler<String> visitorHandler;
+	private JDTVisitorHandler visitorHandler;
 
 	private JDTVisitor mockedVisitor;
 
 	@Before
 	public void setUp() throws Exception {
-		visitorHandler = Factory.createJDTVisitorHandler(null, null);
+		visitorHandler = Factory.createJDTProjectVisitorHandler(null, null);
 		mockedVisitor = EasyMock.createMock(JDTVisitor.class);
 	}
 
@@ -56,9 +54,6 @@ public class BasicJDTVisitorHandler {
 		EasyMock.replay(mockedJavaProject, mockedVisitor);
 		visitorHandler.caseJavaProject(mockedJavaProject, mockedVisitor);
 		EasyMock.verify(mockedJavaProject, mockedVisitor);
-
-		assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-		assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 	}
 
 	@Test
@@ -73,8 +68,6 @@ public class BasicJDTVisitorHandler {
 		visitorHandler.caseJavaModel(mockedJavaModel, mockedVisitor);
 		EasyMock.verify(mockedJavaModel, mockedVisitor);
 
-		assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-		assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 	}
 
 	@Test
@@ -89,8 +82,6 @@ public class BasicJDTVisitorHandler {
 		visitorHandler.casePackageFragmentRoot(mockedPackageFragmentRoot, mockedVisitor);
 		EasyMock.verify(mockedPackageFragmentRoot, mockedVisitor);
 
-		assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-		assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 	}
 
 	@Test
@@ -106,8 +97,6 @@ public class BasicJDTVisitorHandler {
 		visitorHandler.casePackageFragment(mockedPackageFragment, mockedVisitor);
 		EasyMock.verify(mockedPackageFragment, mockedVisitor);
 
-		assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-		assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 	}
 
 	@Test
@@ -117,8 +106,6 @@ public class BasicJDTVisitorHandler {
 		visitorHandler.caseAnnotation(mockedAnnotation, mockedVisitor);
 		EasyMock.verify(mockedAnnotation, mockedVisitor);
 
-		assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-		assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 	}
 
 	@Test
@@ -135,8 +122,6 @@ public class BasicJDTVisitorHandler {
 		visitorHandler.caseClassFile(mockedClassFile, mockedVisitor);
 		EasyMock.verify(mockedClassFile, mockedVisitor);
 
-		assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-		assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 	}
 
 	@Test
@@ -152,8 +137,6 @@ public class BasicJDTVisitorHandler {
 		visitorHandler.caseCompilationUnit(mockedCompilationUnit, mockedVisitor);
 		EasyMock.verify(mockedCompilationUnit, mockedVisitor);
 
-		assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-		assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 	}
 
 	@Test
@@ -181,8 +164,6 @@ public class BasicJDTVisitorHandler {
 		visitorHandler.caseField(mockedField, mockedVisitor);
 		EasyMock.verify(returnType, mJavaProject, mDeclaringType, mockedField, mockedVisitor);
 
-		assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-		assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 	}
 
 	@Test
@@ -197,8 +178,6 @@ public class BasicJDTVisitorHandler {
 		visitorHandler.caseInitializer(mockedInitializer, mockedVisitor);
 		EasyMock.verify(mockedInitializer, mockedVisitor);
 
-		assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-		assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 	}
 
 	@Test
@@ -227,8 +206,6 @@ public class BasicJDTVisitorHandler {
 		visitorHandler.caseMethod(mMethod, mockedVisitor);
 		EasyMock.verify(mDeclaringType, mMethod, mockedVisitor);
 
-		assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-		assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 	}
 
 	@Test
@@ -243,8 +220,6 @@ public class BasicJDTVisitorHandler {
 		visitorHandler.caseImportContainer(mockedImportContainer, mockedVisitor);
 		EasyMock.verify(mockedImportContainer, mockedVisitor);
 
-		assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-		assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 	}
 
 	@Test
@@ -254,8 +229,6 @@ public class BasicJDTVisitorHandler {
 		visitorHandler.casePackageDeclaration(mockedPackageDeclaration, mockedVisitor);
 		EasyMock.verify(mockedPackageDeclaration, mockedVisitor);
 
-		assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-		assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 	}
 
 	@Test
@@ -265,8 +238,6 @@ public class BasicJDTVisitorHandler {
 		visitorHandler.caseTypeParameter(mockedTypeParameter, mockedVisitor);
 		EasyMock.verify(mockedTypeParameter, mockedVisitor);
 
-		assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-		assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 	}
 
 	@Test
@@ -276,8 +247,6 @@ public class BasicJDTVisitorHandler {
 		visitorHandler.caseLocalVariable(mockedLocalVariable, mockedVisitor);
 		EasyMock.verify(mockedLocalVariable, mockedVisitor);
 
-		assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-		assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 	}
 
 	@Test
@@ -287,8 +256,6 @@ public class BasicJDTVisitorHandler {
 		visitorHandler.caseImportDeclaration(mockedImportDeclaration, mockedVisitor);
 		EasyMock.verify(mockedImportDeclaration, mockedVisitor);
 
-		assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-		assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 	}
 
 }

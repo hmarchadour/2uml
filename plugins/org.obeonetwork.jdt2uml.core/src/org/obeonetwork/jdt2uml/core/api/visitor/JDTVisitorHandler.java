@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.obeonetwork.jdt2uml.core.api.visitor;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -26,9 +27,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
-import org.obeonetwork.jdt2uml.core.api.store.JDTStore;
+import org.eclipse.uml2.uml.Model;
 
-public interface JDTVisitorHandler<T> {
+public interface JDTVisitorHandler {
 
 	void caseJavaProject(IJavaProject javaProject, JDTVisitor visitor);
 
@@ -46,10 +47,6 @@ public interface JDTVisitorHandler<T> {
 
 	void caseInitializer(IInitializer initializer, JDTVisitor visitor);
 
-	JDTStore<T> getInternal();
-
-	JDTStore<T> getExternal();
-
 	void caseImportDeclaration(IImportDeclaration importDeclaration, JDTVisitor visitor);
 
 	void caseImportContainer(IImportContainer importContainer, JDTVisitor visitor);
@@ -65,5 +62,9 @@ public interface JDTVisitorHandler<T> {
 	void caseAnnotation(IAnnotation annotation, JDTVisitor visitor);
 
 	void caseJavaModel(IJavaModel javaModel, JDTVisitor visitor);
+
+	Model getModel();
+
+	IProgressMonitor getMonitor();
 
 }

@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.obeonetwork.jdt2uml.core.api.JDTProjectConverterJob;
+import org.obeonetwork.jdt2uml.core.api.job.ExportUMLModels;
 
 public class JDTProjectHandler extends AbstractHandler {
 
@@ -35,7 +35,7 @@ public class JDTProjectHandler extends AbstractHandler {
 			Object selectedElement = ((TreeSelection)selection).getFirstElement();
 			if (selectedElement instanceof IJavaProject) {
 				IJavaProject javaProject = (IJavaProject)selectedElement;
-				Job jdt2uml = new JDTProjectConverterJob(javaProject, "model");
+				Job jdt2uml = new ExportUMLModels(javaProject, "model", "libraries");
 				jdt2uml.schedule();
 			}
 		}

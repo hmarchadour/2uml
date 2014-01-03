@@ -35,7 +35,7 @@ import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitorHandler;
 @RunWith(Parameterized.class)
 public class JDTVisitorImplTest {
 
-	private JDTVisitorHandler<?> mockedHandler;
+	private JDTVisitorHandler mockedHandler;
 
 	private JDTVisitor jdtVisitor;
 

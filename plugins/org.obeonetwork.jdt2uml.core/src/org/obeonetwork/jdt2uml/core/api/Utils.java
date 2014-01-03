@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.obeonetwork.jdt2uml.core.api;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.emf.common.util.URI;
@@ -23,11 +26,15 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.uml2.uml.Component;
 import org.eclipse.uml2.uml.Namespace;
 import org.eclipse.uml2.uml.Package;
+import org.eclipse.uml2.uml.PackageableElement;
+import org.eclipse.uml2.uml.UMLFactory;
 import org.eclipse.uml2.uml.UMLPackage;
 
 public final class Utils {
@@ -140,19 +147,35 @@ public final class Utils {
 	}
 
 	public static boolean isExternal(IType type) {
-		IPackageFragment packageFragment = type.getPackageFragment();
-		return isExternal(packageFragment);
+		return getPackageFragmentRoot(type).isExternal();
 	}
 
-	public static boolean isExternal(IPackageFragment packageFragment) {
-		boolean isExternal = false;
-		IJavaElement parent = packageFragment.getParent();
-		if (parent instanceof IPackageFragmentRoot) {
-			isExternal = ((IPackageFragmentRoot)parent).isExternal();
-		} else if (parent instanceof IPackageFragment) {
-			isExternal = isExternal((IPackageFragment)parent);
+	public static IPackageFragmentRoot getPackageFragmentRoot(IType type) {
+		IJavaElement currentParent = type;
+		do {
+			currentParent = currentParent.getParent();
+		} while (currentParent != null && !(currentParent instanceof IPackageFragmentRoot));
+
+		return (IPackageFragmentRoot)currentParent;
+	}
+
+	public static String getPath(IJavaElement javaElement) {
+		List<String> segments = new ArrayList<String>();
+		IJavaElement currentParent = javaElement;
+		segments.add(currentParent.getElementName());
+		do {
+			currentParent = currentParent.getParent();
+			if (currentParent != null) {
+				segments.add(currentParent.getElementName());
+			}
+		} while (currentParent != null && !(currentParent instanceof IPackageFragmentRoot));
+		Collections.reverse(segments);
+		StringBuilder strBuilder = new StringBuilder();
+		for (String segment : segments) {
+			strBuilder.append(segment);
+			strBuilder.append('/');
 		}
-		return isExternal;
+		return strBuilder.toString();
 	}
 
 	public static String resolveFullQualifiedName(IType type, String typeIdent) {
@@ -203,5 +226,58 @@ public final class Utils {
 		if (!namespace.getImportedPackages().contains(root)) {
 			namespace.createPackageImport(root);
 		}
+	}
+
+	public static org.eclipse.uml2.uml.Package handlePackage(Component parent,
+			IPackageFragment packageFragment) {
+		String[] subpackages = packageFragment.getElementName().split("\\.");
+		org.eclipse.uml2.uml.Package current = null;
+		for (String subpackage : subpackages) {
+			if (subpackage == null || subpackage.length() == 0) {
+				break;
+			}
+			if (current == null) {
+				List<PackageableElement> packagedElements = parent.getPackagedElements();
+				for (PackageableElement packageableElement : packagedElements) {
+					if (packageableElement instanceof org.eclipse.uml2.uml.Package) {
+						if (subpackage.equals(packageableElement.getName())) {
+							current = (org.eclipse.uml2.uml.Package)packageableElement;
+							break;
+						}
+					}
+				}
+				if (current == null) {
+					Package createPackage = UMLFactory.eINSTANCE.createPackage();
+					createPackage.setName(subpackage);
+					parent.getPackagedElements().add(createPackage);
+					current = createPackage;
+				}
+			} else {
+				org.eclipse.uml2.uml.Package nextPackage = current.getNestedPackage(subpackage);
+				if (nextPackage == null) {
+					nextPackage = current.createNestedPackage(subpackage);
+				}
+				current = nextPackage;
+			}
+		}
+		return current;
+	}
+
+	public static int countAllJavaItems(IJavaElement javaElement) {
+		int count = 1;
+		if (javaElement instanceof IPackageFragmentRoot && ((IPackageFragmentRoot)javaElement).isExternal()) {
+			// doesn't explore
+		} else if (javaElement instanceof IParent) {
+			IJavaElement[] children;
+			try {
+				children = ((IParent)javaElement).getChildren();
+				for (IJavaElement subJavaElement : children) {
+					count += countAllJavaItems(subJavaElement);
+				}
+			} catch (JavaModelException e) {
+				e.printStackTrace();
+			}
+		}
+		return count;
 	}
 }

@@ -1,5 +1,8 @@
 package org.obeonetwork.jdt2uml.core.internal.visitor;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -24,47 +27,69 @@ import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitorHandler;
 
 public class JDTVisitorImpl implements JDTVisitor {
 
-	private final JDTVisitorHandler<?> handler;
+	public final static int RECURSIVE_DEFAULT_LIMIT = 100;
 
-	public JDTVisitorImpl(JDTVisitorHandler<?> handler) {
+	private final int recursiveLimit;
+
+	private Set<IJavaElement> visited;
+
+	private Set<IJavaElement> stack;
+
+	private final JDTVisitorHandler handler;
+
+	public JDTVisitorImpl(JDTVisitorHandler handler) {
 		this.handler = handler;
+		this.recursiveLimit = RECURSIVE_DEFAULT_LIMIT;
+		visited = new HashSet<IJavaElement>();
+		stack = new HashSet<IJavaElement>();
 	}
 
 	@Override
 	public void visit(IJavaElement javaElement) {
-		if (javaElement != null) {
-			try {
-				if (javaElement instanceof IJavaProject) {
-					visitJavaProject((IJavaProject)javaElement);
-				} else if (javaElement instanceof IJavaModel) {
-					visitJavaModel((IJavaModel)javaElement);
-				} else if (javaElement instanceof IPackageFragmentRoot) {
-					visitPackageFragmentRoot((IPackageFragmentRoot)javaElement);
-				} else if (javaElement instanceof IPackageFragment) {
-					visitFragmentRoot((IPackageFragment)javaElement);
-				} else if (javaElement instanceof IClassFile) {
-					visitClassFile((IClassFile)javaElement);
-				} else if (javaElement instanceof ICompilationUnit) {
-					visitCompilationUnit((ICompilationUnit)javaElement);
-				} else if (javaElement instanceof IMember) {
-					visitMember((IMember)javaElement);
-				} else if (javaElement instanceof IAnnotation) {
-					visitAnnotation((IAnnotation)javaElement);
-				} else if (javaElement instanceof IImportContainer) {
-					visitImportContainer((IImportContainer)javaElement);
-				} else if (javaElement instanceof IImportDeclaration) {
-					visitImportDeclaration((IImportDeclaration)javaElement);
-				} else if (javaElement instanceof IPackageDeclaration) {
-					visitPackageDeclaration((IPackageDeclaration)javaElement);
-				} else if (javaElement instanceof ITypeParameter) {
-					visitTypeParameter((ITypeParameter)javaElement);
-				} else if (javaElement instanceof ILocalVariable) {
-					visitLocalVariable((ILocalVariable)javaElement);
-				} else {
-					System.out.println("Not handled !" + javaElement);
+		if (javaElement != null && !visited.contains(javaElement)) {
+			if (stack.size() < recursiveLimit) {
+				visited.add(javaElement);
+				stack.add(javaElement);
+				try {
+					if (javaElement instanceof IJavaProject) {
+						visitJavaProject((IJavaProject)javaElement);
+					} else if (javaElement instanceof IJavaModel) {
+						visitJavaModel((IJavaModel)javaElement);
+					} else if (javaElement instanceof IPackageFragmentRoot) {
+						visitPackageFragmentRoot((IPackageFragmentRoot)javaElement);
+					} else if (javaElement instanceof IPackageFragment) {
+						visitFragmentRoot((IPackageFragment)javaElement);
+					} else if (javaElement instanceof IClassFile) {
+						visitClassFile((IClassFile)javaElement);
+					} else if (javaElement instanceof ICompilationUnit) {
+						visitCompilationUnit((ICompilationUnit)javaElement);
+					} else if (javaElement instanceof IMember) {
+						visitMember((IMember)javaElement);
+					} else if (javaElement instanceof IAnnotation) {
+						visitAnnotation((IAnnotation)javaElement);
+					} else if (javaElement instanceof IImportContainer) {
+						visitImportContainer((IImportContainer)javaElement);
+					} else if (javaElement instanceof IImportDeclaration) {
+						visitImportDeclaration((IImportDeclaration)javaElement);
+					} else if (javaElement instanceof IPackageDeclaration) {
+						visitPackageDeclaration((IPackageDeclaration)javaElement);
+					} else if (javaElement instanceof ITypeParameter) {
+						visitTypeParameter((ITypeParameter)javaElement);
+					} else if (javaElement instanceof ILocalVariable) {
+						visitLocalVariable((ILocalVariable)javaElement);
+					} else {
+						System.out.println("Not handled !" + javaElement);
+					}
+				} catch (JavaModelException e) {
+					e.printStackTrace();
 				}
-			} catch (JavaModelException e) {
-				e.printStackTrace();
+				stack.remove(javaElement);
+			} else {
+				StringBuilder error = new StringBuilder("Max recursive level");
+				for (IJavaElement item : stack) {
+					error.append("\n" + item.getElementName());
+				}
+				System.err.println(error.toString());
 			}
 		}
 	}

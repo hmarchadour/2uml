@@ -1,8 +1,5 @@
 package org.obeonetwork.jdt2uml.core.tests.unit.visitor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -26,7 +23,7 @@ public class TypeJDTVisitorHandler {
 
 	private static String FULL_QUALIFIED_NAME = "java.lang.Object";
 
-	private JDTVisitorHandler<String> visitorHandler;
+	private JDTVisitorHandler visitorHandler;
 
 	private JDTVisitor mockedVisitor;
 
@@ -36,7 +33,7 @@ public class TypeJDTVisitorHandler {
 
 	@Before
 	public void setUp() throws Exception {
-		visitorHandler = Factory.createJDTVisitorHandler(null, null);
+		visitorHandler = Factory.createJDTProjectVisitorHandler(null, null);
 		mockedVisitor = EasyMock.createMock(JDTVisitor.class);
 	}
 
@@ -89,13 +86,7 @@ public class TypeJDTVisitorHandler {
 		EasyMock.verify(packageFragment, packageFragmentRoot, mockedType, mockedVisitor);
 
 		if (isExternal) {
-			assertEquals(1, visitorHandler.getExternal().getAllJavaItems().size());
-			assertTrue(visitorHandler.getExternal().getAllJavaAnnotations().contains(FULL_QUALIFIED_NAME));
-			assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 		} else {
-			assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-			assertEquals(1, visitorHandler.getInternal().getAllJavaItems().size());
-			assertTrue(visitorHandler.getInternal().getAllJavaAnnotations().contains(FULL_QUALIFIED_NAME));
 		}
 	}
 
@@ -119,13 +110,7 @@ public class TypeJDTVisitorHandler {
 		EasyMock.verify(packageFragment, packageFragmentRoot, mockedType, mockedVisitor);
 
 		if (isExternal) {
-			assertEquals(1, visitorHandler.getExternal().getAllJavaItems().size());
-			assertTrue(visitorHandler.getExternal().getAllJavaEnums().contains(FULL_QUALIFIED_NAME));
-			assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 		} else {
-			assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-			assertEquals(1, visitorHandler.getInternal().getAllJavaItems().size());
-			assertTrue(visitorHandler.getInternal().getAllJavaEnums().contains(FULL_QUALIFIED_NAME));
 		}
 	}
 
@@ -150,13 +135,7 @@ public class TypeJDTVisitorHandler {
 		EasyMock.verify(packageFragment, packageFragmentRoot, mockedType, mockedVisitor);
 
 		if (isExternal) {
-			assertEquals(1, visitorHandler.getExternal().getAllJavaItems().size());
-			assertTrue(visitorHandler.getExternal().getAllJavaInterfaces().contains(FULL_QUALIFIED_NAME));
-			assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 		} else {
-			assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-			assertEquals(1, visitorHandler.getInternal().getAllJavaItems().size());
-			assertTrue(visitorHandler.getInternal().getAllJavaInterfaces().contains(FULL_QUALIFIED_NAME));
 		}
 	}
 
@@ -182,13 +161,7 @@ public class TypeJDTVisitorHandler {
 		EasyMock.verify(packageFragment, packageFragmentRoot, mockedType, mockedVisitor);
 
 		if (isExternal) {
-			assertEquals(1, visitorHandler.getExternal().getAllJavaItems().size());
-			assertTrue(visitorHandler.getExternal().getAllJavaClasses().contains(FULL_QUALIFIED_NAME));
-			assertEquals(0, visitorHandler.getInternal().getAllJavaItems().size());
 		} else {
-			assertEquals(0, visitorHandler.getExternal().getAllJavaItems().size());
-			assertEquals(1, visitorHandler.getInternal().getAllJavaItems().size());
-			assertTrue(visitorHandler.getInternal().getAllJavaClasses().contains(FULL_QUALIFIED_NAME));
 		}
 	}
 }

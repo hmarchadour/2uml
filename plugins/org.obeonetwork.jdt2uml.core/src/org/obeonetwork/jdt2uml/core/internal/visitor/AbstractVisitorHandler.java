@@ -24,25 +24,17 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.uml2.uml.Model;
-import org.obeonetwork.jdt2uml.core.api.Factory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
-import org.obeonetwork.jdt2uml.core.api.store.JDTStore;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitorHandler;
 
-public class JDTVisitorHandlerImpl implements JDTVisitorHandler<String> {
-
-	private final JDTStore<String> internalStore;
-
-	private final JDTStore<String> externalStore;
+public abstract class AbstractVisitorHandler implements JDTVisitorHandler {
 
 	private final Model model;
 
 	private final IProgressMonitor monitor;
 
-	public JDTVisitorHandlerImpl(Model model, IProgressMonitor monitor) {
-		internalStore = Factory.createIdentStore();
-		externalStore = Factory.createIdentStore();
+	public AbstractVisitorHandler(Model model, IProgressMonitor monitor) {
 		this.model = model;
 		this.monitor = monitor;
 	}
@@ -63,6 +55,10 @@ public class JDTVisitorHandlerImpl implements JDTVisitorHandler<String> {
 			} catch (JavaModelException e) {
 				e.printStackTrace();
 			}
+		}
+		if (monitor != null) {
+			monitor.subTask(Utils.getPath(javaElement));
+			monitor.worked(1);
 		}
 	}
 
@@ -90,50 +86,12 @@ public class JDTVisitorHandlerImpl implements JDTVisitorHandler<String> {
 	@Override
 	public void casePackageFragment(IPackageFragment packageFragment, JDTVisitor visitor) {
 		casePre(packageFragment, visitor);
-		if (monitor != null) {
-			monitor.subTask(packageFragment.getElementName());
-			monitor.worked(1);
-		}
+		// nothing
 		casePost(packageFragment, visitor);
 	}
 
 	@Override
-	public void caseType(IType type, JDTVisitor visitor) {
-		casePre(type, visitor);
-
-		if (!internalStore.exist(type) /* && !externalStore.exist(type) */) {
-			// store
-			if (Utils.isExternal(type)) {
-				// TODO disabled for now, remove soon
-				// externalStore.add(type);
-			} else {
-				internalStore.add(type);
-				try {
-					// handle member types
-					for (IType memberType : type.getTypes()) {
-						visitor.visit(memberType);
-					}
-					// handle super types
-					String superclassName = type.getSuperclassName();
-					if (superclassName != null && !superclassName.isEmpty()) {
-						for (IType superType : Utils.getType(type, superclassName)) {
-							visitor.visit(superType);
-						}
-					}
-					// handle implemented interfaces
-					for (String superInterfaceName : type.getSuperInterfaceNames()) {
-						for (IType interfaceType : Utils.getType(type, superInterfaceName)) {
-							visitor.visit(interfaceType);
-						}
-					}
-				} catch (JavaModelException e) {
-					e.printStackTrace();
-				}
-				casePost(type, visitor);
-			}
-		}
-
-	}
+	public abstract void caseType(IType type, JDTVisitor visitor);
 
 	@Override
 	public void caseAnnotation(IAnnotation annotation, JDTVisitor visitor) {
@@ -148,9 +106,6 @@ public class JDTVisitorHandlerImpl implements JDTVisitorHandler<String> {
 	public void caseClassFile(IClassFile classFile, JDTVisitor visitor) {
 		casePre(classFile, visitor);
 
-		if (monitor != null) {
-			monitor.subTask(classFile.getElementName());
-		}
 		IType classType = classFile.getType();
 		if (classType != null) {
 			visitor.visit(classType);
@@ -162,9 +117,6 @@ public class JDTVisitorHandlerImpl implements JDTVisitorHandler<String> {
 	public void caseCompilationUnit(ICompilationUnit compilationUnit, JDTVisitor visitor) {
 		casePre(compilationUnit, visitor);
 
-		if (monitor != null) {
-			monitor.subTask(compilationUnit.getElementName());
-		}
 		IType primaryType = compilationUnit.findPrimaryType();
 		if (primaryType != null) {
 			visitor.visit(primaryType);
@@ -179,11 +131,9 @@ public class JDTVisitorHandlerImpl implements JDTVisitorHandler<String> {
 
 		Set<String> qualifiedNames = Utils.getQualifiedNames(field);
 		for (String qualifiedName : qualifiedNames) {
-			if (!internalStore.exist(qualifiedName) && !externalStore.exist(qualifiedName)) {
-				Set<IType> retrieveTypes = Utils.retrieveTypes(field.getJavaProject(), qualifiedName);
-				for (IType type : retrieveTypes) {
-					visitor.visit(type);
-				}
+			Set<IType> retrieveTypes = Utils.retrieveTypes(field.getJavaProject(), qualifiedName);
+			for (IType type : retrieveTypes) {
+				visitor.visit(type);
 			}
 		}
 
@@ -203,11 +153,9 @@ public class JDTVisitorHandlerImpl implements JDTVisitorHandler<String> {
 
 		Set<String> qualifiedNames = Utils.getQualifiedNames(method);
 		for (String qualifiedName : qualifiedNames) {
-			if (!internalStore.exist(qualifiedName) && !externalStore.exist(qualifiedName)) {
-				Set<IType> retrieveTypes = Utils.retrieveTypes(method.getJavaProject(), qualifiedName);
-				for (IType type : retrieveTypes) {
-					visitor.visit(type);
-				}
+			Set<IType> retrieveTypes = Utils.retrieveTypes(method.getJavaProject(), qualifiedName);
+			for (IType type : retrieveTypes) {
+				visitor.visit(type);
 			}
 		}
 
@@ -250,12 +198,12 @@ public class JDTVisitorHandlerImpl implements JDTVisitorHandler<String> {
 	}
 
 	@Override
-	public JDTStore<String> getInternal() {
-		return internalStore;
+	public Model getModel() {
+		return model;
 	}
 
 	@Override
-	public JDTStore<String> getExternal() {
-		return externalStore;
+	public IProgressMonitor getMonitor() {
+		return monitor;
 	}
 }
