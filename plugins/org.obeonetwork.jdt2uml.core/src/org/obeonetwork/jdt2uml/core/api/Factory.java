@@ -11,6 +11,7 @@
 package org.obeonetwork.jdt2uml.core.api;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.uml2.uml.Model;
 import org.obeonetwork.jdt2uml.core.api.store.JDTStore;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitorHandler;
@@ -19,8 +20,8 @@ import org.obeonetwork.jdt2uml.core.internal.visitor.JDTVisitorHandlerImpl;
 import org.obeonetwork.jdt2uml.core.internal.visitor.JDTVisitorImpl;
 
 public final class Factory {
-	public static JDTVisitorHandler<String> createJDTVisitorHandler(IProgressMonitor monitor) {
-		return new JDTVisitorHandlerImpl(monitor);
+	public static JDTVisitorHandler<String> createJDTVisitorHandler(Model model, IProgressMonitor monitor) {
+		return new JDTVisitorHandlerImpl(model, monitor);
 	}
 
 	public static JDTVisitor createJDTVisitor(JDTVisitorHandler<?> handler) {

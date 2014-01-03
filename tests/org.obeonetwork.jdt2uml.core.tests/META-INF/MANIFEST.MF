@@ -6,8 +6,11 @@ Bundle-Version: 1.0.0.qualifier
 Require-Bundle: org.obeonetwork.jdt2uml.core;bundle-version="1.0.0",
  org.junit,
  org.eclipse.core.resources,
+ org.eclipse.text,
+ org.eclipse.jdt.core,
  org.easymock,
- com.google.guava
+ com.google.guava,
+ org.eclipse.uml2.uml
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Obeo

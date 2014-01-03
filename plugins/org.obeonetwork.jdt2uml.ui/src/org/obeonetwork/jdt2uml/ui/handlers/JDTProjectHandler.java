@@ -34,7 +34,8 @@ public class JDTProjectHandler extends AbstractHandler {
 		if (!selection.isEmpty() && selection instanceof TreeSelection) {
 			Object selectedElement = ((TreeSelection)selection).getFirstElement();
 			if (selectedElement instanceof IJavaProject) {
-				Job jdt2uml = new JDTProjectConverterJob((IJavaProject)selectedElement, "model");
+				IJavaProject javaProject = (IJavaProject)selectedElement;
+				Job jdt2uml = new JDTProjectConverterJob(javaProject, "model");
 				jdt2uml.schedule();
 			}
 		}

@@ -148,4 +148,8 @@ public class JDTIdentStoreImpl implements JDTStore<String> {
 		return exist;
 	}
 
+	@Override
+	public boolean exist(IType type) {
+		return exist(type.getFullyQualifiedName());
+	}
 }

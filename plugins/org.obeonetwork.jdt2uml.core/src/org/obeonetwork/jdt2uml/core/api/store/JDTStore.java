@@ -29,4 +29,6 @@ public interface JDTStore<T> {
 	Set<T> getAllJavaEnums();
 
 	boolean exist(T item);
+
+	boolean exist(IType type);
 }

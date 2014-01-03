@@ -13,6 +13,10 @@ package org.obeonetwork.jdt2uml.core.api;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -22,6 +26,9 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.uml2.uml.Namespace;
+import org.eclipse.uml2.uml.Package;
+import org.eclipse.uml2.uml.UMLPackage;
 
 public final class Utils {
 
@@ -68,30 +75,16 @@ public final class Utils {
 	public static Set<IType> getType(IType superType, String typeIdent) {
 		Set<IType> types = new HashSet<IType>();
 		if (typeIdent != null) {
-			String[][] resolveType = resolve(superType, typeIdent);
-			if (resolveType != null) {
-				Set<IType> retrieveTypes = retrieveTypes(superType.getJavaProject(),
-						Utils.resolveQualifiedName(resolveType));
+
+			String fullQualifiedName = resolveFullQualifiedName(superType, typeIdent);
+			if (fullQualifiedName != null && !fullQualifiedName.isEmpty()) {
+				Set<IType> retrieveTypes = retrieveTypes(superType.getJavaProject(), fullQualifiedName);
 				for (IType type : retrieveTypes) {
 					types.add(type);
 				}
 			}
 		}
 		return types;
-	}
-
-	public static Set<String> getQualifiedNames(IField field) {
-		Set<String> qualifiedNames = new HashSet<String>();
-		try {
-			String typeIdent = Signature.getSimpleName(Signature.toString(field.getTypeSignature()));
-			String[][] resolveType = resolve(field.getDeclaringType(), typeIdent);
-			if (resolveType != null) {
-				qualifiedNames.add(Utils.resolveQualifiedName(resolveType));
-			}
-		} catch (JavaModelException e) {
-			e.printStackTrace();
-		}
-		return qualifiedNames;
 	}
 
 	public static Set<IType> retrieveTypes(IJavaProject javaProject, String qualifiedName) {
@@ -109,14 +102,18 @@ public final class Utils {
 		return types;
 	}
 
-	public static String[][] resolve(IType type, String typeIdent) {
+	public static Set<String> getQualifiedNames(IField field) {
+		Set<String> qualifiedNames = new HashSet<String>();
 		try {
-			return type.resolveType(typeIdent);
+			String typeIdent = Signature.getSimpleName(Signature.toString(field.getTypeSignature()));
+			String fullQualifiedName = resolveFullQualifiedName(field.getDeclaringType(), typeIdent);
+			if (fullQualifiedName != null && !fullQualifiedName.isEmpty()) {
+				qualifiedNames.add(fullQualifiedName);
+			}
 		} catch (JavaModelException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return null;
 		}
+		return qualifiedNames;
 	}
 
 	public static Set<String> getQualifiedNames(IMethod method) {
@@ -124,19 +121,16 @@ public final class Utils {
 		IType declaringType = method.getDeclaringType();
 		try {
 			String typeIdent = Signature.getSimpleName(Signature.toString(method.getReturnType()));
-			String[][] resolveType = resolve(declaringType, typeIdent);
-			if (resolveType != null) {
-				qualifiedNames.add(Utils.resolveQualifiedName(resolveType));
+			String fullQualifiedName = resolveFullQualifiedName(declaringType, typeIdent);
+			if (fullQualifiedName != null && !fullQualifiedName.isEmpty()) {
+				qualifiedNames.add(fullQualifiedName);
 			}
-
-			String[] parameterTypes = Signature.getParameterTypes(method.getSignature());
-			for (String parameterType : parameterTypes) {
+			for (String parameterType : method.getParameterTypes()) {
 				String typeParamIdent = Signature.getSimpleName(Signature.toString(parameterType));
 
-				String[][] resolveParamType = resolve(declaringType, typeParamIdent);
-				if (resolveParamType != null) {
-					String qualifiedParamTypeIdent = Utils.resolveQualifiedName(resolveParamType);
-					qualifiedNames.add(qualifiedParamTypeIdent);
+				String fullQualifiedName2 = resolveFullQualifiedName(declaringType, typeParamIdent);
+				if (fullQualifiedName2 != null && !fullQualifiedName2.isEmpty()) {
+					qualifiedNames.add(fullQualifiedName2);
 				}
 			}
 		} catch (JavaModelException e) {
@@ -161,7 +155,18 @@ public final class Utils {
 		return isExternal;
 	}
 
-	public static String resolveQualifiedName(String[][] resolveType) {
+	public static String resolveFullQualifiedName(IType type, String typeIdent) {
+		StringBuilder builder = new StringBuilder();
+		try {
+			String[][] resolveType = type.resolveType(typeIdent);
+			builder.append(resolveQualifiedName(resolveType));
+		} catch (JavaModelException e) {
+			e.printStackTrace();
+		}
+		return builder.toString();
+	}
+
+	private static String resolveQualifiedName(String[][] resolveType) {
 
 		StringBuilder builder = new StringBuilder();
 		boolean first = true;
@@ -178,5 +183,25 @@ public final class Utils {
 			}
 		}
 		return builder.toString();
+	}
+
+	/**
+	 * Loads & import library into the {@link Namespace}.
+	 * 
+	 * @param namespace
+	 *            the {@link Namespace} context
+	 * @param libraryUri
+	 *            the URI of the library to load.
+	 */
+	public static void importPrimitiveTypes(Namespace namespace, String libraryUri) {
+		final ResourceSet resourceSet = namespace.eResource().getResourceSet();
+		final Resource resource = resourceSet.getResource(URI.createURI(libraryUri), true);
+
+		final Package root = (Package)EcoreUtil.getObjectByType(resource.getContents(),
+				UMLPackage.Literals.PACKAGE);
+		// We check if a package import already exists
+		if (!namespace.getImportedPackages().contains(root)) {
+			namespace.createPackageImport(root);
+		}
 	}
 }
