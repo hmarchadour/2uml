@@ -8,27 +8,14 @@
  * Contributors:
  *    Hugo Marchadour - initial API and implementation and/or initial documentation
  *******************************************************************************/
-package org.obeonetwork.jdt2uml.core.api.store;
+package org.obeonetwork.jdt2uml.core.api.handler;
 
-import java.util.Set;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.uml2.uml.Model;
 
-import org.eclipse.jdt.core.IType;
+public interface JDTUpdatorHandler extends JDTHandler {
 
-public interface JDTStore<T> {
+	JDTUpdatorHandler copy(Model model);
 
-	void add(IType type);
-
-	Set<T> getAllJavaItems();
-
-	Set<T> getAllJavaClasses();
-
-	Set<T> getAllJavaInterfaces();
-
-	Set<T> getAllJavaAnnotations();
-
-	Set<T> getAllJavaEnums();
-
-	boolean exist(T item);
-
-	boolean exist(IType type);
+	String getModelFileName(IJavaProject javaProject);
 }

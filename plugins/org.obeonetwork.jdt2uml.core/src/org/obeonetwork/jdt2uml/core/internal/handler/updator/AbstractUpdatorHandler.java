@@ -1,4 +1,4 @@
-package org.obeonetwork.jdt2uml.core.internal.visitor;
+package org.obeonetwork.jdt2uml.core.internal.handler.updator;
 
 import java.util.Set;
 
@@ -25,16 +25,16 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.uml2.uml.Model;
 import org.obeonetwork.jdt2uml.core.api.Utils;
+import org.obeonetwork.jdt2uml.core.api.handler.JDTUpdatorHandler;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
-import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitorHandler;
 
-public abstract class AbstractVisitorHandler implements JDTVisitorHandler {
+public abstract class AbstractUpdatorHandler implements JDTUpdatorHandler {
 
 	private final Model model;
 
 	private final IProgressMonitor monitor;
 
-	public AbstractVisitorHandler(Model model, IProgressMonitor monitor) {
+	public AbstractUpdatorHandler(IProgressMonitor monitor, Model model) {
 		this.model = model;
 		this.monitor = monitor;
 	}

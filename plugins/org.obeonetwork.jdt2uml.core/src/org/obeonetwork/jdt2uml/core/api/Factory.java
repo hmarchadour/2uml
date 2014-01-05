@@ -11,29 +11,37 @@
 package org.obeonetwork.jdt2uml.core.api;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.uml2.uml.Model;
-import org.obeonetwork.jdt2uml.core.api.store.JDTStore;
+import org.obeonetwork.jdt2uml.core.api.handler.JDTCreatorHandler;
+import org.obeonetwork.jdt2uml.core.api.handler.JDTHandler;
+import org.obeonetwork.jdt2uml.core.api.job.UMLJob;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
-import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitorHandler;
-import org.obeonetwork.jdt2uml.core.internal.store.JDTIdentStoreImpl;
+import org.obeonetwork.jdt2uml.core.internal.handler.creator.LibrariesCreatorHandler;
+import org.obeonetwork.jdt2uml.core.internal.handler.creator.ProjectCreatorHandler;
+import org.obeonetwork.jdt2uml.core.internal.handler.updator.ProjectUpdatorHandler;
+import org.obeonetwork.jdt2uml.core.internal.job.ExportUMLImpl;
 import org.obeonetwork.jdt2uml.core.internal.visitor.JDTVisitorImpl;
-import org.obeonetwork.jdt2uml.core.internal.visitor.LibrariesVisitorHandler;
-import org.obeonetwork.jdt2uml.core.internal.visitor.ProjectVisitorHandler;
 
 public final class Factory {
-	public static JDTVisitorHandler createJDTProjectVisitorHandler(Model model, IProgressMonitor monitor) {
-		return new ProjectVisitorHandler(model, monitor);
+
+	public static UMLJob createExportUML(String title, IJavaProject project, JDTCreatorHandler visitorHandler) {
+		return new ExportUMLImpl(title, project, visitorHandler);
 	}
 
-	public static JDTVisitorHandler createJDTLibrariesVisitorHandler(Model model, IProgressMonitor monitor) {
-		return new LibrariesVisitorHandler(model, monitor);
+	public static JDTCreatorHandler createJDTProjectVisitorHandler(IProgressMonitor monitor) {
+		return new ProjectCreatorHandler(monitor);
 	}
 
-	public static JDTVisitor createJDTVisitor(JDTVisitorHandler handler) {
+	public static JDTCreatorHandler createJDTLibrariesVisitorHandler(IProgressMonitor monitor) {
+		return new LibrariesCreatorHandler(monitor);
+	}
+
+	public static ProjectUpdatorHandler createJDTModelUpdatorHandler(IProgressMonitor monitor, Model model) {
+		return new ProjectUpdatorHandler(monitor, model);
+	}
+
+	public static JDTVisitor createJDTVisitor(JDTHandler handler) {
 		return new JDTVisitorImpl(handler);
-	}
-
-	public static JDTStore<String> createIdentStore() {
-		return new JDTIdentStoreImpl();
 	}
 }

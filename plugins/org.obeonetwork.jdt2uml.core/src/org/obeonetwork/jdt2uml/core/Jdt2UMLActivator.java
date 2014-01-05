@@ -10,7 +10,14 @@
  *******************************************************************************/
 package org.obeonetwork.jdt2uml.core;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Plugin;
+import org.obeonetwork.jdt2uml.core.api.listener.ChangeListener;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -23,6 +30,8 @@ public class Jdt2UMLActivator extends Plugin {
 
 	// The shared instance
 	private static Jdt2UMLActivator plugin;
+
+	private Set<IResourceChangeListener> changeListeners;
 
 	/**
 	 * The constructor
@@ -38,6 +47,15 @@ public class Jdt2UMLActivator extends Plugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		changeListeners = new HashSet<IResourceChangeListener>();
+		updateChangeListerners();
+	}
+
+	private void updateChangeListerners() {
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		ChangeListener changeListener = new ChangeListener();
+		changeListeners.add(changeListener);
+		workspace.addResourceChangeListener(changeListener);
 	}
 
 	/*
@@ -46,6 +64,11 @@ public class Jdt2UMLActivator extends Plugin {
 	 */
 	@Override
 	public void stop(BundleContext context) throws Exception {
+		for (IResourceChangeListener changeListener : changeListeners) {
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(changeListener);
+		}
+		changeListeners.clear();
+		changeListeners = null;
 		plugin = null;
 		super.stop(context);
 	}

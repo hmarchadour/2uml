@@ -8,7 +8,7 @@
  * Contributors:
  *    Hugo Marchadour - initial API and implementation and/or initial documentation
  *******************************************************************************/
-package org.obeonetwork.jdt2uml.core.api.visitor;
+package org.obeonetwork.jdt2uml.core.api.handler;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IAnnotation;
@@ -28,8 +28,9 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.uml2.uml.Model;
+import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
 
-public interface JDTVisitorHandler {
+public interface JDTHandler {
 
 	void caseJavaProject(IJavaProject javaProject, JDTVisitor visitor);
 
@@ -66,5 +67,4 @@ public interface JDTVisitorHandler {
 	Model getModel();
 
 	IProgressMonitor getMonitor();
-
 }

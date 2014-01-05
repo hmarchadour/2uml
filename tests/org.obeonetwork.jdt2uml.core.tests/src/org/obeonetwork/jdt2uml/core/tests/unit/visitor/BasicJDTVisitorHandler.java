@@ -23,18 +23,18 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.obeonetwork.jdt2uml.core.api.Factory;
+import org.obeonetwork.jdt2uml.core.api.handler.JDTCreatorHandler;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
-import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitorHandler;
 
 public class BasicJDTVisitorHandler {
 
-	private JDTVisitorHandler visitorHandler;
+	private JDTCreatorHandler visitorHandler;
 
 	private JDTVisitor mockedVisitor;
 
 	@Before
 	public void setUp() throws Exception {
-		visitorHandler = Factory.createJDTProjectVisitorHandler(null, null);
+		visitorHandler = Factory.createJDTProjectVisitorHandler(null);
 		mockedVisitor = EasyMock.createMock(JDTVisitor.class);
 	}
 

@@ -216,9 +216,13 @@ public final class Utils {
 	 * @param libraryUri
 	 *            the URI of the library to load.
 	 */
-	public static void importPrimitiveTypes(Namespace namespace, String libraryUri) {
+	public static void importUMLResource(Namespace namespace, String libraryUri) {
+		importUMLResource(namespace, URI.createURI(libraryUri));
+	}
+
+	public static void importUMLResource(Namespace namespace, URI libraryUri) {
 		final ResourceSet resourceSet = namespace.eResource().getResourceSet();
-		final Resource resource = resourceSet.getResource(URI.createURI(libraryUri), true);
+		final Resource resource = resourceSet.getResource(libraryUri, true);
 
 		final Package root = (Package)EcoreUtil.getObjectByType(resource.getContents(),
 				UMLPackage.Literals.PACKAGE);
@@ -279,5 +283,17 @@ public final class Utils {
 			}
 		}
 		return count;
+	}
+
+	public static String getModelFileName(IJavaProject javaProject) {
+		return javaProject.getElementName() + ".model";
+	}
+
+	public static String getLibrariesFileName(IJavaProject javaProject) {
+		return javaProject.getElementName() + ".libraries";
+	}
+
+	public static String createModelPath(IJavaProject javaProject, String fileName) {
+		return '/' + javaProject.getElementName() + "/target/uml/" + fileName + ".uml";
 	}
 }

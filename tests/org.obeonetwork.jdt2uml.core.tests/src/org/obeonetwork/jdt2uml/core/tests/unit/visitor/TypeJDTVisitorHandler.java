@@ -15,15 +15,15 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.obeonetwork.jdt2uml.core.api.Factory;
+import org.obeonetwork.jdt2uml.core.api.handler.JDTCreatorHandler;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
-import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitorHandler;
 
 @RunWith(Parameterized.class)
 public class TypeJDTVisitorHandler {
 
 	private static String FULL_QUALIFIED_NAME = "java.lang.Object";
 
-	private JDTVisitorHandler visitorHandler;
+	private JDTCreatorHandler visitorHandler;
 
 	private JDTVisitor mockedVisitor;
 
@@ -33,7 +33,7 @@ public class TypeJDTVisitorHandler {
 
 	@Before
 	public void setUp() throws Exception {
-		visitorHandler = Factory.createJDTProjectVisitorHandler(null, null);
+		visitorHandler = Factory.createJDTProjectVisitorHandler(null);
 		mockedVisitor = EasyMock.createMock(JDTVisitor.class);
 	}
 

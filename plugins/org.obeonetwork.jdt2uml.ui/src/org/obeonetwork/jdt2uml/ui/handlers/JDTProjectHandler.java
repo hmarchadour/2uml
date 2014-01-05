@@ -35,7 +35,8 @@ public class JDTProjectHandler extends AbstractHandler {
 			Object selectedElement = ((TreeSelection)selection).getFirstElement();
 			if (selectedElement instanceof IJavaProject) {
 				IJavaProject javaProject = (IJavaProject)selectedElement;
-				Job jdt2uml = new ExportUMLModels(javaProject, "model", "libraries");
+
+				Job jdt2uml = new ExportUMLModels(javaProject);
 				jdt2uml.schedule();
 			}
 		}

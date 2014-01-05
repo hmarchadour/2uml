@@ -29,13 +29,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.obeonetwork.jdt2uml.core.api.Factory;
+import org.obeonetwork.jdt2uml.core.api.handler.JDTCreatorHandler;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
-import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitorHandler;
 
 @RunWith(Parameterized.class)
 public class JDTVisitorImplTest {
 
-	private JDTVisitorHandler mockedHandler;
+	private JDTCreatorHandler mockedHandler;
 
 	private JDTVisitor jdtVisitor;
 
@@ -45,7 +45,7 @@ public class JDTVisitorImplTest {
 
 	@Before
 	public void setUp() throws Exception {
-		mockedHandler = EasyMock.createMock(JDTVisitorHandler.class);
+		mockedHandler = EasyMock.createMock(JDTCreatorHandler.class);
 		jdtVisitor = Factory.createJDTVisitor(mockedHandler);
 	}
 

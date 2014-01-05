@@ -16,38 +16,36 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
-import org.obeonetwork.jdt2uml.core.internal.job.ExportUML;
-import org.obeonetwork.jdt2uml.core.internal.job.ExportUMLLibrariesModel;
-import org.obeonetwork.jdt2uml.core.internal.job.ExportUMLProjectModel;
+import org.obeonetwork.jdt2uml.core.api.Factory;
+import org.obeonetwork.jdt2uml.core.api.handler.JDTCreatorHandler;
+import org.obeonetwork.jdt2uml.core.internal.job.ExportUMLImpl;
 
 public class ExportUMLModels extends Job {
 
 	private final IJavaProject javaProject;
 
-	private final String modelFileName;
-
-	private final String librariesFileName;
-
-	public ExportUMLModels(IJavaProject project, String modelFileName, String librariesFileName) {
+	public ExportUMLModels(IJavaProject project) {
 		super("Export UML Models");
 		this.javaProject = project;
-		this.modelFileName = modelFileName;
-		this.librariesFileName = librariesFileName;
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		try {
-			ExportUML exportUMLLibrariesJob = new ExportUMLLibrariesModel(javaProject, librariesFileName);
-			ExportUML exportUMLProjectJob = new ExportUMLProjectModel(javaProject, modelFileName);
+			JDTCreatorHandler projectHandler = Factory.createJDTProjectVisitorHandler(monitor);
+			JDTCreatorHandler libsHandler = Factory.createJDTLibrariesVisitorHandler(monitor);
+
+			UMLJob exportLibraries = new ExportUMLImpl("Export Libraries Model in "
+					+ javaProject.getElementName(), javaProject, projectHandler);
+			UMLJob exportProject = new ExportUMLImpl("Export Project Model in "
+					+ javaProject.getElementName(), javaProject, libsHandler);
 			try {
-				int totalWork = exportUMLLibrariesJob.countMonitorWork()
-						+ exportUMLProjectJob.countMonitorWork();
+				int totalWork = exportLibraries.countMonitorWork() + exportProject.countMonitorWork();
 
 				monitor.beginTask("Export UML Models", totalWork);
 
-				exportUMLLibrariesJob.run(monitor);
-				exportUMLProjectJob.run(monitor);
+				exportLibraries.run(monitor);
+				exportProject.run(monitor);
 			} catch (JavaModelException e) {
 				return Status.CANCEL_STATUS;
 			}

@@ -22,8 +22,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
+import org.obeonetwork.jdt2uml.core.api.handler.JDTHandler;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
-import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitorHandler;
 
 public class JDTVisitorImpl implements JDTVisitor {
 
@@ -35,9 +35,9 @@ public class JDTVisitorImpl implements JDTVisitor {
 
 	private Set<IJavaElement> stack;
 
-	private final JDTVisitorHandler handler;
+	private final JDTHandler handler;
 
-	public JDTVisitorImpl(JDTVisitorHandler handler) {
+	public JDTVisitorImpl(JDTHandler handler) {
 		this.handler = handler;
 		this.recursiveLimit = RECURSIVE_DEFAULT_LIMIT;
 		visited = new HashSet<IJavaElement>();

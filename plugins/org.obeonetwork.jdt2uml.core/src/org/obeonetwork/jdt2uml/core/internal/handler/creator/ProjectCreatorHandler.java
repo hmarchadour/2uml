@@ -1,4 +1,4 @@
-package org.obeonetwork.jdt2uml.core.internal.visitor;
+package org.obeonetwork.jdt2uml.core.internal.handler.creator;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
@@ -8,13 +8,13 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.uml2.uml.Classifier;
 import org.eclipse.uml2.uml.Component;
-import org.eclipse.uml2.uml.Model;
 import org.eclipse.uml2.uml.Package;
 import org.eclipse.uml2.uml.UMLFactory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
+import org.obeonetwork.jdt2uml.core.api.handler.JDTCreatorHandler;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
 
-public class ProjectVisitorHandler extends AbstractVisitorHandler {
+public class ProjectCreatorHandler extends AbstractCreatorHandler {
 
 	private Component currentComponent;
 
@@ -22,8 +22,13 @@ public class ProjectVisitorHandler extends AbstractVisitorHandler {
 
 	private Classifier currentClassifier;
 
-	public ProjectVisitorHandler(Model model, IProgressMonitor monitor) {
-		super(model, monitor);
+	public ProjectCreatorHandler(IProgressMonitor monitor) {
+		super(monitor);
+	}
+
+	@Override
+	public JDTCreatorHandler copy() {
+		return new ProjectCreatorHandler(getMonitor());
 	}
 
 	@Override
@@ -123,5 +128,10 @@ public class ProjectVisitorHandler extends AbstractVisitorHandler {
 			currentClassifier = oldCurrentClassifier;
 			casePost(type, visitor);
 		}
+	}
+
+	@Override
+	public String getNewModelFileName(IJavaProject javaProject) {
+		return Utils.getModelFileName(javaProject);
 	}
 }
