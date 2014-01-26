@@ -10,28 +10,40 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.uml2.uml.Model;
+import org.obeonetwork.jdt2uml.core.api.Utils;
 import org.obeonetwork.jdt2uml.core.api.job.ExportUMLModels;
 
 public class ChangeListener implements IResourceChangeListener {
 
 	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
-		if (event.getType() == IResourceChangeEvent.POST_BUILD) {
-			System.out.println("POST_BUILD changed!");
-			Set<IJavaProject> allJavaProjects = getJavaProjects();
-			Set<IJavaProject> filtredJavaProjects = filterJavaProjects(allJavaProjects);
-			for (IJavaProject filtredJavaProject : filtredJavaProjects) {
-				Job jdt2uml = new ExportUMLModels(filtredJavaProject);
-				jdt2uml.schedule();
+		if (event.getType() == IResourceChangeEvent.POST_CHANGE) {
+			IJavaElement javaElement = JavaCore.create(event.getResource());
+			if (javaElement != null && javaElement instanceof IJavaProject) {
+				IJavaProject javaProject = (IJavaProject)javaElement;
+				Set<Model> models = Utils.getModel(javaProject);
+				if (models.isEmpty()) {
+					Set<IJavaProject> javaProjects = new HashSet<IJavaProject>();
+					javaProjects.add(javaProject);
+					IWorkspaceRunnable jdt2uml = new ExportUMLModels(javaProjects);
+					try {
+						ResourcesPlugin.getWorkspace().run(jdt2uml, new NullProgressMonitor());
+					} catch (CoreException e) {
+						e.printStackTrace();
+					}
+				} else {
+					handleDeltaChanges(event.getDelta());
+				}
 			}
-		} else if (event.getType() == IResourceChangeEvent.POST_CHANGE) {
-			handleDeltaChanges(event.getDelta());
 		}
 	}
 
@@ -70,20 +82,41 @@ public class ChangeListener implements IResourceChangeListener {
 		return javaProjects;
 	}
 
-	protected void handleAddedResource(IResource resource) {
-		IJavaElement javaElement = JavaCore.create(resource);
-		System.out.println(javaElement);
+	private void handle(final IResource resource) {
+		IWorkspaceRunnable iWorkspaceRunnable = new IWorkspaceRunnable() {
+
+			@Override
+			public void run(IProgressMonitor monitor) throws CoreException {
+				IJavaElement javaElement = JavaCore.create(resource);
+				if (javaElement != null && javaElement instanceof IJavaProject) {
+					Set<IJavaProject> javaProjects = new HashSet<IJavaProject>();
+					javaProjects.add((IJavaProject)javaElement);
+					IWorkspaceRunnable jdt2uml = new ExportUMLModels(javaProjects);
+					try {
+						ResourcesPlugin.getWorkspace().run(jdt2uml, new NullProgressMonitor());
+					} catch (CoreException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		try {
+			ResourcesPlugin.getWorkspace().run(iWorkspaceRunnable, new NullProgressMonitor());
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+	}
+
+	protected void handleAddedResource(final IResource resource) {
+		handle(resource);
 	}
 
 	protected void handleRemovedResource(IResource resource) {
-		IJavaElement javaElement = JavaCore.create(resource);
-		System.out.println(javaElement);
+		handle(resource);
 	}
 
 	protected void handleChangedResource(IResource resource) {
-		IJavaElement javaElement = JavaCore.create(resource);
-		System.out.println(javaElement);
-
+		handle(resource);
 	}
 
 	protected void handleDeltaChanges(IResourceDelta rootDelta) {
@@ -106,6 +139,8 @@ public class ChangeListener implements IResourceChangeListener {
 								handleChangedResource(resource);
 							}
 							return true;
+						} else {
+							System.out.println(delta.getKind());
 						}
 
 						return false;

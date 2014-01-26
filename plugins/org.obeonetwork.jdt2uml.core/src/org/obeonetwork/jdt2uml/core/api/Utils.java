@@ -17,8 +17,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -31,6 +33,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.uml2.uml.Component;
+import org.eclipse.uml2.uml.Model;
 import org.eclipse.uml2.uml.Namespace;
 import org.eclipse.uml2.uml.Package;
 import org.eclipse.uml2.uml.PackageableElement;
@@ -295,5 +298,39 @@ public final class Utils {
 
 	public static String createModelPath(IJavaProject javaProject, String fileName) {
 		return '/' + javaProject.getElementName() + "/target/uml/" + fileName + ".uml";
+	}
+
+	public static Set<Model> getModel(IJavaProject javaProject) {
+		Set<Model> result = new HashSet<Model>();
+		URI resourceURI = URI.createPlatformResourceURI(
+				Utils.createModelPath(javaProject, Utils.getModelFileName(javaProject)), true);
+		if (resourceURI.isFile()) {
+			Resource resource = new ResourceSetImpl().getResource(resourceURI, true);
+			if (resource != null) {
+				List<EObject> contents = resource.getContents();
+				for (EObject eObject : contents) {
+					if (eObject instanceof Model) {
+						result.add((Model)eObject);
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	public static Set<Model> getLibraries(IJavaProject javaProject) {
+		Set<Model> result = new HashSet<Model>();
+		URI resourceURI = URI.createPlatformResourceURI(
+				Utils.createModelPath(javaProject, Utils.getLibrariesFileName(javaProject)), true);
+		Resource resource = new ResourceSetImpl().getResource(resourceURI, true);
+		if (resource != null) {
+			List<EObject> contents = resource.getContents();
+			for (EObject eObject : contents) {
+				if (eObject instanceof Model) {
+					result.add((Model)eObject);
+				}
+			}
+		}
+		return result;
 	}
 }

@@ -10,10 +10,16 @@
  *******************************************************************************/
 package org.obeonetwork.jdt2uml.ui.handlers;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -34,10 +40,14 @@ public class JDTProjectHandler extends AbstractHandler {
 		if (!selection.isEmpty() && selection instanceof TreeSelection) {
 			Object selectedElement = ((TreeSelection)selection).getFirstElement();
 			if (selectedElement instanceof IJavaProject) {
-				IJavaProject javaProject = (IJavaProject)selectedElement;
-
-				Job jdt2uml = new ExportUMLModels(javaProject);
-				jdt2uml.schedule();
+				Set<IJavaProject> javaProjects = new HashSet<IJavaProject>();
+				javaProjects.add((IJavaProject)selectedElement);
+				IWorkspaceRunnable jdt2uml = new ExportUMLModels(javaProjects);
+				try {
+					ResourcesPlugin.getWorkspace().run(jdt2uml, new NullProgressMonitor());
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		return null;
