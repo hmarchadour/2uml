@@ -1,4 +1,4 @@
-package org.obeonetwork.jdt2uml.core.api.listener;
+package org.obeonetwork.jdt2uml.ide.internal;
 
 import java.util.HashSet;
 import java.util.Map;

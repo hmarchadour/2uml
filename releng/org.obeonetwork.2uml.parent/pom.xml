@@ -53,6 +53,7 @@
 	
 	<module>../../plugins/org.obeonetwork.jdt2uml.core</module>
     <module>../../plugins/org.obeonetwork.jdt2uml.ui</module>
+    <module>../../plugins/org.obeonetwork.jdt2uml.ide</module>
 	<module>../../tests/org.obeonetwork.jdt2uml.core.tests</module>
 	
     <!-- features -->
