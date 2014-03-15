@@ -14,8 +14,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
@@ -46,6 +44,7 @@ public class BasicJDTVisitorHandler {
 	public void caseJavaProject() {
 		IJavaProject mockedJavaProject = EasyMock.createMock(IJavaProject.class);
 		try {
+			EasyMock.expect(mockedJavaProject.getElementName()).andReturn("JavaProject");
 			EasyMock.expect(mockedJavaProject.getChildren()).andReturn(new IJavaElement[0]);
 		} catch (JavaModelException e) {
 			e.printStackTrace();
@@ -67,35 +66,6 @@ public class BasicJDTVisitorHandler {
 		EasyMock.replay(mockedJavaModel, mockedVisitor);
 		visitorHandler.caseJavaModel(mockedJavaModel, mockedVisitor);
 		EasyMock.verify(mockedJavaModel, mockedVisitor);
-
-	}
-
-	@Test
-	public void casePackageFragmentRoot() {
-		IPackageFragmentRoot mockedPackageFragmentRoot = EasyMock.createMock(IPackageFragmentRoot.class);
-		try {
-			EasyMock.expect(mockedPackageFragmentRoot.getChildren()).andReturn(new IJavaElement[0]);
-		} catch (JavaModelException e) {
-			e.printStackTrace();
-		}
-		EasyMock.replay(mockedPackageFragmentRoot, mockedVisitor);
-		visitorHandler.casePackageFragmentRoot(mockedPackageFragmentRoot, mockedVisitor);
-		EasyMock.verify(mockedPackageFragmentRoot, mockedVisitor);
-
-	}
-
-	@Test
-	public void casePackageFragment() {
-		IPackageFragment mockedPackageFragment = EasyMock.createMock(IPackageFragment.class);
-		try {
-			EasyMock.expect(mockedPackageFragment.getChildren()).andReturn(new IJavaElement[0]);
-
-		} catch (JavaModelException e) {
-			e.printStackTrace();
-		}
-		EasyMock.replay(mockedPackageFragment, mockedVisitor);
-		visitorHandler.casePackageFragment(mockedPackageFragment, mockedVisitor);
-		EasyMock.verify(mockedPackageFragment, mockedVisitor);
 
 	}
 

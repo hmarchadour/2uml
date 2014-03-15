@@ -33,12 +33,12 @@ public class ProjectCreatorHandler extends AbstractCreatorHandler {
 
 	@Override
 	public void caseJavaProject(IJavaProject javaProject, JDTVisitor visitor) {
-		Component oldCurrentComponent = currentComponent;
-		currentComponent = UMLFactory.eINSTANCE.createComponent();
-		currentComponent.setName(javaProject.getElementName());
 		if (getModel() == null) {
 			throw new IllegalStateException("model is null");
 		}
+		Component oldCurrentComponent = currentComponent;
+		currentComponent = UMLFactory.eINSTANCE.createComponent();
+		currentComponent.setName(javaProject.getElementName());
 		getModel().getPackagedElements().add(currentComponent);
 
 		super.caseJavaProject(javaProject, visitor);
@@ -57,9 +57,6 @@ public class ProjectCreatorHandler extends AbstractCreatorHandler {
 	public void casePackageFragment(IPackageFragment packageFragment, JDTVisitor visitor) {
 		Package oldCurrentPackage = currentPackage;
 
-		if (currentComponent == null) {
-			throw new IllegalStateException("currentComponent is null");
-		}
 		currentPackage = Utils.handlePackage(currentComponent, packageFragment);
 
 		super.casePackageFragment(packageFragment, visitor);
