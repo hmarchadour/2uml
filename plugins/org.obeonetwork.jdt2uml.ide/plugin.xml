@@ -6,7 +6,7 @@
          name="Jdt2UML compilation participant"
          point="org.eclipse.jdt.core.compilationParticipant">
       <compilationParticipant
-            class="org.obeonetwork.jdt2uml.core.internal.job.JdtCompilationParticipant"
+            class="org.obeonetwork.jdt2uml.ide.internal.JdtCompilationParticipant"
             id="org.obeonetwork.jdt2uml.core.compilationParticipant">
          <managedMarker
                markerType="org.eclipse.jdt.apt.core.compile.problem">

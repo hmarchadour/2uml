@@ -6,9 +6,10 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.obeonetwork.jdt2uml.ui.Jdt2UMLUIActivator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.obeonetwork.jdt2uml.core,
  org.eclipse.jdt.core,
- org.eclipse.core.resources
+ org.eclipse.core.resources,
+ org.obeonetwork.jdt2uml.core,
+ org.obeonetwork.jdt2uml.creator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: Obeo
 Export-Package: org.obeonetwork.jdt2uml.ui.handlers

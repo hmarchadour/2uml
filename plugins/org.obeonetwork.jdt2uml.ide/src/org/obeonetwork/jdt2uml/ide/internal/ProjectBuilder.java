@@ -13,7 +13,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.obeonetwork.jdt2uml.core.api.job.ExportUMLModels;
+import org.obeonetwork.jdt2uml.creator.api.job.ExportUMLModels;
 
 public class ProjectBuilder extends IncrementalProjectBuilder {
 

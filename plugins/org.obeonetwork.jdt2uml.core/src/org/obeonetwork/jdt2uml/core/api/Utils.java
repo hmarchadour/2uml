@@ -39,7 +39,7 @@ import org.eclipse.uml2.uml.Package;
 import org.eclipse.uml2.uml.PackageableElement;
 import org.eclipse.uml2.uml.UMLFactory;
 import org.eclipse.uml2.uml.UMLPackage;
-import org.obeonetwork.jdt2uml.core.Jdt2UMLActivator;
+import org.obeonetwork.jdt2uml.core.CoreActivator;
 
 public final class Utils {
 
@@ -48,7 +48,7 @@ public final class Utils {
 		try {
 			result = type.isClass();
 		} catch (JavaModelException e) {
-			Jdt2UMLActivator.logUnexpectedError(e);
+			CoreActivator.logUnexpectedError(e);
 		}
 		return result;
 	}
@@ -58,7 +58,7 @@ public final class Utils {
 		try {
 			result = type.isInterface();
 		} catch (JavaModelException e) {
-			Jdt2UMLActivator.logUnexpectedError(e);
+			CoreActivator.logUnexpectedError(e);
 		}
 		return result;
 	}
@@ -68,7 +68,7 @@ public final class Utils {
 		try {
 			result = type.isAnnotation();
 		} catch (JavaModelException e) {
-			Jdt2UMLActivator.logUnexpectedError(e);
+			CoreActivator.logUnexpectedError(e);
 		}
 		return result;
 	}
@@ -78,7 +78,7 @@ public final class Utils {
 		try {
 			result = type.isEnum();
 		} catch (JavaModelException e) {
-			Jdt2UMLActivator.logUnexpectedError(e);
+			CoreActivator.logUnexpectedError(e);
 		}
 		return result;
 	}
@@ -108,7 +108,7 @@ public final class Utils {
 				System.out.println(qualifiedName + " not retrieve in this project");
 			}
 		} catch (JavaModelException e) {
-			Jdt2UMLActivator.logUnexpectedError(e);
+			CoreActivator.logUnexpectedError(e);
 		}
 		return types;
 	}
@@ -122,7 +122,7 @@ public final class Utils {
 				qualifiedNames.add(fullQualifiedName);
 			}
 		} catch (JavaModelException e) {
-			Jdt2UMLActivator.logUnexpectedError(e);
+			CoreActivator.logUnexpectedError(e);
 		}
 		return qualifiedNames;
 	}
@@ -145,7 +145,7 @@ public final class Utils {
 				}
 			}
 		} catch (JavaModelException e) {
-			Jdt2UMLActivator.logUnexpectedError(e);
+			CoreActivator.logUnexpectedError(e);
 		}
 		return qualifiedNames;
 	}
@@ -188,7 +188,7 @@ public final class Utils {
 			String[][] resolveType = type.resolveType(typeIdent);
 			builder.append(resolveQualifiedName(resolveType));
 		} catch (JavaModelException e) {
-			Jdt2UMLActivator.logUnexpectedError(e);
+			CoreActivator.logUnexpectedError(e);
 		}
 		return builder.toString();
 	}
@@ -283,7 +283,7 @@ public final class Utils {
 					count += countAllJavaItems(subJavaElement);
 				}
 			} catch (JavaModelException e) {
-				Jdt2UMLActivator.logUnexpectedError(e);
+				CoreActivator.logUnexpectedError(e);
 			}
 		}
 		return count;

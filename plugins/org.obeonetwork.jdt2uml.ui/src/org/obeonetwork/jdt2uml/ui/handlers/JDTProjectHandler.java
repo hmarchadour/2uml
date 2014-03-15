@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.obeonetwork.jdt2uml.core.api.job.ExportUMLModels;
+import org.obeonetwork.jdt2uml.creator.api.job.ExportUMLModels;
 
 public class JDTProjectHandler extends AbstractHandler {
 

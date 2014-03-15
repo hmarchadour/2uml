@@ -28,44 +28,44 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.uml2.uml.Model;
-import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
+import org.obeonetwork.jdt2uml.core.api.visitor.JModelVisitor;
 import org.obeonetwork.jdt2uml.core.api.wrapper.ITypeWrapper;
 
 public interface JDTHandler {
 
-	void caseJavaProject(IJavaProject javaProject, JDTVisitor visitor);
+	void caseJavaProject(IJavaProject javaProject, JModelVisitor visitor);
 
-	void casePackageFragmentRoot(IPackageFragmentRoot fragmentRoot, JDTVisitor visitor);
+	void casePackageFragmentRoot(IPackageFragmentRoot fragmentRoot, JModelVisitor visitor);
 
-	void casePackageFragment(IPackageFragment packageFragment, JDTVisitor visitor);
+	void casePackageFragment(IPackageFragment packageFragment, JModelVisitor visitor);
 
-	void caseCompilationUnit(ICompilationUnit compilationUnit, JDTVisitor visitor);
+	void caseCompilationUnit(ICompilationUnit compilationUnit, JModelVisitor visitor);
 
-	void caseClassFile(IClassFile classFile, JDTVisitor visitor);
+	void caseClassFile(IClassFile classFile, JModelVisitor visitor);
 
-	void caseField(IField field, JDTVisitor visitor);
+	void caseField(IField field, JModelVisitor visitor);
 
-	void caseMethod(IMethod method, JDTVisitor visitor);
+	void caseMethod(IMethod method, JModelVisitor visitor);
 
-	void caseInitializer(IInitializer initializer, JDTVisitor visitor);
+	void caseInitializer(IInitializer initializer, JModelVisitor visitor);
 
-	void caseImportDeclaration(IImportDeclaration importDeclaration, JDTVisitor visitor);
+	void caseImportDeclaration(IImportDeclaration importDeclaration, JModelVisitor visitor);
 
-	void caseImportContainer(IImportContainer importContainer, JDTVisitor visitor);
+	void caseImportContainer(IImportContainer importContainer, JModelVisitor visitor);
 
-	void casePackageDeclaration(IPackageDeclaration packageDeclaration, JDTVisitor visitor);
+	void casePackageDeclaration(IPackageDeclaration packageDeclaration, JModelVisitor visitor);
 
-	void caseTypeParameter(ITypeParameter typeParameter, JDTVisitor visitor);
+	void caseTypeParameter(ITypeParameter typeParameter, JModelVisitor visitor);
 
-	void caseLocalVariable(ILocalVariable localVariable, JDTVisitor visitor);
+	void caseLocalVariable(ILocalVariable localVariable, JModelVisitor visitor);
 
-	void caseType(IType type, JDTVisitor visitor);
+	void caseType(IType type, JModelVisitor visitor);
 
-	void caseType(ITypeWrapper type, JDTVisitor visitor);
+	void caseType(ITypeWrapper type, JModelVisitor visitor);
 
-	void caseAnnotation(IAnnotation annotation, JDTVisitor visitor);
+	void caseAnnotation(IAnnotation annotation, JModelVisitor visitor);
 
-	void caseJavaModel(IJavaModel javaModel, JDTVisitor visitor);
+	void caseJavaModel(IJavaModel javaModel, JModelVisitor visitor);
 
 	Model getModel();
 
