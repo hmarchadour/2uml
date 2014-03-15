@@ -1,29 +1,35 @@
 package org.obeonetwork.jdt2uml.core.tests.unit.visitor;
 
+import static org.junit.Assert.fail;
+
 import java.util.Collection;
 import java.util.HashSet;
 
 import org.easymock.EasyMock;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.uml2.uml.UMLFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.obeonetwork.jdt2uml.core.api.Factory;
-import org.obeonetwork.jdt2uml.core.api.handler.JDTCreatorHandler;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
+import org.obeonetwork.jdt2uml.core.api.wrapper.ITypeWrapper;
+import org.obeonetwork.jdt2uml.core.internal.handler.creator.ProjectCreatorHandler;
 
+@SuppressWarnings("restriction")
 @RunWith(Parameterized.class)
 public class TypeJDTVisitorHandler {
 
+	private static String NAME = "Object";
+
+	private static String PACKAGE_NAME = "java.lang";
+
 	private static String FULL_QUALIFIED_NAME = "java.lang.Object";
 
-	private JDTCreatorHandler visitorHandler;
+	private ProjectCreatorHandler visitorHandler;
 
 	private JDTVisitor mockedVisitor;
 
@@ -33,7 +39,7 @@ public class TypeJDTVisitorHandler {
 
 	@Before
 	public void setUp() throws Exception {
-		visitorHandler = Factory.createJDTProjectVisitorHandler(null);
+		visitorHandler = (ProjectCreatorHandler)Factory.createJDTProjectVisitorHandler(null);
 		mockedVisitor = EasyMock.createMock(JDTVisitor.class);
 	}
 
@@ -53,37 +59,34 @@ public class TypeJDTVisitorHandler {
 		return params;
 	}
 
-	private void initMocks(IType mockedType, IPackageFragment packageFragment,
-			IPackageFragmentRoot packageFragmentRoot) throws JavaModelException {
-		EasyMock.expect(mockedType.getFullyQualifiedName()).andReturn(FULL_QUALIFIED_NAME);
-		EasyMock.expect(mockedType.getFullyQualifiedName()).andReturn(FULL_QUALIFIED_NAME);
-		EasyMock.expect(mockedType.getFullyQualifiedName()).andReturn(FULL_QUALIFIED_NAME);
-		EasyMock.expect(mockedType.getTypes()).andReturn(new IType[0]);
-		EasyMock.expect(mockedType.getSuperclassName()).andReturn(null);
-		EasyMock.expect(mockedType.getSuperInterfaceNames()).andReturn(new String[0]);
-		EasyMock.expect(mockedType.getPackageFragment()).andReturn(packageFragment);
-		EasyMock.expect(packageFragment.getParent()).andReturn(packageFragmentRoot);
-		EasyMock.expect(packageFragmentRoot.isExternal()).andReturn(isExternal);
-		EasyMock.expect(mockedType.getChildren()).andReturn(new IJavaElement[0]);
+	private void initMocks(ITypeWrapper mockedType) throws JavaModelException {
+		EasyMock.expect(mockedType.getType()).andReturn(EasyMock.createMock(IType.class)).anyTimes();
+		EasyMock.expect(mockedType.isExternal()).andReturn(isExternal).anyTimes();
+		EasyMock.expect(mockedType.getElementName()).andReturn(NAME).anyTimes();
+		EasyMock.expect(mockedType.getSuperclassName()).andReturn(null).anyTimes();
+		EasyMock.expect(mockedType.getSuperInterfaceNames()).andReturn(new HashSet<String>()).anyTimes();
+		EasyMock.expect(mockedType.getTypes()).andReturn(new HashSet<IType>()).anyTimes();
 	}
 
 	@Test
 	public void caseAnnotationType() {
-		IType mockedType = EasyMock.createMock(IType.class);
-		IPackageFragment packageFragment = EasyMock.createMock(IPackageFragment.class);
-		IPackageFragmentRoot packageFragmentRoot = EasyMock.createMock(IPackageFragmentRoot.class);
-
+		fail("TODO");
+		ITypeWrapper mockedType = EasyMock.createMock(ITypeWrapper.class);
+		visitorHandler.setCurrentComponent(UMLFactory.eINSTANCE.createComponent());
+		visitorHandler.setCurrentPackage(UMLFactory.eINSTANCE.createPackage());
 		try {
-			initMocks(mockedType, packageFragment, packageFragmentRoot);
-			EasyMock.expect(mockedType.isAnnotation()).andReturn(true);
-			EasyMock.expect(mockedType.isAnnotation()).andReturn(true);
+			initMocks(mockedType);
+			EasyMock.expect(mockedType.isAnnotation()).andReturn(true).anyTimes();
+			EasyMock.expect(mockedType.isClass()).andReturn(false).anyTimes();
+			EasyMock.expect(mockedType.isInterface()).andReturn(false).anyTimes();
+			EasyMock.expect(mockedType.isEnum()).andReturn(false).anyTimes();
 		} catch (JavaModelException e) {
 			e.printStackTrace();
 		}
 
-		EasyMock.replay(packageFragment, packageFragmentRoot, mockedType, mockedVisitor);
+		EasyMock.replay(mockedType, mockedVisitor);
 		visitorHandler.caseType(mockedType, mockedVisitor);
-		EasyMock.verify(packageFragment, packageFragmentRoot, mockedType, mockedVisitor);
+		EasyMock.verify(mockedType, mockedVisitor);
 
 		if (isExternal) {
 		} else {
@@ -92,22 +95,22 @@ public class TypeJDTVisitorHandler {
 
 	@Test
 	public void caseEnumType() {
-		IType mockedType = EasyMock.createMock(IType.class);
-		IPackageFragment packageFragment = EasyMock.createMock(IPackageFragment.class);
-		IPackageFragmentRoot packageFragmentRoot = EasyMock.createMock(IPackageFragmentRoot.class);
-
+		ITypeWrapper mockedType = EasyMock.createMock(ITypeWrapper.class);
+		visitorHandler.setCurrentComponent(UMLFactory.eINSTANCE.createComponent());
+		visitorHandler.setCurrentPackage(UMLFactory.eINSTANCE.createPackage());
 		try {
-			initMocks(mockedType, packageFragment, packageFragmentRoot);
-			EasyMock.expect(mockedType.isAnnotation()).andReturn(false);
-			EasyMock.expect(mockedType.isEnum()).andReturn(true);
-			EasyMock.expect(mockedType.isEnum()).andReturn(true);
+			initMocks(mockedType);
+			EasyMock.expect(mockedType.isAnnotation()).andReturn(false).anyTimes();
+			EasyMock.expect(mockedType.isClass()).andReturn(false).anyTimes();
+			EasyMock.expect(mockedType.isInterface()).andReturn(false).anyTimes();
+			EasyMock.expect(mockedType.isEnum()).andReturn(true).anyTimes();
 		} catch (JavaModelException e) {
 			e.printStackTrace();
 		}
 
-		EasyMock.replay(packageFragment, packageFragmentRoot, mockedType, mockedVisitor);
+		EasyMock.replay(mockedType, mockedVisitor);
 		visitorHandler.caseType(mockedType, mockedVisitor);
-		EasyMock.verify(packageFragment, packageFragmentRoot, mockedType, mockedVisitor);
+		EasyMock.verify(mockedType, mockedVisitor);
 
 		if (isExternal) {
 		} else {
@@ -116,23 +119,22 @@ public class TypeJDTVisitorHandler {
 
 	@Test
 	public void caseInterfaceType() {
-		IType mockedType = EasyMock.createMock(IType.class);
-		IPackageFragment packageFragment = EasyMock.createMock(IPackageFragment.class);
-		IPackageFragmentRoot packageFragmentRoot = EasyMock.createMock(IPackageFragmentRoot.class);
-
+		ITypeWrapper mockedType = EasyMock.createMock(ITypeWrapper.class);
+		visitorHandler.setCurrentComponent(UMLFactory.eINSTANCE.createComponent());
+		visitorHandler.setCurrentPackage(UMLFactory.eINSTANCE.createPackage());
 		try {
-			initMocks(mockedType, packageFragment, packageFragmentRoot);
-			EasyMock.expect(mockedType.isAnnotation()).andReturn(false);
-			EasyMock.expect(mockedType.isEnum()).andReturn(false);
-			EasyMock.expect(mockedType.isInterface()).andReturn(true);
-			EasyMock.expect(mockedType.isInterface()).andReturn(true);
+			initMocks(mockedType);
+			EasyMock.expect(mockedType.isAnnotation()).andReturn(false).anyTimes();
+			EasyMock.expect(mockedType.isClass()).andReturn(false).anyTimes();
+			EasyMock.expect(mockedType.isInterface()).andReturn(true).anyTimes();
+			EasyMock.expect(mockedType.isEnum()).andReturn(false).anyTimes();
 		} catch (JavaModelException e) {
 			e.printStackTrace();
 		}
 
-		EasyMock.replay(packageFragment, packageFragmentRoot, mockedType, mockedVisitor);
+		EasyMock.replay(mockedType, mockedVisitor);
 		visitorHandler.caseType(mockedType, mockedVisitor);
-		EasyMock.verify(packageFragment, packageFragmentRoot, mockedType, mockedVisitor);
+		EasyMock.verify(mockedType, mockedVisitor);
 
 		if (isExternal) {
 		} else {
@@ -141,24 +143,22 @@ public class TypeJDTVisitorHandler {
 
 	@Test
 	public void caseClassType() {
-		IType mockedType = EasyMock.createMock(IType.class);
-		IPackageFragment packageFragment = EasyMock.createMock(IPackageFragment.class);
-		IPackageFragmentRoot packageFragmentRoot = EasyMock.createMock(IPackageFragmentRoot.class);
-
+		ITypeWrapper mockedType = EasyMock.createMock(ITypeWrapper.class);
+		visitorHandler.setCurrentComponent(UMLFactory.eINSTANCE.createComponent());
+		visitorHandler.setCurrentPackage(UMLFactory.eINSTANCE.createPackage());
 		try {
-			initMocks(mockedType, packageFragment, packageFragmentRoot);
-			EasyMock.expect(mockedType.isAnnotation()).andReturn(false);
-			EasyMock.expect(mockedType.isEnum()).andReturn(false);
-			EasyMock.expect(mockedType.isInterface()).andReturn(false);
-			EasyMock.expect(mockedType.isClass()).andReturn(true);
-			EasyMock.expect(mockedType.isClass()).andReturn(true);
+			initMocks(mockedType);
+			EasyMock.expect(mockedType.isAnnotation()).andReturn(false).anyTimes();
+			EasyMock.expect(mockedType.isClass()).andReturn(true).anyTimes();
+			EasyMock.expect(mockedType.isInterface()).andReturn(false).anyTimes();
+			EasyMock.expect(mockedType.isEnum()).andReturn(false).anyTimes();
 		} catch (JavaModelException e) {
 			e.printStackTrace();
 		}
 
-		EasyMock.replay(packageFragment, packageFragmentRoot, mockedType, mockedVisitor);
+		EasyMock.replay(mockedType, mockedVisitor);
 		visitorHandler.caseType(mockedType, mockedVisitor);
-		EasyMock.verify(packageFragment, packageFragmentRoot, mockedType, mockedVisitor);
+		EasyMock.verify(mockedType, mockedVisitor);
 
 		if (isExternal) {
 		} else {

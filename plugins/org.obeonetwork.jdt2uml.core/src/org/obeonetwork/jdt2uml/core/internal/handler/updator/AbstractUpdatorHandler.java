@@ -24,9 +24,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.uml2.uml.Model;
+import org.obeonetwork.jdt2uml.core.Jdt2UMLActivator;
 import org.obeonetwork.jdt2uml.core.api.Utils;
 import org.obeonetwork.jdt2uml.core.api.handler.JDTUpdatorHandler;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
+import org.obeonetwork.jdt2uml.core.api.wrapper.ITypeWrapper;
 
 public abstract class AbstractUpdatorHandler implements JDTUpdatorHandler {
 
@@ -53,7 +55,7 @@ public abstract class AbstractUpdatorHandler implements JDTUpdatorHandler {
 					visitor.visit(subJavaElement);
 				}
 			} catch (JavaModelException e) {
-				e.printStackTrace();
+				Jdt2UMLActivator.logUnexpectedError(e);
 			}
 		}
 		if (monitor != null) {
@@ -91,7 +93,7 @@ public abstract class AbstractUpdatorHandler implements JDTUpdatorHandler {
 	}
 
 	@Override
-	public abstract void caseType(IType type, JDTVisitor visitor);
+	public abstract void caseType(ITypeWrapper type, JDTVisitor visitor);
 
 	@Override
 	public void caseAnnotation(IAnnotation annotation, JDTVisitor visitor) {

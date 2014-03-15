@@ -25,9 +25,11 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.uml2.uml.Model;
 import org.eclipse.uml2.uml.UMLFactory;
+import org.obeonetwork.jdt2uml.core.Jdt2UMLActivator;
 import org.obeonetwork.jdt2uml.core.api.Utils;
 import org.obeonetwork.jdt2uml.core.api.handler.JDTCreatorHandler;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
+import org.obeonetwork.jdt2uml.core.api.wrapper.ITypeWrapper;
 
 public abstract class AbstractCreatorHandler implements JDTCreatorHandler {
 
@@ -50,11 +52,13 @@ public abstract class AbstractCreatorHandler implements JDTCreatorHandler {
 		if (javaElement instanceof IParent) {
 			try {
 				IJavaElement[] subJavaElements = ((IParent)javaElement).getChildren();
-				for (IJavaElement subJavaElement : subJavaElements) {
-					visitor.visit(subJavaElement);
+				if (subJavaElements != null) {
+					for (IJavaElement subJavaElement : subJavaElements) {
+						visitor.visit(subJavaElement);
+					}
 				}
 			} catch (JavaModelException e) {
-				e.printStackTrace();
+				Jdt2UMLActivator.logUnexpectedError(e);
 			}
 		}
 		if (monitor != null) {
@@ -92,7 +96,7 @@ public abstract class AbstractCreatorHandler implements JDTCreatorHandler {
 	}
 
 	@Override
-	public abstract void caseType(IType type, JDTVisitor visitor);
+	public abstract void caseType(ITypeWrapper type, JDTVisitor visitor);
 
 	@Override
 	public void caseAnnotation(IAnnotation annotation, JDTVisitor visitor) {

@@ -27,7 +27,6 @@ import org.eclipse.uml2.uml.Model;
 import org.obeonetwork.jdt2uml.core.api.Factory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
 import org.obeonetwork.jdt2uml.core.api.handler.JDTUpdatorHandler;
-import org.obeonetwork.jdt2uml.core.internal.job.ExportUMLImpl;
 import org.obeonetwork.jdt2uml.core.internal.job.UpdateUMLImpl;
 
 public class UpdateUMLModels extends Job {

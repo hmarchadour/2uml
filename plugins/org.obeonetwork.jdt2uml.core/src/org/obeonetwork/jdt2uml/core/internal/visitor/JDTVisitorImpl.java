@@ -3,6 +3,7 @@ package org.obeonetwork.jdt2uml.core.internal.visitor;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -22,8 +23,11 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
+import org.obeonetwork.jdt2uml.core.Jdt2UMLActivator;
+import org.obeonetwork.jdt2uml.core.api.Factory;
 import org.obeonetwork.jdt2uml.core.api.handler.JDTHandler;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
+import org.obeonetwork.jdt2uml.core.api.wrapper.ITypeWrapper;
 
 public class JDTVisitorImpl implements JDTVisitor {
 
@@ -78,10 +82,10 @@ public class JDTVisitorImpl implements JDTVisitor {
 					} else if (javaElement instanceof ILocalVariable) {
 						visitLocalVariable((ILocalVariable)javaElement);
 					} else {
-						System.out.println("Not handled !" + javaElement);
+						Jdt2UMLActivator.log(IStatus.ERROR, "Not handled !" + javaElement);
 					}
 				} catch (JavaModelException e) {
-					e.printStackTrace();
+					Jdt2UMLActivator.logUnexpectedError(e);
 				}
 				stack.remove(javaElement);
 			} else {
@@ -89,7 +93,7 @@ public class JDTVisitorImpl implements JDTVisitor {
 				for (IJavaElement item : stack) {
 					error.append("\n" + item.getElementName());
 				}
-				System.err.println(error.toString());
+				Jdt2UMLActivator.log(IStatus.ERROR, error.toString());
 			}
 		}
 	}
@@ -150,7 +154,8 @@ public class JDTVisitorImpl implements JDTVisitor {
 		} else if (javaElement instanceof IInitializer) {
 			handler.caseInitializer((IInitializer)javaElement, this);
 		} else if (javaElement instanceof IType) {
-			handler.caseType((IType)javaElement, this);
+			ITypeWrapper type = Factory.toWrappedType((IType)javaElement);
+			handler.caseType(type, this);
 		}
 	}
 }

@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
+import org.obeonetwork.jdt2uml.core.Jdt2UMLActivator;
 import org.obeonetwork.jdt2uml.core.api.Factory;
 import org.obeonetwork.jdt2uml.core.api.handler.JDTCreatorHandler;
 import org.obeonetwork.jdt2uml.core.internal.job.ExportUMLImpl;
@@ -53,14 +54,14 @@ public class ExportUMLModels implements IWorkspaceRunnable {
 			try {
 				umlJob.run(monitor);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Jdt2UMLActivator.logUnexpectedError(e);
 			}
 		}
 		for (UMLJob umlJob : exportProjects) {
 			try {
 				umlJob.run(monitor);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Jdt2UMLActivator.logUnexpectedError(e);
 			}
 		}
 

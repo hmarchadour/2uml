@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.uml2.uml.Model;
 import org.eclipse.uml2.uml.resource.UMLResource;
+import org.obeonetwork.jdt2uml.core.Jdt2UMLActivator;
 import org.obeonetwork.jdt2uml.core.api.Factory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
 import org.obeonetwork.jdt2uml.core.api.handler.JDTCreatorHandler;
@@ -61,13 +62,12 @@ public class ExportUMLImpl implements UMLJob {
 			for (IProject referencedProject : referencedProjects) {
 				if (referencedProject.hasNature(JavaCore.NATURE_ID)) {
 					IJavaProject referencedJDTProject = JavaCore.create(referencedProject);
-					UMLJob exportUML = new ExportUMLImpl("", referencedJDTProject,
-							visitorHandler.copy());
+					UMLJob exportUML = new ExportUMLImpl("", referencedJDTProject, visitorHandler.copy());
 					subExportsToDo.add(exportUML);
 				}
 			}
 		} catch (CoreException e) {
-			e.printStackTrace();
+			Jdt2UMLActivator.logUnexpectedError(e);
 		}
 	}
 

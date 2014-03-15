@@ -10,9 +10,12 @@ import org.eclipse.uml2.uml.Component;
 import org.eclipse.uml2.uml.Package;
 import org.eclipse.uml2.uml.PackageableElement;
 import org.eclipse.uml2.uml.UMLFactory;
+import org.obeonetwork.jdt2uml.core.Jdt2UMLActivator;
+import org.obeonetwork.jdt2uml.core.api.Factory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
 import org.obeonetwork.jdt2uml.core.api.handler.JDTCreatorHandler;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
+import org.obeonetwork.jdt2uml.core.api.wrapper.ITypeWrapper;
 
 public class LibrariesCreatorHandler extends AbstractCreatorHandler {
 
@@ -34,9 +37,13 @@ public class LibrariesCreatorHandler extends AbstractCreatorHandler {
 
 	@Override
 	public void caseType(IType type, JDTVisitor visitor) {
-		casePre(type, visitor);
+		caseType(Factory.toWrappedType(type), visitor);
+	}
 
-		IPackageFragmentRoot root = Utils.getPackageFragmentRoot(type);
+	@Override
+	public void caseType(ITypeWrapper type, JDTVisitor visitor) {
+		casePre(type.getType(), visitor);
+		IPackageFragmentRoot root = type.getPackageFragmentRoot();
 		if (root.isExternal()) {
 			Component currentComponent;
 			Classifier currentClassifier;
@@ -52,20 +59,19 @@ public class LibrariesCreatorHandler extends AbstractCreatorHandler {
 				}
 				getModel().getPackagedElements().add(currentComponent);
 			}
-			Package currentPackage = Utils.handlePackage(currentComponent, type.getPackageFragment());
-
-			if (Utils.isAnnotation(type)) {
+			Package currentPackage = type.handlePackage(currentComponent);
+			if (type.isAnnotation()) {
 				// TODO
 				currentClassifier = null;
-			} else if (Utils.isEnum(type)) {
+			} else if (type.isEnum()) {
 				currentClassifier = UMLFactory.eINSTANCE.createEnumeration();
-			} else if (Utils.isInterface(type)) {
+			} else if (type.isInterface()) {
 				currentClassifier = UMLFactory.eINSTANCE.createInterface();
-			} else if (Utils.isClass(type)) {
+			} else if (type.isClass()) {
 				currentClassifier = UMLFactory.eINSTANCE.createClass();
 			} else {
 				currentClassifier = null;
-				throw new IllegalArgumentException("Type " + type.getElementName()
+				throw new IllegalArgumentException("Type " + type.getType().getElementName()
 						+ " is not a class, an interface, an enum or an annotation");
 			}
 			currentClassifier.setName(type.getElementName());
@@ -79,7 +85,7 @@ public class LibrariesCreatorHandler extends AbstractCreatorHandler {
 				}
 			}
 		} else {
-			getMonitor().worked(Utils.countAllJavaItems(type));
+			getMonitor().worked(Utils.countAllJavaItems(type.getType()));
 		}
 		// handle all types related to the current
 		try {
@@ -90,18 +96,18 @@ public class LibrariesCreatorHandler extends AbstractCreatorHandler {
 			// handle super types
 			String superclassName = type.getSuperclassName();
 			if (superclassName != null && !superclassName.isEmpty()) {
-				for (IType superType : Utils.getType(type, superclassName)) {
+				for (IType superType : type.resolveType(superclassName)) {
 					visitor.visit(superType);
 				}
 			}
 			// handle implemented interfaces
 			for (String superInterfaceName : type.getSuperInterfaceNames()) {
-				for (IType interfaceType : Utils.getType(type, superInterfaceName)) {
+				for (IType interfaceType : type.resolveType(superInterfaceName)) {
 					visitor.visit(interfaceType);
 				}
 			}
 		} catch (JavaModelException e) {
-			e.printStackTrace();
+			Jdt2UMLActivator.logUnexpectedError(e);
 		}
 
 		// casePost(type, visitor);

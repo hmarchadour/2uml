@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.Status;
 import org.obeonetwork.jdt2uml.core.api.listener.ChangeListener;
 import org.osgi.framework.BundleContext;
 
@@ -80,6 +81,22 @@ public class Jdt2UMLActivator extends Plugin {
 	 */
 	public static Jdt2UMLActivator getDefault() {
 		return plugin;
+	}
+
+	public static void logUnexpectedError(Throwable exception) {
+		log(Status.ERROR, "Unexpected error.", exception);
+	}
+
+	public static void log(int severity, String message) {
+		log(severity, message, null);
+	}
+
+	public static void log(int severity, String message, Throwable exception) {
+		if (exception == null) {
+			getDefault().getLog().log(new Status(severity, Jdt2UMLActivator.PLUGIN_ID, message));
+		} else {
+			getDefault().getLog().log(new Status(severity, Jdt2UMLActivator.PLUGIN_ID, message, exception));
+		}
 	}
 
 }

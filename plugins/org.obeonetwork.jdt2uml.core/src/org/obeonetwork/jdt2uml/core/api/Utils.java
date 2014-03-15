@@ -39,6 +39,7 @@ import org.eclipse.uml2.uml.Package;
 import org.eclipse.uml2.uml.PackageableElement;
 import org.eclipse.uml2.uml.UMLFactory;
 import org.eclipse.uml2.uml.UMLPackage;
+import org.obeonetwork.jdt2uml.core.Jdt2UMLActivator;
 
 public final class Utils {
 
@@ -47,7 +48,7 @@ public final class Utils {
 		try {
 			result = type.isClass();
 		} catch (JavaModelException e) {
-			e.printStackTrace();
+			Jdt2UMLActivator.logUnexpectedError(e);
 		}
 		return result;
 	}
@@ -57,7 +58,7 @@ public final class Utils {
 		try {
 			result = type.isInterface();
 		} catch (JavaModelException e) {
-			e.printStackTrace();
+			Jdt2UMLActivator.logUnexpectedError(e);
 		}
 		return result;
 	}
@@ -67,7 +68,7 @@ public final class Utils {
 		try {
 			result = type.isAnnotation();
 		} catch (JavaModelException e) {
-			e.printStackTrace();
+			Jdt2UMLActivator.logUnexpectedError(e);
 		}
 		return result;
 	}
@@ -77,20 +78,20 @@ public final class Utils {
 		try {
 			result = type.isEnum();
 		} catch (JavaModelException e) {
-			e.printStackTrace();
+			Jdt2UMLActivator.logUnexpectedError(e);
 		}
 		return result;
 	}
 
-	public static Set<IType> getType(IType superType, String typeIdent) {
+	public static Set<IType> resolveType(IType currentType, String typeIdent) {
 		Set<IType> types = new HashSet<IType>();
 		if (typeIdent != null) {
 
-			String fullQualifiedName = resolveFullQualifiedName(superType, typeIdent);
+			String fullQualifiedName = resolveFullQualifiedName(currentType, typeIdent);
 			if (fullQualifiedName != null && !fullQualifiedName.isEmpty()) {
-				Set<IType> retrieveTypes = retrieveTypes(superType.getJavaProject(), fullQualifiedName);
-				for (IType type : retrieveTypes) {
-					types.add(type);
+				Set<IType> retrieveTypes = retrieveTypes(currentType.getJavaProject(), fullQualifiedName);
+				for (IType retrieveType : retrieveTypes) {
+					types.add(retrieveType);
 				}
 			}
 		}
@@ -107,7 +108,7 @@ public final class Utils {
 				System.out.println(qualifiedName + " not retrieve in this project");
 			}
 		} catch (JavaModelException e) {
-			e.printStackTrace();
+			Jdt2UMLActivator.logUnexpectedError(e);
 		}
 		return types;
 	}
@@ -121,7 +122,7 @@ public final class Utils {
 				qualifiedNames.add(fullQualifiedName);
 			}
 		} catch (JavaModelException e) {
-			e.printStackTrace();
+			Jdt2UMLActivator.logUnexpectedError(e);
 		}
 		return qualifiedNames;
 	}
@@ -144,7 +145,7 @@ public final class Utils {
 				}
 			}
 		} catch (JavaModelException e) {
-			e.printStackTrace();
+			Jdt2UMLActivator.logUnexpectedError(e);
 		}
 		return qualifiedNames;
 	}
@@ -187,7 +188,7 @@ public final class Utils {
 			String[][] resolveType = type.resolveType(typeIdent);
 			builder.append(resolveQualifiedName(resolveType));
 		} catch (JavaModelException e) {
-			e.printStackTrace();
+			Jdt2UMLActivator.logUnexpectedError(e);
 		}
 		return builder.toString();
 	}
@@ -282,7 +283,7 @@ public final class Utils {
 					count += countAllJavaItems(subJavaElement);
 				}
 			} catch (JavaModelException e) {
-				e.printStackTrace();
+				Jdt2UMLActivator.logUnexpectedError(e);
 			}
 		}
 		return count;

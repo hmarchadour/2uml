@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.BuildContext;
 import org.eclipse.jdt.core.compiler.CompilationParticipant;
 import org.eclipse.jdt.core.compiler.ReconcileContext;
+import org.obeonetwork.jdt2uml.core.Jdt2UMLActivator;
 import org.obeonetwork.jdt2uml.core.api.job.ExportUMLModels;
 
 public class JdtCompilationParticipant extends CompilationParticipant {
@@ -67,7 +68,7 @@ public class JdtCompilationParticipant extends CompilationParticipant {
 			try {
 				uml.delete(false, new NullProgressMonitor());
 			} catch (CoreException e) {
-				e.printStackTrace();
+				Jdt2UMLActivator.logUnexpectedError(e);
 			}
 		}
 	}
@@ -79,7 +80,7 @@ public class JdtCompilationParticipant extends CompilationParticipant {
 		try {
 			ResourcesPlugin.getWorkspace().run(jdt2uml, new NullProgressMonitor());
 		} catch (CoreException e) {
-			e.printStackTrace();
+			Jdt2UMLActivator.logUnexpectedError(e);
 		}
 	}
 }

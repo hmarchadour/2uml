@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.uml2.uml.Model;
+import org.obeonetwork.jdt2uml.core.Jdt2UMLActivator;
 import org.obeonetwork.jdt2uml.core.api.Utils;
 import org.obeonetwork.jdt2uml.core.api.job.ExportUMLModels;
 
@@ -38,7 +39,7 @@ public class ChangeListener implements IResourceChangeListener {
 					try {
 						ResourcesPlugin.getWorkspace().run(jdt2uml, new NullProgressMonitor());
 					} catch (CoreException e) {
-						e.printStackTrace();
+						Jdt2UMLActivator.logUnexpectedError(e);
 					}
 				} else {
 					handleDeltaChanges(event.getDelta());
@@ -58,7 +59,7 @@ public class ChangeListener implements IResourceChangeListener {
 						filtredJavaProjects.remove(JavaCore.create(referencingProject));
 					}
 				} catch (CoreException e) {
-					e.printStackTrace();
+					Jdt2UMLActivator.logUnexpectedError(e);
 				}
 			}
 		}
@@ -76,7 +77,7 @@ public class ChangeListener implements IResourceChangeListener {
 					javaProjects.add(JavaCore.create(project));
 				}
 			} catch (CoreException e) {
-				e.printStackTrace();
+				Jdt2UMLActivator.logUnexpectedError(e);
 			}
 		}
 		return javaProjects;
@@ -95,7 +96,7 @@ public class ChangeListener implements IResourceChangeListener {
 					try {
 						ResourcesPlugin.getWorkspace().run(jdt2uml, new NullProgressMonitor());
 					} catch (CoreException e) {
-						e.printStackTrace();
+						Jdt2UMLActivator.logUnexpectedError(e);
 					}
 				}
 			}
@@ -103,7 +104,7 @@ public class ChangeListener implements IResourceChangeListener {
 		try {
 			ResourcesPlugin.getWorkspace().run(iWorkspaceRunnable, new NullProgressMonitor());
 		} catch (CoreException e) {
-			e.printStackTrace();
+			Jdt2UMLActivator.logUnexpectedError(e);
 		}
 	}
 
@@ -150,7 +151,7 @@ public class ChangeListener implements IResourceChangeListener {
 					resourceDelta.accept(visitor);
 				} catch (CoreException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Jdt2UMLActivator.logUnexpectedError(e);
 				}
 			}
 		}

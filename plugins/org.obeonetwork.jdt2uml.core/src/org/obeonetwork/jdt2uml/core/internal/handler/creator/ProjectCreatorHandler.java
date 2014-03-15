@@ -10,9 +10,12 @@ import org.eclipse.uml2.uml.Classifier;
 import org.eclipse.uml2.uml.Component;
 import org.eclipse.uml2.uml.Package;
 import org.eclipse.uml2.uml.UMLFactory;
+import org.obeonetwork.jdt2uml.core.Jdt2UMLActivator;
+import org.obeonetwork.jdt2uml.core.api.Factory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
 import org.obeonetwork.jdt2uml.core.api.handler.JDTCreatorHandler;
 import org.obeonetwork.jdt2uml.core.api.visitor.JDTVisitor;
+import org.obeonetwork.jdt2uml.core.api.wrapper.ITypeWrapper;
 
 public class ProjectCreatorHandler extends AbstractCreatorHandler {
 
@@ -66,19 +69,24 @@ public class ProjectCreatorHandler extends AbstractCreatorHandler {
 
 	@Override
 	public void caseType(IType type, JDTVisitor visitor) {
+		caseType(Factory.toWrappedType(type), visitor);
+	}
 
-		if (!Utils.isExternal(type)) {
-			casePre(type, visitor);
+	@Override
+	public void caseType(ITypeWrapper type, JDTVisitor visitor) {
+
+		if (!type.isExternal()) {
+			casePre(type.getType(), visitor);
 
 			Classifier oldCurrentClassifier = currentClassifier;
 			if (currentClassifier == null) {
-				if (Utils.isAnnotation(type)) {
+				if (type.isAnnotation()) {
 					// TODO
-				} else if (Utils.isEnum(type)) {
+				} else if (type.isEnum()) {
 					currentClassifier = UMLFactory.eINSTANCE.createEnumeration();
-				} else if (Utils.isInterface(type)) {
+				} else if (type.isInterface()) {
 					currentClassifier = UMLFactory.eINSTANCE.createInterface();
-				} else if (Utils.isClass(type)) {
+				} else if (type.isClass()) {
 					currentClassifier = UMLFactory.eINSTANCE.createClass();
 				} else {
 					throw new IllegalArgumentException("Type " + type.getElementName()
@@ -109,26 +117,53 @@ public class ProjectCreatorHandler extends AbstractCreatorHandler {
 				// handle super types
 				String superclassName = type.getSuperclassName();
 				if (superclassName != null && !superclassName.isEmpty()) {
-					for (IType superType : Utils.getType(type, superclassName)) {
+					for (IType superType : type.resolveType(superclassName)) {
 						visitor.visit(superType);
 					}
 				}
 				// handle implemented interfaces
 				for (String superInterfaceName : type.getSuperInterfaceNames()) {
-					for (IType interfaceType : Utils.getType(type, superInterfaceName)) {
+					for (IType interfaceType : type.resolveType(superInterfaceName)) {
 						visitor.visit(interfaceType);
 					}
 				}
 			} catch (JavaModelException e) {
-				e.printStackTrace();
+				Jdt2UMLActivator.logUnexpectedError(e);
 			}
 			currentClassifier = oldCurrentClassifier;
-			casePost(type, visitor);
+			casePost(type.getType(), visitor);
 		}
 	}
 
 	@Override
 	public String getNewModelFileName(IJavaProject javaProject) {
 		return Utils.getModelFileName(javaProject);
+	}
+
+	public Classifier getCurrentClassifier() {
+		return currentClassifier;
+	}
+
+	public Component getCurrentComponent() {
+		return currentComponent;
+	}
+
+	public Package getCurrentPackage() {
+		return currentPackage;
+	}
+
+	@Deprecated
+	public void setCurrentClassifier(Classifier currentClassifier) {
+		this.currentClassifier = currentClassifier;
+	}
+
+	@Deprecated
+	public void setCurrentComponent(Component currentComponent) {
+		this.currentComponent = currentComponent;
+	}
+
+	@Deprecated
+	public void setCurrentPackage(Package currentPackage) {
+		this.currentPackage = currentPackage;
 	}
 }

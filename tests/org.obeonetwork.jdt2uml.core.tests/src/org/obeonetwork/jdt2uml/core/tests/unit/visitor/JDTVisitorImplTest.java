@@ -63,7 +63,7 @@ public class JDTVisitorImplTest {
 				IImportContainer.class, IImportDeclaration.class, IPackageFragment.class,
 				IPackageFragmentRoot.class, ITypeParameter.class, IClassFile.class, IJavaModel.class,
 				IJavaProject.class, ILocalVariable.class, IField.class, IInitializer.class, IMethod.class,
-				IType.class, IPackageDeclaration.class};
+				IPackageDeclaration.class};
 
 		for (Class<?> javaItemClass : javaItemClasses) {
 			String testCaseName = javaItemClass.getSimpleName();
@@ -108,7 +108,7 @@ public class JDTVisitorImplTest {
 		} else if (mockedJavaElem instanceof IInitializer) {
 			mockedHandler.caseInitializer((IInitializer)mockedJavaElem, jdtVisitor);
 		} else if (mockedJavaElem instanceof IType) {
-			mockedHandler.caseType((IType)mockedJavaElem, jdtVisitor);
+			fail("Cannot be tested here");
 		} else if (mockedJavaElem instanceof IAnnotation) {
 			mockedHandler.caseAnnotation((IAnnotation)mockedJavaElem, jdtVisitor);
 		} else if (mockedJavaElem instanceof IImportContainer) {
