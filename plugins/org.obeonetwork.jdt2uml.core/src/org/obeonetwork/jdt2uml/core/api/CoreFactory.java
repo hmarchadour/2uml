@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.obeonetwork.jdt2uml.core.api;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-import org.obeonetwork.jdt2uml.core.api.handler.JDTHandler;
-import org.obeonetwork.jdt2uml.core.api.visitor.JModelVisitor;
+import org.obeonetwork.jdt2uml.core.api.visitor.Visitable;
 import org.obeonetwork.jdt2uml.core.api.wrapper.ITypeWrapper;
-import org.obeonetwork.jdt2uml.core.internal.visitor.JModelVisitorImpl;
 import org.obeonetwork.jdt2uml.core.internal.wrapper.TypeWrapper;
+import org.obeonetwork.jdt2uml.core.internal.wrapper.VisitableImpl;
 
 public final class CoreFactory {
 
@@ -23,7 +23,8 @@ public final class CoreFactory {
 		return new TypeWrapper(type);
 	}
 
-	public static JModelVisitor createJDTVisitor(JDTHandler handler) {
-		return new JModelVisitorImpl(handler);
+	public static Visitable toVisitable(IJavaElement javaElement) {
+		return new VisitableImpl(javaElement);
 	}
+
 }

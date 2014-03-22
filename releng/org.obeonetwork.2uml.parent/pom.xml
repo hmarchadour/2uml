@@ -53,12 +53,12 @@
 	
 	<module>../../plugins/org.obeonetwork.jdt2uml.core</module>
 	<module>../../plugins/org.obeonetwork.jdt2uml.creator</module>
-	<module>../../plugins/org.obeonetwork.jdt2uml.updator</module>
+	<!-- <module>../../plugins/org.obeonetwork.jdt2uml.updator</module> -->
     <module>../../plugins/org.obeonetwork.jdt2uml.ui</module>
     <module>../../plugins/org.obeonetwork.jdt2uml.ide</module>
-	<module>../../tests/org.obeonetwork.jdt2uml.core.tests</module>
+	<!-- <module>../../tests/org.obeonetwork.jdt2uml.core.tests</module>
 	<module>../../tests/org.obeonetwork.jdt2uml.creator.tests</module>
-	<module>../../tests/org.obeonetwork.jdt2uml.updator.tests</module>
+	<module>../../tests/org.obeonetwork.jdt2uml.updator.tests</module> -->
 	
     <!-- features -->
     <module>../../packaging/${project.groupId}.jar2uml.feature</module>

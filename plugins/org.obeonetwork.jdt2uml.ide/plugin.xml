@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension
+   <!--<extension
          id="jdt2uml.compilation.participant"
          name="Jdt2UML compilation participant"
          point="org.eclipse.jdt.core.compilationParticipant">
@@ -12,5 +12,5 @@
                markerType="org.eclipse.jdt.apt.core.compile.problem">
          </managedMarker>
       </compilationParticipant>
-   </extension>
+   </extension>-->
 </plugin>

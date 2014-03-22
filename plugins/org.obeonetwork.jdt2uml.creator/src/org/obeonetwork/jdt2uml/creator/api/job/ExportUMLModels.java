@@ -20,7 +20,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.obeonetwork.jdt2uml.core.CoreActivator;
 import org.obeonetwork.jdt2uml.core.api.job.UMLJob;
 import org.obeonetwork.jdt2uml.creator.api.CreatorFactory;
-import org.obeonetwork.jdt2uml.creator.api.handler.JDTCreatorHandler;
+import org.obeonetwork.jdt2uml.creator.api.LibVisitor;
+import org.obeonetwork.jdt2uml.creator.api.ProjectVisitor;
 import org.obeonetwork.jdt2uml.creator.internal.job.ExportUMLModelsImpl;
 
 public class ExportUMLModels implements IWorkspaceRunnable {
@@ -38,15 +39,15 @@ public class ExportUMLModels implements IWorkspaceRunnable {
 		int totalWork = 0;
 		for (IJavaProject javaProject : javaProjects) {
 
-			JDTCreatorHandler projectHandler = CreatorFactory.createJDTProjectVisitorHandler(monitor);
-			JDTCreatorHandler libsHandler = CreatorFactory.createJDTLibrariesVisitorHandler(monitor);
+			LibVisitor libVisitor = CreatorFactory.createLibVisitor(monitor);
+			ProjectVisitor projectVisitor = CreatorFactory.createProjectVisitor(monitor);
 
 			UMLJob exportLibrary = new ExportUMLModelsImpl("Export Libraries Model in "
-					+ javaProject.getElementName(), javaProject, projectHandler);
+					+ javaProject.getElementName(), javaProject, libVisitor);
 			exportLibraries.add(exportLibrary);
 
-			UMLJob exportModel = new ExportUMLModelsImpl("Export Project Model in " + javaProject.getElementName(),
-					javaProject, libsHandler);
+			UMLJob exportModel = new ExportUMLModelsImpl("Export Project Model in "
+					+ javaProject.getElementName(), javaProject, projectVisitor);
 			exportProjects.add(exportModel);
 			totalWork = exportLibrary.countMonitorWork() + exportModel.countMonitorWork();
 		}

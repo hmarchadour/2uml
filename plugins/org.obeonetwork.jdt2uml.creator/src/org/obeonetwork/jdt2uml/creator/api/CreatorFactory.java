@@ -13,23 +13,22 @@ package org.obeonetwork.jdt2uml.creator.api;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.obeonetwork.jdt2uml.core.api.job.UMLJob;
-import org.obeonetwork.jdt2uml.creator.api.handler.JDTCreatorHandler;
-import org.obeonetwork.jdt2uml.creator.internal.handler.lib.LibJDTCreatorHandler;
-import org.obeonetwork.jdt2uml.creator.internal.handler.project.ProjJDTCreatorHandler;
+import org.obeonetwork.jdt2uml.creator.internal.handler.lib.LibVisitorImpl;
+import org.obeonetwork.jdt2uml.creator.internal.handler.project.ProjectVisitorImpl;
 import org.obeonetwork.jdt2uml.creator.internal.job.ExportUMLModelsImpl;
 
 public final class CreatorFactory {
 
-	public static UMLJob createExportUML(String title, IJavaProject project, JDTCreatorHandler visitorHandler) {
-		return new ExportUMLModelsImpl(title, project, visitorHandler);
+	public static UMLJob createExportUML(String title, IJavaProject project, CreatorVisitor visitor) {
+		return new ExportUMLModelsImpl(title, project, visitor);
 	}
 
-	public static JDTCreatorHandler createJDTProjectVisitorHandler(IProgressMonitor monitor) {
-		return new ProjJDTCreatorHandler(monitor);
+	public static LibVisitor createLibVisitor(IProgressMonitor monitor) {
+		return new LibVisitorImpl(monitor);
 	}
 
-	public static JDTCreatorHandler createJDTLibrariesVisitorHandler(IProgressMonitor monitor) {
-		return new LibJDTCreatorHandler(monitor);
+	public static ProjectVisitor createProjectVisitor(IProgressMonitor monitor) {
+		return new ProjectVisitorImpl(monitor);
 	}
 
 }

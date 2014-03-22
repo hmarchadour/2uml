@@ -18,7 +18,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * This test suite regroup all unit tests about visitors used in the core plugins.
  */
 @RunWith(Suite.class)
-@SuiteClasses({BasicJDTVisitorHandler.class, TypeJDTVisitorHandler.class})
+@SuiteClasses({})
 public class AllUnitVisitorTests {
 
 }

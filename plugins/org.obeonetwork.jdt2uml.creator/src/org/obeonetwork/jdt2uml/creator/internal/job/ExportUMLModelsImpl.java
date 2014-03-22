@@ -28,10 +28,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.uml2.uml.Model;
 import org.eclipse.uml2.uml.resource.UMLResource;
 import org.obeonetwork.jdt2uml.core.CoreActivator;
-import org.obeonetwork.jdt2uml.core.api.CoreFactory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
 import org.obeonetwork.jdt2uml.core.api.job.UMLJob;
-import org.obeonetwork.jdt2uml.creator.api.handler.JDTCreatorHandler;
+import org.obeonetwork.jdt2uml.creator.api.CreatorVisitor;
 
 import com.google.common.collect.Maps;
 
@@ -43,17 +42,17 @@ public class ExportUMLModelsImpl implements UMLJob {
 
 	private final String fileName;
 
-	private final JDTCreatorHandler visitorHandler;
+	private final CreatorVisitor visitor;
 
 	private final Set<Model> relatedProjectResults;
 
 	private final Set<UMLJob> subExportsToDo;
 
-	public ExportUMLModelsImpl(String title, IJavaProject project, JDTCreatorHandler visitorHandler) {
+	public ExportUMLModelsImpl(String title, IJavaProject project, CreatorVisitor visitor) {
 		this.title = title;
 		this.javaProject = project;
-		this.fileName = visitorHandler.getNewModelFileName(javaProject);
-		this.visitorHandler = visitorHandler;
+		this.fileName = visitor.getNewModelFileName(javaProject);
+		this.visitor = visitor;
 		relatedProjectResults = new HashSet<Model>();
 		subExportsToDo = new HashSet<UMLJob>();
 
@@ -62,7 +61,8 @@ public class ExportUMLModelsImpl implements UMLJob {
 			for (IProject referencedProject : referencedProjects) {
 				if (referencedProject.hasNature(JavaCore.NATURE_ID)) {
 					IJavaProject referencedJDTProject = JavaCore.create(referencedProject);
-					UMLJob exportUML = new ExportUMLModelsImpl("", referencedJDTProject, visitorHandler.copy());
+					UMLJob exportUML = new ExportUMLModelsImpl("", referencedJDTProject,
+							visitor.newInstance());
 					subExportsToDo.add(exportUML);
 				}
 			}
@@ -87,7 +87,7 @@ public class ExportUMLModelsImpl implements UMLJob {
 	 */
 	@Override
 	public Model getCurrentResult() {
-		return visitorHandler.getModel();
+		return visitor.getModel();
 	}
 
 	/**
@@ -139,7 +139,7 @@ public class ExportUMLModelsImpl implements UMLJob {
 		recursiveCallOnRelatedProjects(monitor);
 
 		Resource resource = new ResourceSetImpl().createResource(getSemanticModelURI());
-		Model model = visitorHandler.getModel();
+		Model model = visitor.getModel();
 		resource.getContents().add(model);
 		model.setName(getFileName());
 		Utils.importUMLResource(model, UMLResource.JAVA_PRIMITIVE_TYPES_LIBRARY_URI);
@@ -148,7 +148,7 @@ public class ExportUMLModelsImpl implements UMLJob {
 			Utils.importUMLResource(model, subExportToDo.getSemanticModelURI());
 		}
 		monitor.setTaskName(getTitle());
-		CoreFactory.createJDTVisitor(visitorHandler).visit(getJavaProject());
+		visitor.visit(getJavaProject());
 
 		try {
 			resource.save(Maps.newHashMap());

@@ -14,10 +14,8 @@ Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Obeo
 Export-Package: org.obeonetwork.jdt2uml.creator,
  org.obeonetwork.jdt2uml.creator.api,
- org.obeonetwork.jdt2uml.creator.api.handler,
  org.obeonetwork.jdt2uml.creator.api.job,
  org.obeonetwork.jdt2uml.creator.api.listener,
- org.obeonetwork.jdt2uml.creator.internal.handler;x-internal:=true,
  org.obeonetwork.jdt2uml.creator.internal.handler.lib;x-internal:=true,
  org.obeonetwork.jdt2uml.creator.internal.handler.project;x-internal:=true,
  org.obeonetwork.jdt2uml.creator.internal.job;x-internal:=true
