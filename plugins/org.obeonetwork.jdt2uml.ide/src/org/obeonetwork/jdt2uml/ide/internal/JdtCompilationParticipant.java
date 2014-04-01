@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.compiler.BuildContext;
 import org.eclipse.jdt.core.compiler.CompilationParticipant;
 import org.eclipse.jdt.core.compiler.ReconcileContext;
 import org.obeonetwork.jdt2uml.core.CoreActivator;
-import org.obeonetwork.jdt2uml.creator.api.job.ExportUMLModels;
+import org.obeonetwork.jdt2uml.creator.api.job.ExportModels;
 
 public class JdtCompilationParticipant extends CompilationParticipant {
 
@@ -76,7 +76,7 @@ public class JdtCompilationParticipant extends CompilationParticipant {
 	private void build(IJavaProject project) {
 		Set<IJavaProject> javaProjects = new HashSet<IJavaProject>();
 		javaProjects.add(project);
-		IWorkspaceRunnable jdt2uml = new ExportUMLModels(javaProjects);
+		IWorkspaceRunnable jdt2uml = new ExportModels(javaProjects);
 		try {
 			ResourcesPlugin.getWorkspace().run(jdt2uml, new NullProgressMonitor());
 		} catch (CoreException e) {

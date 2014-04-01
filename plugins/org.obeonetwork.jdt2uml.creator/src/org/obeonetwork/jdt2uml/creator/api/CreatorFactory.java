@@ -15,12 +15,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.obeonetwork.jdt2uml.core.api.job.UMLJob;
 import org.obeonetwork.jdt2uml.creator.internal.handler.lib.LibVisitorImpl;
 import org.obeonetwork.jdt2uml.creator.internal.handler.project.ProjectVisitorImpl;
-import org.obeonetwork.jdt2uml.creator.internal.job.ExportUMLModelsImpl;
+import org.obeonetwork.jdt2uml.creator.internal.job.ExportModel;
 
 public final class CreatorFactory {
 
 	public static UMLJob createExportUML(String title, IJavaProject project, CreatorVisitor visitor) {
-		return new ExportUMLModelsImpl(title, project, visitor);
+		return new ExportModel(title, project, visitor);
 	}
 
 	public static LibVisitor createLibVisitor(IProgressMonitor monitor) {

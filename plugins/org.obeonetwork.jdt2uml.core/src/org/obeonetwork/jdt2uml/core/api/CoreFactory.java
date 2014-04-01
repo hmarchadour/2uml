@@ -11,9 +11,13 @@
 package org.obeonetwork.jdt2uml.core.api;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.obeonetwork.jdt2uml.core.api.job.ProjectTODO;
+import org.obeonetwork.jdt2uml.core.api.job.UMLJob;
 import org.obeonetwork.jdt2uml.core.api.visitor.Visitable;
 import org.obeonetwork.jdt2uml.core.api.wrapper.ITypeWrapper;
+import org.obeonetwork.jdt2uml.core.internal.ProjectTODOImpl;
 import org.obeonetwork.jdt2uml.core.internal.wrapper.TypeWrapper;
 import org.obeonetwork.jdt2uml.core.internal.wrapper.VisitableImpl;
 
@@ -25,6 +29,10 @@ public final class CoreFactory {
 
 	public static Visitable toVisitable(IJavaElement javaElement) {
 		return new VisitableImpl(javaElement);
+	}
+
+	public static ProjectTODO createJobsTODO(IJavaProject javaProject, UMLJob projectJob, UMLJob libJob) {
+		return new ProjectTODOImpl(javaProject, projectJob, libJob);
 	}
 
 }

@@ -8,8 +8,8 @@ public interface CreatorVisitor extends Visitor {
 
 	String getNewModelFileName(IJavaProject javaProject);
 
-	Model getModel();
-
 	@Override
 	public CreatorVisitor newInstance();
+
+	public void visit(Model model, IJavaProject javaProject);
 }

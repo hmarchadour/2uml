@@ -12,6 +12,7 @@ import org.eclipse.uml2.uml.Classifier;
 import org.eclipse.uml2.uml.Component;
 import org.eclipse.uml2.uml.Model;
 import org.eclipse.uml2.uml.Package;
+import org.eclipse.uml2.uml.PackageableElement;
 import org.eclipse.uml2.uml.UMLFactory;
 import org.obeonetwork.jdt2uml.core.api.CoreFactory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
@@ -22,7 +23,7 @@ import org.obeonetwork.jdt2uml.creator.api.LibVisitor;
 
 public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 
-	private final Model model;
+	private Model model;
 
 	private Component currentComponent;
 
@@ -30,7 +31,7 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 
 	public LibVisitorImpl(IProgressMonitor monitor) {
 		super(monitor);
-		this.model = UMLFactory.eINSTANCE.createModel();
+		this.model = null;
 	}
 
 	@Override
@@ -41,6 +42,21 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 	@Override
 	public String getNewModelFileName(IJavaProject javaProject) {
 		return Utils.getLibrariesFileName(javaProject);
+	}
+
+	@Override
+	public void visit(Model model, IJavaProject javaProject) {
+		this.model = model;
+		visit(javaProject);
+		this.model = null;
+	}
+
+	@Override
+	public void preVisit(IJavaElement javaElement) {
+		if (this.model == null) {
+			throw new IllegalStateException("Model cannot be null");
+		}
+		super.preVisit(javaElement);
 	}
 
 	@Override
@@ -68,16 +84,20 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 			throw new IllegalStateException(
 					"Visit a packageFragmentRoot in another packageFragmentRoot should not appended");
 		}
-		currentComponent = UMLFactory.eINSTANCE.createComponent();
-		currentComponent.setName(packageFragmentRoot.getElementName());
-		model.getPackagedElements().add(currentComponent);
+		PackageableElement searchInImportedLibs = model.getImportedMember(packageFragmentRoot
+				.getElementName());
+		if (searchInImportedLibs == null || !(searchInImportedLibs instanceof Component)) {
+			currentComponent = UMLFactory.eINSTANCE.createComponent();
+			currentComponent.setName(packageFragmentRoot.getElementName());
+			model.getPackagedElements().add(currentComponent);
 
-		try {
-			for (IJavaElement element : packageFragmentRoot.getChildren()) {
-				CoreFactory.toVisitable(element).accept(this);
+			try {
+				for (IJavaElement element : packageFragmentRoot.getChildren()) {
+					CoreFactory.toVisitable(element).accept(this);
+				}
+			} catch (JavaModelException e) {
+				CreatorActivator.logUnexpectedError(e);
 			}
-		} catch (JavaModelException e) {
-			CreatorActivator.logUnexpectedError(e);
 		}
 		currentComponent = null;
 
@@ -134,11 +154,6 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 		}
 
 		postVisit(classFile);
-	}
-
-	@Override
-	public Model getModel() {
-		return model;
 	}
 
 }

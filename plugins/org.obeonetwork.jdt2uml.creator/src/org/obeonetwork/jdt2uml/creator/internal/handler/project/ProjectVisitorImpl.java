@@ -23,7 +23,7 @@ import org.obeonetwork.jdt2uml.creator.api.ProjectVisitor;
 
 public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisitor {
 
-	private final Model model;
+	private Model model;
 
 	private Component currentComponent;
 
@@ -31,7 +31,7 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 
 	public ProjectVisitorImpl(IProgressMonitor monitor) {
 		super(monitor);
-		this.model = UMLFactory.eINSTANCE.createModel();
+		this.model = null;
 	}
 
 	@Override
@@ -45,18 +45,44 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 	}
 
 	@Override
+	public void visit(Model model, IJavaProject javaProject) {
+		this.model = model;
+		visit(javaProject);
+		this.model = null;
+	}
+
+	@Override
+	public void preVisit(IJavaElement javaElement) {
+		if (this.model == null) {
+			throw new IllegalStateException("Model cannot be null");
+		}
+		super.preVisit(javaElement);
+	}
+
+	@Override
 	public void visit(IJavaProject javaProject) {
 		preVisit(javaProject);
 
+		if (currentComponent != null) {
+			throw new IllegalStateException(
+					"Visit a packageFragmentRoot in another packageFragmentRoot should not appended");
+		}
+		currentComponent = UMLFactory.eINSTANCE.createComponent();
+		currentComponent.setName(javaProject.getElementName());
+		model.getPackagedElements().add(currentComponent);
+
 		try {
 			for (IPackageFragmentRoot packageFragmentRoot : javaProject.getAllPackageFragmentRoots()) {
-				if (!packageFragmentRoot.isExternal()) {
+				if (!packageFragmentRoot.isExternal()
+						&& javaProject.equals(packageFragmentRoot.getJavaProject())) {
 					CoreFactory.toVisitable(packageFragmentRoot).accept(this);
 				}
 			}
 		} catch (JavaModelException e) {
 			CreatorActivator.logUnexpectedError(e);
 		}
+
+		currentComponent = null;
 
 		postVisit(javaProject);
 	}
@@ -65,14 +91,6 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 	public void visit(IPackageFragmentRoot packageFragmentRoot) {
 		preVisit(packageFragmentRoot);
 
-		if (currentComponent != null) {
-			throw new IllegalStateException(
-					"Visit a packageFragmentRoot in another packageFragmentRoot should not appended");
-		}
-		currentComponent = UMLFactory.eINSTANCE.createComponent();
-		currentComponent.setName(packageFragmentRoot.getElementName());
-		model.getPackagedElements().add(currentComponent);
-
 		try {
 			for (IJavaElement element : packageFragmentRoot.getChildren()) {
 				CoreFactory.toVisitable(element).accept(this);
@@ -80,8 +98,6 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 		} catch (JavaModelException e) {
 			CreatorActivator.logUnexpectedError(e);
 		}
-		currentComponent = null;
-
 		postVisit(packageFragmentRoot);
 	}
 
@@ -122,10 +138,4 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 
 		postVisit(compilationUnit);
 	}
-
-	@Override
-	public Model getModel() {
-		return model;
-	}
-
 }

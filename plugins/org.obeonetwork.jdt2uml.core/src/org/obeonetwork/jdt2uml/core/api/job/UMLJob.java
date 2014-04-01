@@ -11,11 +11,9 @@ import org.eclipse.uml2.uml.Model;
 
 public interface UMLJob {
 
-	void recursiveCallOnRelatedProjects(IProgressMonitor monitor) throws InterruptedException;
-
 	IStatus run(IProgressMonitor monitor) throws InterruptedException;
 
-	Model getCurrentResult();
+	Model getModel();
 
 	Set<Model> getRelatedProjectResults();
 
@@ -26,8 +24,6 @@ public interface UMLJob {
 	IJavaProject getJavaProject();
 
 	int countMonitorWork() throws JavaModelException;
-
-	Set<UMLJob> getSubExportsToDo();
 
 	URI getSemanticModelURI();
 

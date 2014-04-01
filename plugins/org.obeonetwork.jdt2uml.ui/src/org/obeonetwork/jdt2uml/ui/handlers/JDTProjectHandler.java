@@ -19,12 +19,15 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.obeonetwork.jdt2uml.creator.api.job.ExportUMLModels;
+import org.obeonetwork.jdt2uml.creator.api.job.ExportModels;
 
 public class JDTProjectHandler extends AbstractHandler {
 
@@ -40,17 +43,26 @@ public class JDTProjectHandler extends AbstractHandler {
 		if (!selection.isEmpty() && selection instanceof TreeSelection) {
 			Object selectedElement = ((TreeSelection)selection).getFirstElement();
 			if (selectedElement instanceof IJavaProject) {
-				Set<IJavaProject> javaProjects = new HashSet<IJavaProject>();
+				final Set<IJavaProject> javaProjects = new HashSet<IJavaProject>();
 				javaProjects.add((IJavaProject)selectedElement);
-				IWorkspaceRunnable jdt2uml = new ExportUMLModels(javaProjects);
-				try {
-					ResourcesPlugin.getWorkspace().run(jdt2uml, new NullProgressMonitor());
-				} catch (CoreException e) {
-					e.printStackTrace();
-				}
+				Job job = new Job("Export UML Model") {
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						IWorkspaceRunnable jdt2uml = new ExportModels(javaProjects);
+						try {
+							ResourcesPlugin.getWorkspace().run(jdt2uml, monitor);
+						} catch (CoreException e) {
+							return Status.CANCEL_STATUS;
+						}
+						return Status.OK_STATUS;
+					}
+				};
+
+				// Start the Job
+				job.schedule();
+
 			}
 		}
 		return null;
 	}
-
 }

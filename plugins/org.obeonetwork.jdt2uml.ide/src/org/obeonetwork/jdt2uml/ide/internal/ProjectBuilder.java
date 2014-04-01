@@ -13,7 +13,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.obeonetwork.jdt2uml.creator.api.job.ExportUMLModels;
+import org.obeonetwork.jdt2uml.creator.api.job.ExportModels;
 
 public class ProjectBuilder extends IncrementalProjectBuilder {
 
@@ -43,7 +43,7 @@ public class ProjectBuilder extends IncrementalProjectBuilder {
 		IJavaProject javaProject = JavaCore.create(getProject());
 		HashSet<IJavaProject> javaProjects = new HashSet<IJavaProject>();
 		javaProjects.add(javaProject);
-		IWorkspaceRunnable jdt2uml = new ExportUMLModels(javaProjects);
+		IWorkspaceRunnable jdt2uml = new ExportModels(javaProjects);
 		try {
 			ResourcesPlugin.getWorkspace().run(jdt2uml, new NullProgressMonitor());
 		} catch (CoreException e) {

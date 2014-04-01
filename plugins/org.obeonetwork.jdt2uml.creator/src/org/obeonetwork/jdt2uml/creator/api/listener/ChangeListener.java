@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.uml2.uml.Model;
 import org.obeonetwork.jdt2uml.core.CoreActivator;
 import org.obeonetwork.jdt2uml.core.api.Utils;
-import org.obeonetwork.jdt2uml.creator.api.job.ExportUMLModels;
+import org.obeonetwork.jdt2uml.creator.api.job.ExportModels;
 
 public class ChangeListener implements IResourceChangeListener {
 
@@ -35,7 +35,7 @@ public class ChangeListener implements IResourceChangeListener {
 				if (models.isEmpty()) {
 					Set<IJavaProject> javaProjects = new HashSet<IJavaProject>();
 					javaProjects.add(javaProject);
-					IWorkspaceRunnable jdt2uml = new ExportUMLModels(javaProjects);
+					IWorkspaceRunnable jdt2uml = new ExportModels(javaProjects);
 					try {
 						ResourcesPlugin.getWorkspace().run(jdt2uml, new NullProgressMonitor());
 					} catch (CoreException e) {
@@ -92,7 +92,7 @@ public class ChangeListener implements IResourceChangeListener {
 				if (javaElement != null && javaElement instanceof IJavaProject) {
 					Set<IJavaProject> javaProjects = new HashSet<IJavaProject>();
 					javaProjects.add((IJavaProject)javaElement);
-					IWorkspaceRunnable jdt2uml = new ExportUMLModels(javaProjects);
+					IWorkspaceRunnable jdt2uml = new ExportModels(javaProjects);
 					try {
 						ResourcesPlugin.getWorkspace().run(jdt2uml, new NullProgressMonitor());
 					} catch (CoreException e) {
