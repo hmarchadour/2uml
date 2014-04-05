@@ -134,7 +134,7 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 		parser.setResolveBindings(true);
 		CompilationUnit ast = (CompilationUnit)parser.createAST(getMonitor());
 
-		ast.accept(new CreatorASTVisitor(currentPackage));
+		ast.accept(new ProjectASTVisitor(currentPackage));
 
 		postVisit(compilationUnit);
 	}

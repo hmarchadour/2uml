@@ -1,18 +1,18 @@
 package org.obeonetwork.jdt2uml.creator.internal.handler.project;
 
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.uml2.uml.Classifier;
 import org.eclipse.uml2.uml.Package;
 import org.eclipse.uml2.uml.UMLFactory;
-import org.obeonetwork.jdt2uml.core.internal.visitor.BasicASTVisitor;
 
-public class CreatorASTVisitor extends BasicASTVisitor {
+public class ProjectASTVisitor extends ASTVisitor {
 
 	private Package currentPackage;
 
-	public CreatorASTVisitor(Package currentPackage) {
+	public ProjectASTVisitor(Package currentPackage) {
 		this.currentPackage = currentPackage;
 	}
 

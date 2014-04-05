@@ -17,5 +17,4 @@ Export-Package: org.obeonetwork.jdt2uml.core,
  org.obeonetwork.jdt2uml.core.api.job,
  org.obeonetwork.jdt2uml.core.api.listener,
  org.obeonetwork.jdt2uml.core.api.visitor,
- org.obeonetwork.jdt2uml.core.api.wrapper,
- org.obeonetwork.jdt2uml.core.internal.visitor;x-internal:=true
+ org.obeonetwork.jdt2uml.core.api.wrapper
