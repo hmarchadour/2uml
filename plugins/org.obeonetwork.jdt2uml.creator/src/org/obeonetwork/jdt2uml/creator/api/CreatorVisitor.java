@@ -9,7 +9,9 @@ public interface CreatorVisitor extends Visitor {
 	String getNewModelFileName(IJavaProject javaProject);
 
 	@Override
-	public CreatorVisitor newInstance();
+	CreatorVisitor newInstance();
 
-	public void visit(Model model, IJavaProject javaProject);
+	boolean relaunchMissingHandlers();
+
+	void visit(Model model, IJavaProject javaProject);
 }

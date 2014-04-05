@@ -11,6 +11,7 @@
 package org.obeonetwork.jdt2uml.ui.handlers;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -41,10 +42,15 @@ public class JDTProjectHandler extends AbstractHandler {
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
 
 		if (!selection.isEmpty() && selection instanceof TreeSelection) {
-			Object selectedElement = ((TreeSelection)selection).getFirstElement();
-			if (selectedElement instanceof IJavaProject) {
-				final Set<IJavaProject> javaProjects = new HashSet<IJavaProject>();
-				javaProjects.add((IJavaProject)selectedElement);
+			final Set<IJavaProject> javaProjects = new HashSet<IJavaProject>();
+			Iterator iterator = ((TreeSelection)selection).iterator();
+			while (iterator.hasNext()) {
+				Object object = (Object)iterator.next();
+				if (object instanceof IJavaProject) {
+					javaProjects.add((IJavaProject)object);
+				}
+			}
+			if (!javaProjects.isEmpty()) {
 				Job job = new Job("Export UML Model") {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
@@ -60,7 +66,6 @@ public class JDTProjectHandler extends AbstractHandler {
 
 				// Start the Job
 				job.schedule();
-
 			}
 		}
 		return null;

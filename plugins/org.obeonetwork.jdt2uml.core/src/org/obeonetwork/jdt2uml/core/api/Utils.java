@@ -31,13 +31,18 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.uml2.uml.Classifier;
 import org.eclipse.uml2.uml.Component;
 import org.eclipse.uml2.uml.Model;
+import org.eclipse.uml2.uml.NamedElement;
 import org.eclipse.uml2.uml.Namespace;
 import org.eclipse.uml2.uml.Package;
+import org.eclipse.uml2.uml.PackageImport;
 import org.eclipse.uml2.uml.PackageableElement;
+import org.eclipse.uml2.uml.PrimitiveType;
 import org.eclipse.uml2.uml.UMLFactory;
 import org.eclipse.uml2.uml.UMLPackage;
+import org.eclipse.uml2.uml.resource.UMLResource;
 import org.obeonetwork.jdt2uml.core.CoreActivator;
 
 public final class Utils {
@@ -233,6 +238,106 @@ public final class Utils {
 		if (!namespace.getImportedPackages().contains(root)) {
 			namespace.createPackageImport(root);
 		}
+	}
+
+	public static List<Component> searchAllImportedComponents(Package pack) {
+		List<Component> components = new ArrayList<Component>();
+		List<PackageImport> packageImports = pack.getPackageImports();
+		for (PackageImport packageImport : packageImports) {
+			Package importedPackage = packageImport.getImportedPackage();
+			if (importedPackage != null) {
+				List<PackageableElement> packagedElements = importedPackage.getPackagedElements();
+				for (PackageableElement packageableElement : packagedElements) {
+					if (packageableElement instanceof Component) {
+						components.add((Component)packageableElement);
+					}
+				}
+				components.addAll(searchAllImportedComponents(importedPackage));
+			}
+		}
+		return components;
+	}
+
+	public static PrimitiveType searchPrimiveTypeInModels(Namespace namespace, String primitiveTypeName) {
+		PrimitiveType result = null;
+		final ResourceSet resourceSet = namespace.eResource().getResourceSet();
+		final Resource resource = resourceSet.getResource(
+				URI.createURI(UMLResource.JAVA_PRIMITIVE_TYPES_LIBRARY_URI), true);
+
+		final Package root = (Package)EcoreUtil.getObjectByType(resource.getContents(),
+				UMLPackage.Literals.PACKAGE);
+
+		NamedElement member = root.getMember(primitiveTypeName);
+		if (member instanceof PrimitiveType) {
+			result = (PrimitiveType)member;
+		}
+		return result;
+	}
+
+	public static Component searchComponentInModels(Namespace namespace, String componentName) {
+		Component result = null;
+
+		List<EObject> contents = namespace.eResource().getContents();
+		List<Component> components = new ArrayList<Component>();
+		for (EObject content : contents) {
+			if (content instanceof Package) {
+				Package rootPackage = (Package)content;
+				List<PackageableElement> packagedElements = rootPackage.getPackagedElements();
+				for (PackageableElement packageableElement : packagedElements) {
+					if (packageableElement instanceof Component) {
+						components.add((Component)packageableElement);
+					}
+				}
+				components.addAll(searchAllImportedComponents(rootPackage));
+			}
+		}
+		for (Component component : components) {
+			if (componentName.equals(component.getName())) {
+				result = component;
+				break;
+			}
+		}
+		return result;
+	}
+
+	public static Classifier searchClassifierInModels(Namespace namespace, String qualifiedName) {
+		Classifier result = null;
+
+		Resource eResource = namespace.eResource();
+		if (eResource != null) {
+			List<EObject> contents = eResource.getContents();
+			List<Component> components = new ArrayList<Component>();
+			for (EObject content : contents) {
+				if (content instanceof Package) {
+					Package rootPackage = (Package)content;
+					List<PackageableElement> packagedElements = rootPackage.getPackagedElements();
+					for (PackageableElement packageableElement : packagedElements) {
+						if (packageableElement instanceof Component) {
+							components.add((Component)packageableElement);
+						}
+					}
+					components.addAll(searchAllImportedComponents(rootPackage));
+				}
+			}
+
+			String[] subpackages = qualifiedName.split("\\.");
+			for (Component component : components) {
+				Namespace member = component;
+				for (int i = 0; i < subpackages.length; i++) {
+					member = (Namespace)member.getMember(subpackages[i]);
+					if (member == null) {
+						break;
+					}
+				}
+				if (member != null && member instanceof Classifier) {
+					result = (Classifier)member;
+					break;
+				}
+			}
+		} else {
+			throw new IllegalStateException("Should not appended");
+		}
+		return result;
 	}
 
 	public static org.eclipse.uml2.uml.Package handlePackage(Component parent,

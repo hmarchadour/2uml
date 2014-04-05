@@ -25,6 +25,7 @@ import org.eclipse.uml2.uml.Model;
 import org.eclipse.uml2.uml.UMLFactory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
 import org.obeonetwork.jdt2uml.core.api.job.UMLJob;
+import org.obeonetwork.jdt2uml.creator.CreatorActivator;
 import org.obeonetwork.jdt2uml.creator.api.CreatorVisitor;
 
 import com.google.common.collect.Maps;
@@ -111,7 +112,10 @@ public class ExportModel implements UMLJob {
 			done = true;
 			monitor.setTaskName(getTitle());
 			visitor.visit(model, getJavaProject());
-
+			boolean relaunchHandlers = visitor.relaunchMissingHandlers();
+			if (!relaunchHandlers) {
+				CreatorActivator.log(IStatus.ERROR, "At least of one handler could not be launch.");
+			}
 			try {
 				this.resource.save(Maps.newHashMap());
 			} catch (IOException e) {

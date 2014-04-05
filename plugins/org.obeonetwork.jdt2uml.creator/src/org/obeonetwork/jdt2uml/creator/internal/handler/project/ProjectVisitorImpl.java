@@ -1,5 +1,9 @@
 package org.obeonetwork.jdt2uml.creator.internal.handler.project;
 
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -20,6 +24,8 @@ import org.obeonetwork.jdt2uml.core.api.visitor.AbstractVisitor;
 import org.obeonetwork.jdt2uml.creator.CreatorActivator;
 import org.obeonetwork.jdt2uml.creator.api.CreatorVisitor;
 import org.obeonetwork.jdt2uml.creator.api.ProjectVisitor;
+import org.obeonetwork.jdt2uml.creator.internal.handler.async.AsyncHandler;
+import org.obeonetwork.jdt2uml.creator.internal.handler.async.ProjectDependencyHandler;
 
 public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisitor {
 
@@ -29,9 +35,27 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 
 	private Package currentPackage;
 
+	private Set<AsyncHandler> handlersToRelaunch;
+
 	public ProjectVisitorImpl(IProgressMonitor monitor) {
 		super(monitor);
 		this.model = null;
+		this.handlersToRelaunch = new LinkedHashSet<AsyncHandler>();
+	}
+
+	@Override
+	public boolean relaunchMissingHandlers() {
+		Iterator<AsyncHandler> it = handlersToRelaunch.iterator();
+		while (it.hasNext()) {
+			AsyncHandler handler = it.next();
+			if (handler.isHandled()) {
+				throw new IllegalStateException("Should not appended");
+			}
+			if (handler.isHandleable()) {
+				handler.handle();
+			}
+		}
+		return handlersToRelaunch.isEmpty();
 	}
 
 	@Override
@@ -76,6 +100,14 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 				if (!packageFragmentRoot.isExternal()
 						&& javaProject.equals(packageFragmentRoot.getJavaProject())) {
 					CoreFactory.toVisitable(packageFragmentRoot).accept(this);
+				} else {
+					AsyncHandler handler = new ProjectDependencyHandler(currentComponent, packageFragmentRoot);
+					if (handler.isHandleable()) {
+						handler.handle();
+					}
+					if (!handler.isHandled()) {
+						handlersToRelaunch.add(handler);
+					}
 				}
 			}
 		} catch (JavaModelException e) {
@@ -143,7 +175,9 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 		parser.setResolveBindings(true);
 		CompilationUnit ast = (CompilationUnit)parser.createAST(getMonitor());
 
-		ast.accept(new ProjectASTVisitor(currentPackage));
+		CompilationUnitASTVisitor visitor = new CompilationUnitASTVisitor(currentPackage);
+		ast.accept(visitor);
+		handlersToRelaunch.addAll(visitor.getHandlers());
 
 		postVisit(compilationUnit);
 	}

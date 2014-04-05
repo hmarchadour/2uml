@@ -1,5 +1,9 @@
 package org.obeonetwork.jdt2uml.creator.internal.handler.lib;
 
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -20,6 +24,7 @@ import org.obeonetwork.jdt2uml.core.api.visitor.AbstractVisitor;
 import org.obeonetwork.jdt2uml.creator.CreatorActivator;
 import org.obeonetwork.jdt2uml.creator.api.CreatorVisitor;
 import org.obeonetwork.jdt2uml.creator.api.LibVisitor;
+import org.obeonetwork.jdt2uml.creator.internal.handler.async.AsyncHandler;
 
 public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 
@@ -29,9 +34,27 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 
 	private Package currentPackage;
 
+	private Set<AsyncHandler> handlersToRelaunch;
+
 	public LibVisitorImpl(IProgressMonitor monitor) {
 		super(monitor);
 		this.model = null;
+		this.handlersToRelaunch = new LinkedHashSet<AsyncHandler>();
+	}
+
+	@Override
+	public boolean relaunchMissingHandlers() {
+		Iterator<AsyncHandler> it = handlersToRelaunch.iterator();
+		while (it.hasNext()) {
+			AsyncHandler handler = it.next();
+			if (handler.isHandleable()) {
+				handler.handle();
+			}
+			if (handler.isHandled()) {
+				handlersToRelaunch.remove(handler);
+			}
+		}
+		return handlersToRelaunch.isEmpty();
 	}
 
 	@Override
