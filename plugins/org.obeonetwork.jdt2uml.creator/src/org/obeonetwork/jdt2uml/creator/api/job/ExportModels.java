@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.obeonetwork.jdt2uml.core.CoreActivator;
 import org.obeonetwork.jdt2uml.core.api.CoreFactory;
+import org.obeonetwork.jdt2uml.core.api.Utils;
 import org.obeonetwork.jdt2uml.core.api.job.ProjectTODO;
 import org.obeonetwork.jdt2uml.core.api.job.UMLJob;
 import org.obeonetwork.jdt2uml.creator.CreatorActivator;
@@ -93,6 +94,7 @@ public class ExportModels implements IWorkspaceRunnable {
 				}
 			}
 			if (isUnique) {
+				totalWork += Utils.countJavaItems(oneOfAllTODOs.getProject());
 				allUniqueTODOs.add(oneOfAllTODOs);
 			}
 		}
@@ -126,8 +128,6 @@ public class ExportModels implements IWorkspaceRunnable {
 
 		UMLJob exportModel = new ExportModel("Export Project Model in " + javaProject.getElementName(),
 				javaProject, projectVisitor);
-
-		totalWork += exportLibrary.countMonitorWork() + exportModel.countMonitorWork();
 
 		ProjectTODO result = CoreFactory.createJobsTODO(javaProject, exportModel, exportLibrary);
 

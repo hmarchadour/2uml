@@ -71,7 +71,6 @@ public abstract class AbstractVisitor implements Visitor {
 	public void postVisit(IJavaElement javaElement) {
 		if (monitor != null) {
 			monitor.subTask(Utils.getPath(javaElement));
-			monitor.worked(1);
 		}
 		stack.remove(javaElement);
 	}

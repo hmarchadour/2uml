@@ -6,7 +6,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.uml2.uml.Model;
 
 public interface UMLJob {
@@ -22,8 +21,6 @@ public interface UMLJob {
 	String getTitle();
 
 	IJavaProject getJavaProject();
-
-	int countMonitorWork() throws JavaModelException;
 
 	URI getSemanticModelURI();
 

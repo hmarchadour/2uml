@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -271,20 +270,49 @@ public final class Utils {
 		return current;
 	}
 
-	public static int countAllJavaItems(IJavaElement javaElement) {
-		int count = 1;
-		if (javaElement instanceof IPackageFragmentRoot && ((IPackageFragmentRoot)javaElement).isExternal()) {
-			// doesn't explore
-		} else if (javaElement instanceof IParent) {
-			IJavaElement[] children;
-			try {
-				children = ((IParent)javaElement).getChildren();
-				for (IJavaElement subJavaElement : children) {
-					count += countAllJavaItems(subJavaElement);
+	public static int countJavaItems(IJavaProject javaElement) {
+		int count = 0;
+		try {
+			IJavaElement[] children = javaElement.getChildren();
+			for (IJavaElement iJavaElement : children) {
+				if (iJavaElement instanceof IPackageFragmentRoot) {
+					count += countJavaItems((IPackageFragmentRoot)iJavaElement);
+				} else {
+					System.out.println(iJavaElement);
 				}
-			} catch (JavaModelException e) {
-				CoreActivator.logUnexpectedError(e);
 			}
+		} catch (JavaModelException e) {
+			CoreActivator.logUnexpectedError(e);
+		}
+		return count;
+	}
+
+	public static int countJavaItems(IPackageFragmentRoot javaElement) {
+		int count = 1;
+		try {
+			IJavaElement[] children = javaElement.getChildren();
+			for (IJavaElement iJavaElement : children) {
+				if (iJavaElement instanceof IPackageFragment) {
+					count += countJavaItems((IPackageFragment)iJavaElement);
+				}
+			}
+		} catch (JavaModelException e) {
+			CoreActivator.logUnexpectedError(e);
+		}
+		return count;
+	}
+
+	public static int countJavaItems(IPackageFragment javaElement) {
+		int count = 1;
+		try {
+			IJavaElement[] children = javaElement.getChildren();
+			for (IJavaElement iJavaElement : children) {
+				if (iJavaElement instanceof IPackageFragment) {
+					count += countJavaItems((IPackageFragment)iJavaElement);
+				}
+			}
+		} catch (JavaModelException e) {
+			CoreActivator.logUnexpectedError(e);
 		}
 		return count;
 	}

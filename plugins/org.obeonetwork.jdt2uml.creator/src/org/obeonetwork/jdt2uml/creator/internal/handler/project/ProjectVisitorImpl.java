@@ -98,6 +98,11 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 		} catch (JavaModelException e) {
 			CreatorActivator.logUnexpectedError(e);
 		}
+
+		if (getMonitor() != null) {
+			getMonitor().worked(1);
+		}
+
 		postVisit(packageFragmentRoot);
 	}
 
@@ -120,6 +125,10 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 			CreatorActivator.logUnexpectedError(e);
 		}
 		currentPackage = prevPackage;
+
+		if (getMonitor() != null) {
+			getMonitor().worked(1);
+		}
 
 		postVisit(packageFragment);
 	}

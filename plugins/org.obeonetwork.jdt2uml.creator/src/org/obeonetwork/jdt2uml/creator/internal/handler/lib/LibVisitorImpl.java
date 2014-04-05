@@ -101,6 +101,10 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 		}
 		currentComponent = null;
 
+		if (getMonitor() != null) {
+			getMonitor().worked(1);
+		}
+
 		postVisit(packageFragmentRoot);
 	}
 
@@ -127,6 +131,10 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 		}
 		currentPackage = prevPackage;
 
+		if (getMonitor() != null) {
+			getMonitor().worked(1);
+		}
+
 		postVisit(packageFragment);
 	}
 
@@ -141,7 +149,7 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 			} else {
 				currentClassifier = UMLFactory.eINSTANCE.createClass();
 			}
-			currentClassifier.setName(classFile.getElementName());
+			currentClassifier.setName(classFile.getType().getElementName());
 			if (currentPackage != null) {
 				if (currentPackage.getPackagedElement(currentClassifier.getName()) == null) {
 					currentPackage.getPackagedElements().add(currentClassifier);

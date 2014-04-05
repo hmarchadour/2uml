@@ -21,7 +21,6 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.uml2.uml.Model;
 import org.eclipse.uml2.uml.UMLFactory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
@@ -46,6 +45,8 @@ public class ExportModel implements UMLJob {
 
 	private Resource resource;
 
+	private boolean done;
+
 	public ExportModel(String title, IJavaProject project, CreatorVisitor visitor) {
 		this.title = title;
 		this.javaProject = project;
@@ -57,7 +58,8 @@ public class ExportModel implements UMLJob {
 		this.resource.getContents().add(model);
 		this.model.setName(getFileName());
 
-		relatedProjectResults = new HashSet<Model>();
+		this.relatedProjectResults = new HashSet<Model>();
+		this.done = false;
 	}
 
 	public String getTitle() {
@@ -103,20 +105,18 @@ public class ExportModel implements UMLJob {
 		return javaProject;
 	}
 
-	public int countMonitorWork() throws JavaModelException {
-		return Utils.countAllJavaItems(getJavaProject());
-	}
-
 	@Override
 	public IStatus run(IProgressMonitor monitor) throws InterruptedException {
+		if (!done) {
+			done = true;
+			monitor.setTaskName(getTitle());
+			visitor.visit(model, getJavaProject());
 
-		monitor.setTaskName(getTitle());
-		visitor.visit(model, getJavaProject());
-
-		try {
-			this.resource.save(Maps.newHashMap());
-		} catch (IOException e) {
-			throw new InterruptedException();
+			try {
+				this.resource.save(Maps.newHashMap());
+			} catch (IOException e) {
+				throw new InterruptedException();
+			}
 		}
 		return Status.OK_STATUS;
 	}
