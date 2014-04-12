@@ -3,6 +3,7 @@ package org.obeonetwork.jdt2uml.core.api;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.dom.ArrayType;
@@ -13,20 +14,24 @@ import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.uml2.uml.Classifier;
+import org.eclipse.uml2.uml.NamedElement;
 import org.eclipse.uml2.uml.Namespace;
 import org.obeonetwork.jdt2uml.core.CoreActivator;
+import org.obeonetwork.jdt2uml.core.api.handler.LazyHandler;
 
 public class DomTypeResolver {
 
-	Namespace context;
+	protected Namespace context;
 
-	Type rootType;
+	protected Type rootType;
 
-	Map<Type, Classifier> resolverMap;
+	protected Map<Type, Classifier> resolverMap;
 
-	boolean isResolved;
+	protected boolean isResolved;
 
-	public DomTypeResolver(Namespace context, Type rootType) {
+	protected Set<LazyHandler> lazyHandlers;
+
+	public DomTypeResolver(Namespace context, Type rootType, Set<LazyHandler> lazyHandlers) {
 		if (context == null) {
 			throw new IllegalStateException("Null context should not appended");
 		}
@@ -35,6 +40,7 @@ public class DomTypeResolver {
 		}
 		this.context = context;
 		this.rootType = rootType;
+		this.lazyHandlers = lazyHandlers;
 		resolverMap = new LinkedHashMap<Type, Classifier>();
 		isResolved = false;
 	}
@@ -66,6 +72,22 @@ public class DomTypeResolver {
 
 	public Type getRootType() {
 		return rootType;
+	}
+
+	protected Classifier searchClassifierInModels(String qualifiedName) {
+		Classifier classifier = Utils.searchClassifierInModels(context, qualifiedName);
+		if (classifier == null) {
+			for (LazyHandler lazyHandler : lazyHandlers) {
+				if (lazyHandler.isCompatible(qualifiedName)) {
+					NamedElement resolved = lazyHandler.resolve();
+					if (resolved instanceof Classifier) {
+						classifier = (Classifier)resolved;
+						break;
+					}
+				}
+			}
+		}
+		return classifier;
 	}
 
 	protected boolean tryToResolve(Type type) {
@@ -116,8 +138,8 @@ public class DomTypeResolver {
 		if (resolverMap.containsKey(qualifiedType)) {
 			result = true;
 		} else {
-			Classifier classifier = Utils.searchClassifierInModels(context, qualifiedType.getName()
-					.getFullyQualifiedName());
+			String qualifiedName = qualifiedType.getName().getFullyQualifiedName();
+			Classifier classifier = searchClassifierInModels(qualifiedName);
 			if (classifier != null) {
 				resolverMap.put(qualifiedType, classifier);
 				result = true;
@@ -135,9 +157,9 @@ public class DomTypeResolver {
 		} else {
 			ITypeBinding resolveBinding = simpleType.resolveBinding();
 			if (resolveBinding != null) {
-				String binaryName = resolveBinding.getBinaryName();
-				if (binaryName != null) {
-					Classifier classifier = Utils.searchClassifierInModels(context, binaryName);
+				String qualifiedName = resolveBinding.getBinaryName();
+				if (qualifiedName != null) {
+					Classifier classifier = searchClassifierInModels(qualifiedName);
 					if (classifier != null) {
 						resolverMap.put(simpleType, classifier);
 						result = true;
@@ -156,6 +178,7 @@ public class DomTypeResolver {
 			result = true;
 		} else {
 			result = true;
+			@SuppressWarnings("rawtypes")
 			List typeArguments = parameterizedType.typeArguments();
 			for (Object object : typeArguments) {
 				if (object instanceof Type) {

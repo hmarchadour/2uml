@@ -8,15 +8,11 @@
  * Contributors:
  *    Hugo Marchadour - initial API and implementation and/or initial documentation
  *******************************************************************************/
-package org.obeonetwork.jdt2uml.creator.internal.job;
+package org.obeonetwork.jdt2uml.core.internal.job;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -24,31 +20,29 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.uml2.uml.Model;
 import org.eclipse.uml2.uml.UMLFactory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
-import org.obeonetwork.jdt2uml.core.api.job.UMLJob;
-import org.obeonetwork.jdt2uml.creator.CreatorActivator;
-import org.obeonetwork.jdt2uml.creator.api.CreatorVisitor;
+import org.obeonetwork.jdt2uml.core.api.job.JobDescriptor;
+import org.obeonetwork.jdt2uml.core.api.visitor.CreatorVisitor;
+import org.obeonetwork.jdt2uml.core.api.visitor.Visitor;
 
-import com.google.common.collect.Maps;
+public class ExportModelDescriptor implements JobDescriptor {
 
-public class ExportModel implements UMLJob {
+	protected final String title;
 
-	private final String title;
+	protected final IJavaProject javaProject;
 
-	private final IJavaProject javaProject;
+	protected final String fileName;
 
-	private final String fileName;
+	protected final CreatorVisitor visitor;
 
-	private final CreatorVisitor visitor;
+	protected final Set<Model> relatedProjectResults;
 
-	private final Set<Model> relatedProjectResults;
+	protected Model model;
 
-	private Model model;
+	protected Resource resource;
 
-	private Resource resource;
+	protected boolean done;
 
-	private boolean done;
-
-	public ExportModel(String title, IJavaProject project, CreatorVisitor visitor) {
+	public ExportModelDescriptor(String title, IJavaProject project, CreatorVisitor visitor) {
 		this.title = title;
 		this.javaProject = project;
 		this.fileName = visitor.getNewModelFileName(javaProject);
@@ -63,8 +57,21 @@ public class ExportModel implements UMLJob {
 		this.done = false;
 	}
 
+	@Override
+	public Visitor getVisitor() {
+		return visitor;
+	}
+
 	public String getTitle() {
 		return title;
+	}
+
+	public boolean isDone() {
+		return done;
+	}
+
+	public void setDone() {
+		this.done = true;
 	}
 
 	public URI getSemanticModelURI() {
@@ -104,24 +111,5 @@ public class ExportModel implements UMLJob {
 	@Override
 	public IJavaProject getJavaProject() {
 		return javaProject;
-	}
-
-	@Override
-	public IStatus run(IProgressMonitor monitor) throws InterruptedException {
-		if (!done) {
-			done = true;
-			monitor.setTaskName(getTitle());
-			visitor.visit(model, getJavaProject());
-			boolean relaunchHandlers = visitor.relaunchMissingHandlers();
-			if (!relaunchHandlers) {
-				CreatorActivator.log(IStatus.ERROR, "At least of one handler could not be launch.");
-			}
-			try {
-				this.resource.save(Maps.newHashMap());
-			} catch (IOException e) {
-				throw new InterruptedException();
-			}
-		}
-		return Status.OK_STATUS;
 	}
 }

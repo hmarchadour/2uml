@@ -12,13 +12,13 @@ public interface ProjectTODO {
 
 	IJavaProject getProject();
 
-	UMLJob getLibJob();
+	JobDescriptor getLibDescriptor();
 
-	UMLJob getProjectJob();
+	JobDescriptor getProjectDescriptor();
 
-	Set<UMLJob> getDepLibJobs();
+	Set<JobDescriptor> getDepLibJobs();
 
-	Set<UMLJob> getDepProjectJobs();
+	Set<JobDescriptor> getDepProjectJobs();
 
 	void avoidDuplicatedTODOs(Set<ProjectTODO> toRemove);
 

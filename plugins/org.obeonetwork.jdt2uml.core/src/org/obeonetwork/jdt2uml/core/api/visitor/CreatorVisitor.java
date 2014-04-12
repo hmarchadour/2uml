@@ -1,8 +1,6 @@
-package org.obeonetwork.jdt2uml.creator.api;
+package org.obeonetwork.jdt2uml.core.api.visitor;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.uml2.uml.Model;
-import org.obeonetwork.jdt2uml.core.api.visitor.Visitor;
 
 public interface CreatorVisitor extends Visitor {
 
@@ -12,6 +10,4 @@ public interface CreatorVisitor extends Visitor {
 	CreatorVisitor newInstance();
 
 	boolean relaunchMissingHandlers();
-
-	void visit(Model model, IJavaProject javaProject);
 }

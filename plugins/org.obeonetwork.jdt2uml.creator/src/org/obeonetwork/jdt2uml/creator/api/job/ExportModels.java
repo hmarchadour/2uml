@@ -24,13 +24,13 @@ import org.eclipse.jdt.core.JavaCore;
 import org.obeonetwork.jdt2uml.core.CoreActivator;
 import org.obeonetwork.jdt2uml.core.api.CoreFactory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
+import org.obeonetwork.jdt2uml.core.api.job.JobDescriptor;
 import org.obeonetwork.jdt2uml.core.api.job.ProjectTODO;
-import org.obeonetwork.jdt2uml.core.api.job.UMLJob;
+import org.obeonetwork.jdt2uml.core.api.visitor.LibVisitor;
+import org.obeonetwork.jdt2uml.core.api.visitor.ProjectVisitor;
+import org.obeonetwork.jdt2uml.core.internal.job.ExportModelDescriptor;
 import org.obeonetwork.jdt2uml.creator.CreatorActivator;
 import org.obeonetwork.jdt2uml.creator.api.CreatorFactory;
-import org.obeonetwork.jdt2uml.creator.api.LibVisitor;
-import org.obeonetwork.jdt2uml.creator.api.ProjectVisitor;
-import org.obeonetwork.jdt2uml.creator.internal.job.ExportModel;
 
 public class ExportModels implements IWorkspaceRunnable {
 
@@ -123,13 +123,12 @@ public class ExportModels implements IWorkspaceRunnable {
 		LibVisitor libVisitor = CreatorFactory.createLibVisitor(monitor);
 		ProjectVisitor projectVisitor = CreatorFactory.createProjectVisitor(monitor);
 
-		UMLJob exportLibrary = new ExportModel("Export Libraries Model in " + javaProject.getElementName(),
-				javaProject, libVisitor);
+		JobDescriptor libraryDescriptor = new ExportModelDescriptor("Export Libraries Model in "
+				+ javaProject.getElementName(), javaProject, libVisitor);
+		JobDescriptor projectDescriptor = new ExportModelDescriptor("Export Project Model in "
+				+ javaProject.getElementName(), javaProject, projectVisitor);
 
-		UMLJob exportModel = new ExportModel("Export Project Model in " + javaProject.getElementName(),
-				javaProject, projectVisitor);
-
-		ProjectTODO result = CoreFactory.createJobsTODO(javaProject, exportModel, exportLibrary);
+		ProjectTODO result = CoreFactory.createJobsTODO(javaProject, projectDescriptor, libraryDescriptor);
 
 		IProject[] referencedProjects = javaProject.getProject().getReferencedProjects();
 		for (IProject referencedProject : referencedProjects) {

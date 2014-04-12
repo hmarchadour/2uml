@@ -16,7 +16,6 @@ Export-Package: org.obeonetwork.jdt2uml.creator,
  org.obeonetwork.jdt2uml.creator.api,
  org.obeonetwork.jdt2uml.creator.api.job,
  org.obeonetwork.jdt2uml.creator.api.listener,
- org.obeonetwork.jdt2uml.creator.internal.handler.lib;x-internal:=true,
- org.obeonetwork.jdt2uml.creator.internal.handler.project;x-internal:=true,
- org.obeonetwork.jdt2uml.creator.internal.job;x-internal:=true
+ org.obeonetwork.jdt2uml.creator.internal.visitor.lib;x-internal:=true,
+ org.obeonetwork.jdt2uml.creator.internal.visitor.project;x-internal:=true
 Bundle-Activator: org.obeonetwork.jdt2uml.creator.CreatorActivator

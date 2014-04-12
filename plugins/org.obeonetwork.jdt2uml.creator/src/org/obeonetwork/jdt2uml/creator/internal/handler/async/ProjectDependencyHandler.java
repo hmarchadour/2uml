@@ -28,7 +28,7 @@ public final class ProjectDependencyHandler extends AbstractAsyncHandler {
 
 	public void handle() {
 
-		if (isHandleable()) {
+		if (isHandleable() && !isHandled()) {
 			currentComponent.createDependency(depComponent);
 			handled = true;
 		}

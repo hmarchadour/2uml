@@ -10,31 +10,29 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.uml2.uml.resource.UMLResource;
 import org.obeonetwork.jdt2uml.core.CoreActivator;
 import org.obeonetwork.jdt2uml.core.api.Utils;
+import org.obeonetwork.jdt2uml.core.api.job.JobDescriptor;
 import org.obeonetwork.jdt2uml.core.api.job.ProjectTODO;
 import org.obeonetwork.jdt2uml.core.api.job.UMLJob;
+import org.obeonetwork.jdt2uml.core.api.visitor.LibVisitor;
+import org.obeonetwork.jdt2uml.core.internal.job.ExportLibModel;
+import org.obeonetwork.jdt2uml.core.internal.job.ExportProjectModel;
 
 public class ProjectTODOImpl implements ProjectTODO {
 
 	protected IJavaProject javaProject;
 
-	protected UMLJob libJob;
+	protected JobDescriptor projectDescriptor;
 
-	protected UMLJob projectJob;
-
-	@Deprecated
-	protected Set<UMLJob> depLibJobs;
-
-	@Deprecated
-	protected Set<UMLJob> depProjectJobs;
+	protected JobDescriptor libDescriptor;
 
 	protected Set<ProjectTODO> subJobsTODOs;
 
-	public ProjectTODOImpl(IJavaProject javaProject, UMLJob projectJob, UMLJob libJob) {
+	public ProjectTODOImpl(IJavaProject javaProject, JobDescriptor projectDescriptor,
+			JobDescriptor libDescriptor) {
 		this.javaProject = javaProject;
-		this.projectJob = projectJob;
-		this.libJob = libJob;
-		depLibJobs = null;
-		depProjectJobs = null;
+		this.projectDescriptor = projectDescriptor;
+		this.libDescriptor = libDescriptor;
+
 		subJobsTODOs = new HashSet<ProjectTODO>();
 	}
 
@@ -44,16 +42,21 @@ public class ProjectTODOImpl implements ProjectTODO {
 			subJobsTODO.run(monitor);
 		}
 
-		Utils.importUMLResource(libJob.getModel(), UMLResource.JAVA_PRIMITIVE_TYPES_LIBRARY_URI);
-		for (UMLJob depProjectJob : getDepProjectJobs()) {
-			if (!projectJob.equals(depProjectJob)) {
-				Utils.importUMLResource(libJob.getModel(), depProjectJob.getSemanticModelURI());
+		Utils.importUMLResource(libDescriptor.getModel(), UMLResource.JAVA_PRIMITIVE_TYPES_LIBRARY_URI);
+		for (JobDescriptor depProjectJob : getDepProjectJobs()) {
+			if (!projectDescriptor.equals(depProjectJob)) {
+				Utils.importUMLResource(libDescriptor.getModel(), depProjectJob.getSemanticModelURI());
 			}
 		}
-		libJob.run(monitor);
 
-		Utils.importUMLResource(projectJob.getModel(), libJob.getSemanticModelURI());
-		projectJob.run(monitor);
+		UMLJob exportLibrary = new ExportLibModel(libDescriptor);
+		exportLibrary.run(monitor);
+
+		Utils.importUMLResource(projectDescriptor.getModel(), libDescriptor.getSemanticModelURI());
+
+		LibVisitor libVisitor = (LibVisitor)libDescriptor.getVisitor();
+		UMLJob exportModel = new ExportProjectModel(libVisitor.getLazyHandlers(), projectDescriptor);
+		exportModel.run(monitor);
 
 		return new Status(IStatus.OK, CoreActivator.PLUGIN_ID, null);
 	}
@@ -64,13 +67,13 @@ public class ProjectTODOImpl implements ProjectTODO {
 	}
 
 	@Override
-	public UMLJob getLibJob() {
-		return libJob;
+	public JobDescriptor getLibDescriptor() {
+		return libDescriptor;
 	}
 
 	@Override
-	public UMLJob getProjectJob() {
-		return projectJob;
+	public JobDescriptor getProjectDescriptor() {
+		return projectDescriptor;
 	}
 
 	@Override
@@ -112,25 +115,21 @@ public class ProjectTODOImpl implements ProjectTODO {
 	}
 
 	@Override
-	public Set<UMLJob> getDepLibJobs() {
-		if (depLibJobs == null) {
-			depLibJobs = new HashSet<UMLJob>();
-			depLibJobs.add(libJob);
-			for (ProjectTODO subJobsTODO : subJobsTODOs) {
-				depLibJobs.addAll(subJobsTODO.getDepLibJobs());
-			}
+	public Set<JobDescriptor> getDepLibJobs() {
+		Set<JobDescriptor> depLibJobs = new HashSet<JobDescriptor>();
+		depLibJobs.add(libDescriptor);
+		for (ProjectTODO subJobsTODO : subJobsTODOs) {
+			depLibJobs.addAll(subJobsTODO.getDepLibJobs());
 		}
 		return depLibJobs;
 	}
 
 	@Override
-	public Set<UMLJob> getDepProjectJobs() {
-		if (depProjectJobs == null) {
-			depProjectJobs = new HashSet<UMLJob>();
-			depProjectJobs.add(projectJob);
-			for (ProjectTODO subJobsTODO : subJobsTODOs) {
-				depProjectJobs.addAll(subJobsTODO.getDepProjectJobs());
-			}
+	public Set<JobDescriptor> getDepProjectJobs() {
+		Set<JobDescriptor> depProjectJobs = new HashSet<JobDescriptor>();
+		depProjectJobs.add(projectDescriptor);
+		for (ProjectTODO subJobsTODO : subJobsTODOs) {
+			depProjectJobs.addAll(subJobsTODO.getDepProjectJobs());
 		}
 		return depProjectJobs;
 	}

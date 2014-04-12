@@ -1,4 +1,4 @@
-package org.obeonetwork.jdt2uml.creator.internal.handler.project;
+package org.obeonetwork.jdt2uml.creator.internal.visitor.project;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -6,6 +6,8 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -13,10 +15,12 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.uml2.uml.BehavioredClassifier;
 import org.eclipse.uml2.uml.Classifier;
+import org.eclipse.uml2.uml.Enumeration;
 import org.eclipse.uml2.uml.Package;
 import org.eclipse.uml2.uml.UMLFactory;
+import org.obeonetwork.jdt2uml.core.api.handler.AsyncHandler;
+import org.obeonetwork.jdt2uml.core.api.handler.LazyHandler;
 import org.obeonetwork.jdt2uml.creator.CreatorActivator;
-import org.obeonetwork.jdt2uml.creator.internal.handler.async.AsyncHandler;
 import org.obeonetwork.jdt2uml.creator.internal.handler.async.FieldDeclarationHandler;
 import org.obeonetwork.jdt2uml.creator.internal.handler.async.MethodDeclarationHandler;
 import org.obeonetwork.jdt2uml.creator.internal.handler.async.SuperInterfaceTypeHandler;
@@ -30,8 +34,11 @@ public class CompilationUnitASTVisitor extends ASTVisitor {
 
 	private Set<AsyncHandler> handlersToRelaunch;
 
-	public CompilationUnitASTVisitor(Package currentPackage) {
+	private Set<LazyHandler> lazyHandlers;
+
+	public CompilationUnitASTVisitor(Package currentPackage, Set<LazyHandler> lazyHandlers) {
 		this.currentPackage = currentPackage;
+		this.lazyHandlers = lazyHandlers;
 		this.handlersToRelaunch = new LinkedHashSet<AsyncHandler>();
 	}
 
@@ -62,7 +69,8 @@ public class CompilationUnitASTVisitor extends ASTVisitor {
 			CreatorActivator.log(IStatus.WARNING,
 					"Visit a fieldDeclaration whithout currentClassifier should not appended");
 		} else {
-			AsyncHandler handler = new FieldDeclarationHandler(currentClassifier, fieldDeclaration);
+			AsyncHandler handler = new FieldDeclarationHandler(currentClassifier, fieldDeclaration,
+					lazyHandlers);
 			tryTo(handler);
 		}
 		return super.visit(fieldDeclaration);
@@ -74,10 +82,34 @@ public class CompilationUnitASTVisitor extends ASTVisitor {
 			CreatorActivator.log(IStatus.WARNING,
 					"Visit a methodDeclaration whithout currentClassifier should not appended");
 		} else {
-			AsyncHandler handler = new MethodDeclarationHandler(currentClassifier, methodDeclaration);
+			AsyncHandler handler = new MethodDeclarationHandler(currentClassifier, methodDeclaration,
+					lazyHandlers);
 			tryTo(handler);
 		}
 		return super.visit(methodDeclaration);
+	}
+
+	@Override
+	public boolean visit(EnumDeclaration enumDeclaration) {
+
+		if (enumDeclaration.isPackageMemberTypeDeclaration()) {
+			if (currentPackage != null) {
+				String identifier = enumDeclaration.getName().getIdentifier();
+				if (currentPackage.getPackagedElement(identifier) == null) {
+					Enumeration enumeration = currentPackage.createOwnedEnumeration(identifier);
+					currentClassifier = enumeration;
+					@SuppressWarnings("rawtypes")
+					List enumConstants = enumDeclaration.enumConstants();
+					for (Object object : enumConstants) {
+						if (object instanceof EnumConstantDeclaration) {
+							EnumConstantDeclaration enumConstantDeclaration = (EnumConstantDeclaration)object;
+							enumeration.createOwnedLiteral(enumConstantDeclaration.getName().getIdentifier());
+						}
+					}
+				}
+			}
+		}
+		return super.visit(enumDeclaration);
 	}
 
 	@Override
@@ -98,17 +130,19 @@ public class CompilationUnitASTVisitor extends ASTVisitor {
 
 				Type superclassType = typeDeclaration.getSuperclassType();
 				if (superclassType != null) {
-					AsyncHandler handler = new SuperTypeHandler(currentClassifier, superclassType);
+					AsyncHandler handler = new SuperTypeHandler(currentClassifier, superclassType,
+							lazyHandlers);
 					tryTo(handler);
 				}
 
 				if (currentClassifier instanceof BehavioredClassifier) {
+					@SuppressWarnings("rawtypes")
 					List superInterfaceTypes = typeDeclaration.superInterfaceTypes();
 					for (Object object : superInterfaceTypes) {
 						if (object != null && object instanceof Type) {
 							Type superInterfaceType = (Type)object;
 							AsyncHandler handler = new SuperInterfaceTypeHandler(
-									(BehavioredClassifier)currentClassifier, superInterfaceType);
+									(BehavioredClassifier)currentClassifier, superInterfaceType, lazyHandlers);
 							tryTo(handler);
 						}
 					}

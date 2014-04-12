@@ -300,42 +300,60 @@ public final class Utils {
 		return result;
 	}
 
+	public static Classifier searchClassifierInModel(Namespace namespace, String qualifiedName) {
+		Model model = namespace.getModel();
+
+		List<NamedElement> contents = model.getMembers();
+		List<Component> components = new ArrayList<Component>();
+		for (EObject content : contents) {
+			if (content instanceof Component) {
+				components.add((Component)content);
+			}
+		}
+
+		Classifier result = searchClassifierInComponents(components, qualifiedName);
+		return result;
+	}
+
 	public static Classifier searchClassifierInModels(Namespace namespace, String qualifiedName) {
 		Classifier result = null;
 
-		Resource eResource = namespace.eResource();
-		if (eResource != null) {
-			List<EObject> contents = eResource.getContents();
-			List<Component> components = new ArrayList<Component>();
-			for (EObject content : contents) {
-				if (content instanceof Package) {
-					Package rootPackage = (Package)content;
-					List<PackageableElement> packagedElements = rootPackage.getPackagedElements();
-					for (PackageableElement packageableElement : packagedElements) {
-						if (packageableElement instanceof Component) {
-							components.add((Component)packageableElement);
-						}
+		result = searchClassifierInModel(namespace, qualifiedName);
+		if (result == null) {
+			// search in imported packages
+			Resource eResource = namespace.eResource();
+			if (eResource != null) {
+				List<EObject> contents = eResource.getContents();
+				List<Component> components = new ArrayList<Component>();
+				for (EObject content : contents) {
+					if (content instanceof Package) {
+						Package rootPackage = (Package)content;
+						components.addAll(searchAllImportedComponents(rootPackage));
 					}
-					components.addAll(searchAllImportedComponents(rootPackage));
 				}
+				result = searchClassifierInComponents(components, qualifiedName);
+			} else {
+				throw new IllegalStateException("Should not appended");
 			}
+		}
+		return result;
+	}
 
-			String[] subpackages = qualifiedName.split("\\.");
-			for (Component component : components) {
-				Namespace member = component;
-				for (int i = 0; i < subpackages.length; i++) {
-					member = (Namespace)member.getMember(subpackages[i]);
-					if (member == null) {
-						break;
-					}
-				}
-				if (member != null && member instanceof Classifier) {
-					result = (Classifier)member;
+	protected static Classifier searchClassifierInComponents(List<Component> components, String qualifiedName) {
+		Classifier result = null;
+		String[] subpackages = qualifiedName.split("\\.");
+		for (Component component : components) {
+			Namespace member = component;
+			for (int i = 0; i < subpackages.length; i++) {
+				member = (Namespace)member.getMember(subpackages[i]);
+				if (member == null) {
 					break;
 				}
 			}
-		} else {
-			throw new IllegalStateException("Should not appended");
+			if (member != null && member instanceof Classifier) {
+				result = (Classifier)member;
+				break;
+			}
 		}
 		return result;
 	}

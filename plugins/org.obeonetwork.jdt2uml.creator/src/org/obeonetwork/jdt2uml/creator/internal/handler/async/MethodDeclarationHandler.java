@@ -2,20 +2,25 @@ package org.obeonetwork.jdt2uml.creator.internal.handler.async;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.uml2.uml.Classifier;
+import org.eclipse.uml2.uml.Enumeration;
 import org.eclipse.uml2.uml.Interface;
 import org.eclipse.uml2.uml.Operation;
 import org.eclipse.uml2.uml.Type;
 import org.eclipse.uml2.uml.VisibilityKind;
 import org.obeonetwork.jdt2uml.core.api.DomTypeResolver;
+import org.obeonetwork.jdt2uml.core.api.handler.LazyHandler;
 
 public final class MethodDeclarationHandler extends AbstractAsyncHandler {
 
 	protected MethodDeclaration methodDeclaration;
+
+	protected Set<LazyHandler> lazyHandlers;
 
 	protected DomTypeResolver returnTypesResolver;
 
@@ -23,16 +28,20 @@ public final class MethodDeclarationHandler extends AbstractAsyncHandler {
 
 	protected List<SingleVariableDeclaration> args;
 
-	public MethodDeclarationHandler(Classifier currentClassifier, MethodDeclaration methodDeclaration) {
+	public MethodDeclarationHandler(Classifier currentClassifier, MethodDeclaration methodDeclaration,
+			Set<LazyHandler> lazyHandlers) {
 		super(currentClassifier);
+
 		this.methodDeclaration = methodDeclaration;
+		this.lazyHandlers = lazyHandlers;
 		org.eclipse.jdt.core.dom.Type returnType = methodDeclaration.getReturnType2();
 		if (returnType != null) {
-			this.returnTypesResolver = new DomTypeResolver(currentClassifier, returnType);
+			this.returnTypesResolver = new DomTypeResolver(currentClassifier, returnType, lazyHandlers);
 		}
 		this.argsTypesResolvers = new ArrayList<DomTypeResolver>();
 		this.args = new ArrayList<SingleVariableDeclaration>();
 
+		@SuppressWarnings("rawtypes")
 		List parameters = methodDeclaration.parameters();
 		for (Object object : parameters) {
 			if (object instanceof SingleVariableDeclaration) {
@@ -42,7 +51,7 @@ public final class MethodDeclarationHandler extends AbstractAsyncHandler {
 				if (argType == null) {
 					throw new IllegalStateException("Should not appended");
 				}
-				argsTypesResolvers.add(new DomTypeResolver(currentClassifier, argType));
+				argsTypesResolvers.add(new DomTypeResolver(currentClassifier, argType, lazyHandlers));
 			}
 		}
 	}
@@ -69,7 +78,7 @@ public final class MethodDeclarationHandler extends AbstractAsyncHandler {
 
 	public void handle() {
 
-		if (isHandleable()) {
+		if (isHandleable() && !isHandled()) {
 
 			Operation operation;
 			if (currentClassifier instanceof Interface) {
@@ -78,6 +87,9 @@ public final class MethodDeclarationHandler extends AbstractAsyncHandler {
 			} else if (currentClassifier instanceof org.eclipse.uml2.uml.Class) {
 				operation = ((org.eclipse.uml2.uml.Class)currentClassifier).createOwnedOperation(
 						methodDeclaration.getName().getIdentifier(), null, null);
+			} else if (currentClassifier instanceof Enumeration) {
+				operation = ((Enumeration)currentClassifier).createOwnedOperation(methodDeclaration.getName()
+						.getIdentifier(), null, null);
 			} else {
 				throw new IllegalStateException("Should not appended");
 			}
@@ -103,6 +115,7 @@ public final class MethodDeclarationHandler extends AbstractAsyncHandler {
 			}
 
 			operation.setVisibility(VisibilityKind.PACKAGE_LITERAL); // Default
+			@SuppressWarnings("rawtypes")
 			List modifiers = methodDeclaration.modifiers();
 			for (Object object : modifiers) {
 				if (object instanceof Modifier) {
