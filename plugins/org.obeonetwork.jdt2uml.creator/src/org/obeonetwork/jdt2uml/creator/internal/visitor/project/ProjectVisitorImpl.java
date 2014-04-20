@@ -136,7 +136,7 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 		}
 
 		if (getMonitor() != null) {
-			getMonitor().worked(1);
+			// getMonitor().worked(1);
 		}
 
 		postVisit(packageFragmentRoot);

@@ -80,7 +80,11 @@ public final class FieldDeclarationHandler extends AbstractAsyncHandler {
 				throw new IllegalStateException("Should not appended");
 			}
 
-			attribute.setVisibility(VisibilityKind.PACKAGE_LITERAL); // Default
+			if (currentClassifier instanceof Interface) {
+				attribute.setVisibility(VisibilityKind.PUBLIC_LITERAL); // Default
+			} else {
+				attribute.setVisibility(VisibilityKind.PACKAGE_LITERAL); // Default
+			}
 			@SuppressWarnings("rawtypes")
 			List modifiers = fieldDeclaration.modifiers();
 			for (Object object : modifiers) {

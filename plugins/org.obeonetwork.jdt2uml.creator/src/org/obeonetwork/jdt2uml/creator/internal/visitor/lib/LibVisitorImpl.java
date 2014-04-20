@@ -135,7 +135,7 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 		currentComponent = null;
 
 		if (getMonitor() != null) {
-			getMonitor().worked(1);
+			// getMonitor().worked(1);
 		}
 
 		postVisit(packageFragmentRoot);
@@ -165,7 +165,7 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 		currentPackage = prevPackage;
 
 		if (getMonitor() != null) {
-			getMonitor().worked(1);
+			// getMonitor().worked(1);
 		}
 
 		postVisit(packageFragment);

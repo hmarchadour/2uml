@@ -22,6 +22,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -411,7 +412,7 @@ public final class Utils {
 	}
 
 	public static int countJavaItems(IPackageFragmentRoot javaElement) {
-		int count = 1;
+		int count = 0;
 		try {
 			IJavaElement[] children = javaElement.getChildren();
 			for (IJavaElement iJavaElement : children) {
@@ -426,12 +427,14 @@ public final class Utils {
 	}
 
 	public static int countJavaItems(IPackageFragment javaElement) {
-		int count = 1;
+		int count = 0;
 		try {
 			IJavaElement[] children = javaElement.getChildren();
 			for (IJavaElement iJavaElement : children) {
 				if (iJavaElement instanceof IPackageFragment) {
 					count += countJavaItems((IPackageFragment)iJavaElement);
+				} else if (iJavaElement instanceof ICompilationUnit) {
+					count += 1;
 				}
 			}
 		} catch (JavaModelException e) {

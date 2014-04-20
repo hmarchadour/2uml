@@ -114,7 +114,12 @@ public final class MethodDeclarationHandler extends AbstractAsyncHandler {
 				operation.createOwnedParameter(arg.getName().getIdentifier(), umlArgType);
 			}
 
-			operation.setVisibility(VisibilityKind.PACKAGE_LITERAL); // Default
+			if (currentClassifier instanceof Interface) {
+				operation.setVisibility(VisibilityKind.PUBLIC_LITERAL); // Default
+			} else {
+				operation.setVisibility(VisibilityKind.PACKAGE_LITERAL); // Default
+			}
+
 			@SuppressWarnings("rawtypes")
 			List modifiers = methodDeclaration.modifiers();
 			for (Object object : modifiers) {
