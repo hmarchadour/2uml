@@ -1,11 +1,11 @@
 package org.obeonetwork.jdt2uml.creator.internal.visitor.project;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -22,7 +22,8 @@ import org.eclipse.uml2.uml.UMLFactory;
 import org.obeonetwork.jdt2uml.core.api.CoreFactory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
 import org.obeonetwork.jdt2uml.core.api.handler.AsyncHandler;
-import org.obeonetwork.jdt2uml.core.api.handler.LazyHandler;
+import org.obeonetwork.jdt2uml.core.api.lazy.LazyClass;
+import org.obeonetwork.jdt2uml.core.api.resolver.Resolver;
 import org.obeonetwork.jdt2uml.core.api.visitor.AbstractVisitor;
 import org.obeonetwork.jdt2uml.core.api.visitor.CreatorVisitor;
 import org.obeonetwork.jdt2uml.core.api.visitor.ProjectVisitor;
@@ -39,17 +40,16 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 
 	private Set<AsyncHandler> handlersToRelaunch;
 
-	private Set<LazyHandler> lazyHandlers;
+	private Resolver domTypeResolver;
 
 	public ProjectVisitorImpl(IProgressMonitor monitor) {
 		super(monitor);
-		this.lazyHandlers = new HashSet<LazyHandler>();
 		this.model = null;
 		this.handlersToRelaunch = new LinkedHashSet<AsyncHandler>();
 	}
 
 	@Override
-	public boolean relaunchMissingHandlers() {
+	public void endCallBack() {
 		Iterator<AsyncHandler> it = handlersToRelaunch.iterator();
 		while (it.hasNext()) {
 			AsyncHandler handler = it.next();
@@ -60,7 +60,9 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 				handler.handle();
 			}
 		}
-		return handlersToRelaunch.isEmpty();
+		if (!handlersToRelaunch.isEmpty()) {
+			CreatorActivator.log(IStatus.ERROR, "At least of one handler could not be launch.");
+		}
 	}
 
 	@Override
@@ -73,8 +75,8 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 		return Utils.getModelFileName(javaProject);
 	}
 
-	public void visit(Set<LazyHandler> lazyHandlers, Model model, IJavaProject javaProject) {
-		this.lazyHandlers = lazyHandlers;
+	public void visit(Set<LazyClass> lazyClasses, Model model, IJavaProject javaProject) {
+		domTypeResolver = CoreFactory.createResolver(model, lazyClasses);
 		this.model = model;
 		visit(javaProject);
 		this.model = null;
@@ -179,7 +181,7 @@ public class ProjectVisitorImpl extends AbstractVisitor implements ProjectVisito
 		parser.setResolveBindings(true);
 		CompilationUnit ast = (CompilationUnit)parser.createAST(getMonitor());
 
-		CompilationUnitASTVisitor visitor = new CompilationUnitASTVisitor(currentPackage, lazyHandlers);
+		CompilationUnitASTVisitor visitor = new CompilationUnitASTVisitor(currentPackage, domTypeResolver);
 		ast.accept(visitor);
 		handlersToRelaunch.addAll(visitor.getHandlers());
 

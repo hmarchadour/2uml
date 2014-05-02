@@ -1,6 +1,5 @@
 package org.obeonetwork.jdt2uml.creator.internal.visitor.lib;
 
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -19,8 +18,10 @@ import org.eclipse.uml2.uml.PackageableElement;
 import org.eclipse.uml2.uml.UMLFactory;
 import org.obeonetwork.jdt2uml.core.api.CoreFactory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
-import org.obeonetwork.jdt2uml.core.api.handler.AsyncHandler;
 import org.obeonetwork.jdt2uml.core.api.handler.LazyHandler;
+import org.obeonetwork.jdt2uml.core.api.lazy.LazyClass;
+import org.obeonetwork.jdt2uml.core.api.lazy.LazyComponent;
+import org.obeonetwork.jdt2uml.core.api.lazy.LazyPackage;
 import org.obeonetwork.jdt2uml.core.api.visitor.AbstractVisitor;
 import org.obeonetwork.jdt2uml.core.api.visitor.CreatorVisitor;
 import org.obeonetwork.jdt2uml.core.api.visitor.LibVisitor;
@@ -31,40 +32,25 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 
 	private Model model;
 
-	private Component currentComponent;
+	private LazyComponent lazyComponent;
 
-	private Package currentPackage;
+	private LazyPackage lazyPackage;
 
-	private Set<AsyncHandler> handlersToRelaunch;
-
-	private Set<LazyHandler> lazyHandlers;
+	private Set<LazyClass> lazyClasses;
 
 	public LibVisitorImpl(IProgressMonitor monitor) {
 		super(monitor);
 		this.model = null;
-		this.handlersToRelaunch = new LinkedHashSet<AsyncHandler>();
-		this.lazyHandlers = new LinkedHashSet<LazyHandler>();
-	}
-
-	public Set<LazyHandler> getLazyHandlers() {
-		return lazyHandlers;
+		this.lazyClasses = new LinkedHashSet<LazyClass>();
 	}
 
 	@Override
-	public boolean relaunchMissingHandlers() {
-		Iterator<AsyncHandler> it = handlersToRelaunch.iterator();
-		while (it.hasNext()) {
-			AsyncHandler handler = it.next();
-			if (!(handler instanceof LazyHandler)) {
-				if (handler.isHandleable()) {
-					handler.handle();
-				}
-				if (handler.isHandled()) {
-					handlersToRelaunch.remove(handler);
-				}
-			}
-		}
-		return handlersToRelaunch.isEmpty();
+	public void endCallBack() {
+		// Nothing
+	}
+
+	public Set<LazyClass> getLazyClasses() {
+		return lazyClasses;
 	}
 
 	@Override
@@ -113,17 +99,16 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 	public void visit(IPackageFragmentRoot packageFragmentRoot) {
 		preVisit(packageFragmentRoot);
 
-		if (currentComponent != null) {
+		if (lazyComponent != null) {
 			throw new IllegalStateException(
 					"Visit a packageFragmentRoot in another packageFragmentRoot should not appended");
 		}
 		PackageableElement searchInImportedLibs = model.getImportedMember(packageFragmentRoot
 				.getElementName());
 		if (searchInImportedLibs == null || !(searchInImportedLibs instanceof Component)) {
-			currentComponent = UMLFactory.eINSTANCE.createComponent();
+			Component currentComponent = UMLFactory.eINSTANCE.createComponent();
 			currentComponent.setName(packageFragmentRoot.getElementName());
-			model.getPackagedElements().add(currentComponent);
-
+			lazyComponent = CoreFactory.createLazyComponent(model, currentComponent);
 			try {
 				for (IJavaElement element : packageFragmentRoot.getChildren()) {
 					CoreFactory.toVisitable(element).accept(this);
@@ -132,7 +117,7 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 				CreatorActivator.logUnexpectedError(e);
 			}
 		}
-		currentComponent = null;
+		lazyComponent = null;
 
 		if (getMonitor() != null) {
 			// getMonitor().worked(1);
@@ -145,13 +130,22 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 	public void visit(IPackageFragment packageFragment) {
 		preVisit(packageFragment);
 
-		if (currentComponent == null) {
+		if (lazyComponent == null) {
 			throw new IllegalStateException(
 					"Visit a packageFragment without a parent packageFragmentRoot should not appended");
 		}
 
-		Package prevPackage = currentPackage;
-		currentPackage = Utils.handlePackage(currentComponent, packageFragment);
+		LazyPackage prevLazyPackage = this.lazyPackage;
+
+		Package createPackage = UMLFactory.eINSTANCE.createPackage();
+		createPackage.setName(packageFragment.getElementName());
+
+		if (prevLazyPackage == null) {
+			this.lazyPackage = CoreFactory.createLazyPackage(lazyComponent, createPackage);
+		} else {
+			this.lazyPackage = CoreFactory.createLazyPackage(prevLazyPackage, createPackage);
+		}
+
 		try {
 			for (ICompilationUnit compilationUnit : packageFragment.getCompilationUnits()) {
 				CoreFactory.toVisitable(compilationUnit).accept(this);
@@ -162,7 +156,7 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 		} catch (JavaModelException e) {
 			CreatorActivator.logUnexpectedError(e);
 		}
-		currentPackage = prevPackage;
+		this.lazyPackage = prevLazyPackage;
 
 		if (getMonitor() != null) {
 			// getMonitor().worked(1);
@@ -175,9 +169,11 @@ public class LibVisitorImpl extends AbstractVisitor implements LibVisitor {
 	public void visit(IClassFile classFile) {
 		preVisit(classFile);
 
-		if (currentPackage != null) {
-			LazyHandler lazyClassifier = new LazyExternalClassifierHandler(currentPackage, classFile);
-			lazyHandlers.add(lazyClassifier);
+		if (lazyPackage != null) {
+			LazyHandler lazyClassifier = new LazyExternalClassifierHandler(classFile);
+			LazyClass lazyClass = CoreFactory.createLazyClass(lazyPackage, lazyClassifier);
+
+			lazyClasses.add(lazyClass);
 		} else {
 			throw new IllegalStateException("Visit a classFile without package should not appended");
 		}

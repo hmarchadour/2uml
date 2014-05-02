@@ -4,7 +4,7 @@ import org.eclipse.uml2.uml.NamedElement;
 
 public interface LazyHandler {
 
-	boolean isCompatible(String key);
+	boolean canHandle(String key);
 
 	NamedElement resolve();
 

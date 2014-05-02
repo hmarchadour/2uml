@@ -1,8 +1,8 @@
 package org.obeonetwork.jdt2uml.creator.internal.handler.async;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -13,67 +13,62 @@ import org.eclipse.uml2.uml.Interface;
 import org.eclipse.uml2.uml.Operation;
 import org.eclipse.uml2.uml.Type;
 import org.eclipse.uml2.uml.VisibilityKind;
-import org.obeonetwork.jdt2uml.core.api.DomTypeResolver;
-import org.obeonetwork.jdt2uml.core.api.handler.LazyHandler;
+import org.obeonetwork.jdt2uml.core.api.resolver.Resolver;
+import org.obeonetwork.jdt2uml.core.api.resolver.ResolverResult;
 
 public final class MethodDeclarationHandler extends AbstractAsyncHandler {
 
 	protected MethodDeclaration methodDeclaration;
 
-	protected Set<LazyHandler> lazyHandlers;
+	protected Resolver typesResolver;
 
-	protected DomTypeResolver returnTypesResolver;
+	protected ResolverResult latestReturnResult;
 
-	protected List<DomTypeResolver> argsTypesResolvers;
-
-	protected List<SingleVariableDeclaration> args;
+	protected Map<SingleVariableDeclaration, ResolverResult> latestArgResults;
 
 	public MethodDeclarationHandler(Classifier currentClassifier, MethodDeclaration methodDeclaration,
-			Set<LazyHandler> lazyHandlers) {
+			Resolver typesResolver) {
 		super(currentClassifier);
 
 		this.methodDeclaration = methodDeclaration;
-		this.lazyHandlers = lazyHandlers;
-		org.eclipse.jdt.core.dom.Type returnType = methodDeclaration.getReturnType2();
-		if (returnType != null) {
-			this.returnTypesResolver = new DomTypeResolver(currentClassifier, returnType, lazyHandlers);
-		}
-		this.argsTypesResolvers = new ArrayList<DomTypeResolver>();
-		this.args = new ArrayList<SingleVariableDeclaration>();
+		this.typesResolver = typesResolver;
+		this.latestArgResults = new LinkedHashMap<SingleVariableDeclaration, ResolverResult>();
 
 		@SuppressWarnings("rawtypes")
 		List parameters = methodDeclaration.parameters();
 		for (Object object : parameters) {
 			if (object instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration variableDeclaration = (SingleVariableDeclaration)object;
-				this.args.add(variableDeclaration);
-				org.eclipse.jdt.core.dom.Type argType = variableDeclaration.getType();
-				if (argType == null) {
-					throw new IllegalStateException("Should not appended");
-				}
-				argsTypesResolvers.add(new DomTypeResolver(currentClassifier, argType, lazyHandlers));
+				this.latestArgResults.put(variableDeclaration, null);
 			}
 		}
 	}
 
 	public boolean isHandleable() {
-		boolean isResolved = true;
-		if (returnTypesResolver != null) {
-			isResolved = returnTypesResolver.isResolved();
-			if (!isResolved) {
-				isResolved = returnTypesResolver.tryToResolve();
+		boolean isHandleable = true;
+
+		org.eclipse.jdt.core.dom.Type returnType = methodDeclaration.getReturnType2();
+		if (returnType != null) {
+			if (latestReturnResult == null || !latestReturnResult.isResolved()) {
+				latestReturnResult = typesResolver.resolve(returnType);
 			}
+			isHandleable = latestReturnResult.isResolved();
 		}
-		if (isResolved) {
-			for (DomTypeResolver typesResolver : argsTypesResolvers) {
-				boolean resolved = typesResolver.isResolved();
-				if (!resolved) {
-					resolved = typesResolver.tryToResolve();
+
+		if (isHandleable) {
+			for (SingleVariableDeclaration arg : latestArgResults.keySet()) {
+				ResolverResult latestArgResult = latestArgResults.get(arg);
+				if (latestArgResult == null || !latestArgResult.isResolved()) {
+					latestArgResult = typesResolver.resolve(arg.getType());
+					latestArgResults.put(arg, latestArgResult);
+					if (!latestArgResult.isResolved()) {
+						isHandleable = false;
+						break;
+					}
 				}
-				isResolved &= resolved;
 			}
 		}
-		return isResolved;
+		return isHandleable;
 	}
 
 	public void handle() {
@@ -94,19 +89,18 @@ public final class MethodDeclarationHandler extends AbstractAsyncHandler {
 				throw new IllegalStateException("Should not appended");
 			}
 
-			if (returnTypesResolver == null) {
+			if (latestReturnResult == null) {
 				// Constructor
 			} else {
-				Type umlType = returnTypesResolver.getRootClassifier();
+				Type umlType = latestReturnResult.getRootClassifier();
 				if (umlType != null) {
 					operation.createReturnResult("return", umlType);
 				} // else void
 			}
-			for (int i = 0; i < args.size(); i++) {
-				SingleVariableDeclaration arg = args.get(i);
-				DomTypeResolver typesResolver = argsTypesResolvers.get(i);
+			for (SingleVariableDeclaration arg : latestArgResults.keySet()) {
+				ResolverResult latestArgResult = latestArgResults.get(arg);
 
-				Type umlArgType = typesResolver.getRootClassifier();
+				Type umlArgType = latestArgResult.getRootClassifier();
 				if (umlArgType == null) {
 					throw new IllegalStateException("Should not appended");
 				}

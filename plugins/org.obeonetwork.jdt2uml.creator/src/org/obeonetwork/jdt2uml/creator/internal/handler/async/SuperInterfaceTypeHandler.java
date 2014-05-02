@@ -1,43 +1,40 @@
 package org.obeonetwork.jdt2uml.creator.internal.handler.async;
 
-import java.util.Set;
-
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.uml2.uml.BehavioredClassifier;
 import org.eclipse.uml2.uml.Classifier;
 import org.eclipse.uml2.uml.Interface;
-import org.obeonetwork.jdt2uml.core.api.DomTypeResolver;
-import org.obeonetwork.jdt2uml.core.api.handler.LazyHandler;
+import org.obeonetwork.jdt2uml.core.api.resolver.Resolver;
+import org.obeonetwork.jdt2uml.core.api.resolver.ResolverResult;
 
 public final class SuperInterfaceTypeHandler extends AbstractAsyncHandler {
 
-	protected org.eclipse.jdt.core.dom.Type superInterfaceType;
+	protected Type superInterfaceType;
 
-	protected Set<LazyHandler> lazyHandlers;
+	protected Resolver typesResolver;
 
-	protected DomTypeResolver typesResolver;
+	protected ResolverResult latestResult;
 
-	public SuperInterfaceTypeHandler(BehavioredClassifier currentClassifier,
-			org.eclipse.jdt.core.dom.Type superInterfaceType, Set<LazyHandler> lazyHandlers) {
+	public SuperInterfaceTypeHandler(BehavioredClassifier currentClassifier, Type superInterfaceType,
+			Resolver typesResolver) {
 		super(currentClassifier);
 
 		this.superInterfaceType = superInterfaceType;
-		this.lazyHandlers = lazyHandlers;
-		this.typesResolver = new DomTypeResolver(currentClassifier, superInterfaceType, lazyHandlers);
+		this.typesResolver = typesResolver;
 
 	}
 
 	public boolean isHandleable() {
-		boolean isResolved = typesResolver.isResolved();
-		if (!isResolved) {
-			isResolved = typesResolver.tryToResolve();
+		if (latestResult == null || !latestResult.isResolved()) {
+			latestResult = typesResolver.resolve(superInterfaceType);
 		}
-		return isResolved;
+		return latestResult.isResolved();
 	}
 
 	public void handle() {
 
 		if (isHandleable() && !isHandled()) {
-			Classifier rootClassifier = typesResolver.getRootClassifier();
+			Classifier rootClassifier = latestResult.getRootClassifier();
 			if (rootClassifier instanceof Interface) {
 				Interface superInterface = (Interface)rootClassifier;
 				((BehavioredClassifier)currentClassifier).createInterfaceRealization(

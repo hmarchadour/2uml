@@ -9,5 +9,5 @@ public interface CreatorVisitor extends Visitor {
 	@Override
 	CreatorVisitor newInstance();
 
-	boolean relaunchMissingHandlers();
+	void endCallBack();
 }

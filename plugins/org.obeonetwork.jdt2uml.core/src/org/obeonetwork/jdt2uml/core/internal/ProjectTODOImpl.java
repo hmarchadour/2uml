@@ -55,7 +55,7 @@ public class ProjectTODOImpl implements ProjectTODO {
 		Utils.importUMLResource(projectDescriptor.getModel(), libDescriptor.getSemanticModelURI());
 
 		LibVisitor libVisitor = (LibVisitor)libDescriptor.getVisitor();
-		UMLJob exportModel = new ExportProjectModel(libVisitor.getLazyHandlers(), projectDescriptor);
+		UMLJob exportModel = new ExportProjectModel(libVisitor.getLazyClasses(), projectDescriptor);
 		exportModel.run(monitor);
 
 		return new Status(IStatus.OK, CoreActivator.PLUGIN_ID, null);

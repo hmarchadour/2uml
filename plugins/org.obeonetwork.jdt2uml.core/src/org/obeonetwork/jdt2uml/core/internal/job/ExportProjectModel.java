@@ -18,10 +18,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.obeonetwork.jdt2uml.core.CoreActivator;
-import org.obeonetwork.jdt2uml.core.api.handler.LazyHandler;
 import org.obeonetwork.jdt2uml.core.api.job.JobDescriptor;
 import org.obeonetwork.jdt2uml.core.api.job.UMLJob;
+import org.obeonetwork.jdt2uml.core.api.lazy.LazyClass;
 import org.obeonetwork.jdt2uml.core.api.visitor.ProjectVisitor;
 
 import com.google.common.collect.Maps;
@@ -32,11 +31,11 @@ public class ExportProjectModel implements UMLJob {
 
 	private JobDescriptor jobDescriptor;
 
-	private Set<LazyHandler> lazyHandlers;
+	private Set<LazyClass> lazyClasses;
 
-	public ExportProjectModel(Set<LazyHandler> lazyHandlers, JobDescriptor jobDescriptor) {
+	public ExportProjectModel(Set<LazyClass> lazyClasses, JobDescriptor jobDescriptor) {
 		this.projectVisitor = (ProjectVisitor)jobDescriptor.getVisitor();
-		this.lazyHandlers = lazyHandlers;
+		this.lazyClasses = lazyClasses;
 		this.jobDescriptor = jobDescriptor;
 	}
 
@@ -54,11 +53,8 @@ public class ExportProjectModel implements UMLJob {
 			resource.getContents().add(jobDescriptor.getModel());
 
 			monitor.setTaskName(jobDescriptor.getTitle());
-			projectVisitor.visit(lazyHandlers, jobDescriptor.getModel(), jobDescriptor.getJavaProject());
-			boolean relaunchHandlers = projectVisitor.relaunchMissingHandlers();
-			if (!relaunchHandlers) {
-				CoreActivator.log(IStatus.ERROR, "At least of one handler could not be launch.");
-			}
+			projectVisitor.visit(lazyClasses, jobDescriptor.getModel(), jobDescriptor.getJavaProject());
+			projectVisitor.endCallBack();
 			try {
 				resource.save(Maps.newHashMap());
 			} catch (IOException e) {

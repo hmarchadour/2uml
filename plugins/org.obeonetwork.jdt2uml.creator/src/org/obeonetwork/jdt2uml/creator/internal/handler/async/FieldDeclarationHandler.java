@@ -1,7 +1,6 @@
 package org.obeonetwork.jdt2uml.creator.internal.handler.async;
 
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -12,26 +11,25 @@ import org.eclipse.uml2.uml.Interface;
 import org.eclipse.uml2.uml.Property;
 import org.eclipse.uml2.uml.Type;
 import org.eclipse.uml2.uml.VisibilityKind;
-import org.obeonetwork.jdt2uml.core.api.DomTypeResolver;
-import org.obeonetwork.jdt2uml.core.api.handler.LazyHandler;
+import org.obeonetwork.jdt2uml.core.api.resolver.Resolver;
+import org.obeonetwork.jdt2uml.core.api.resolver.ResolverResult;
 
 public final class FieldDeclarationHandler extends AbstractAsyncHandler {
 
 	protected FieldDeclaration fieldDeclaration;
 
-	protected DomTypeResolver typesResolver;
-
-	protected Set<LazyHandler> lazyHandlers;
+	protected Resolver typesResolver;
 
 	protected String fieldName;
 
+	protected ResolverResult latestResult;
+
 	public FieldDeclarationHandler(Classifier currentClassifier, FieldDeclaration fieldDeclaration,
-			Set<LazyHandler> lazyHandlers) {
+			Resolver typesResolver) {
 		super(currentClassifier);
 
 		this.fieldDeclaration = fieldDeclaration;
-		this.lazyHandlers = lazyHandlers;
-		this.typesResolver = new DomTypeResolver(currentClassifier, fieldDeclaration.getType(), lazyHandlers);
+		this.typesResolver = typesResolver;
 
 		// hack to get the field name
 		Object o = fieldDeclaration.fragments().get(0);
@@ -43,18 +41,17 @@ public final class FieldDeclarationHandler extends AbstractAsyncHandler {
 	}
 
 	public boolean isHandleable() {
-		boolean isResolved = typesResolver.isResolved();
-		if (!isResolved) {
-			isResolved = typesResolver.tryToResolve();
+		if (latestResult == null || !latestResult.isResolved()) {
+			latestResult = typesResolver.resolve(fieldDeclaration.getType());
 		}
-		return isResolved;
+		return latestResult.isResolved();
 	}
 
 	public void handle() {
 
 		if (isHandleable() && !isHandled()) {
 			String name = fieldName;
-			Type umlType = typesResolver.getRootClassifier();
+			Type umlType = latestResult.getRootClassifier();
 
 			if (umlType == null) {
 				throw new IllegalStateException("Should not appended");

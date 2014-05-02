@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.obeonetwork.jdt2uml.core.CoreActivator;
 import org.obeonetwork.jdt2uml.core.api.job.JobDescriptor;
 import org.obeonetwork.jdt2uml.core.api.job.UMLJob;
 import org.obeonetwork.jdt2uml.core.api.visitor.LibVisitor;
@@ -50,10 +49,7 @@ public class ExportLibModel implements UMLJob {
 
 			monitor.setTaskName(jobDescriptor.getTitle());
 			libVisitor.visit(jobDescriptor.getModel(), jobDescriptor.getJavaProject());
-			boolean relaunchHandlers = libVisitor.relaunchMissingHandlers();
-			if (!relaunchHandlers) {
-				CoreActivator.log(IStatus.ERROR, "At least of one handler could not be launch.");
-			}
+			libVisitor.endCallBack();
 			try {
 				resource.save(Maps.newHashMap());
 			} catch (IOException e) {

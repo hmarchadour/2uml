@@ -19,7 +19,7 @@ import org.eclipse.uml2.uml.Enumeration;
 import org.eclipse.uml2.uml.Package;
 import org.eclipse.uml2.uml.UMLFactory;
 import org.obeonetwork.jdt2uml.core.api.handler.AsyncHandler;
-import org.obeonetwork.jdt2uml.core.api.handler.LazyHandler;
+import org.obeonetwork.jdt2uml.core.api.resolver.Resolver;
 import org.obeonetwork.jdt2uml.creator.CreatorActivator;
 import org.obeonetwork.jdt2uml.creator.internal.handler.async.FieldDeclarationHandler;
 import org.obeonetwork.jdt2uml.creator.internal.handler.async.MethodDeclarationHandler;
@@ -34,11 +34,12 @@ public class CompilationUnitASTVisitor extends ASTVisitor {
 
 	private Set<AsyncHandler> handlersToRelaunch;
 
-	private Set<LazyHandler> lazyHandlers;
+	private Resolver typeResolver;
 
-	public CompilationUnitASTVisitor(Package currentPackage, Set<LazyHandler> lazyHandlers) {
+	public CompilationUnitASTVisitor(Package currentPackage, Resolver typeResolver) {
 		this.currentPackage = currentPackage;
-		this.lazyHandlers = lazyHandlers;
+		this.typeResolver = typeResolver;
+
 		this.handlersToRelaunch = new LinkedHashSet<AsyncHandler>();
 	}
 
@@ -70,7 +71,7 @@ public class CompilationUnitASTVisitor extends ASTVisitor {
 					"Visit a fieldDeclaration whithout currentClassifier should not appended");
 		} else {
 			AsyncHandler handler = new FieldDeclarationHandler(currentClassifier, fieldDeclaration,
-					lazyHandlers);
+					typeResolver);
 			tryTo(handler);
 		}
 		return super.visit(fieldDeclaration);
@@ -83,7 +84,7 @@ public class CompilationUnitASTVisitor extends ASTVisitor {
 					"Visit a methodDeclaration whithout currentClassifier should not appended");
 		} else {
 			AsyncHandler handler = new MethodDeclarationHandler(currentClassifier, methodDeclaration,
-					lazyHandlers);
+					typeResolver);
 			tryTo(handler);
 		}
 		return super.visit(methodDeclaration);
@@ -131,7 +132,7 @@ public class CompilationUnitASTVisitor extends ASTVisitor {
 				Type superclassType = typeDeclaration.getSuperclassType();
 				if (superclassType != null) {
 					AsyncHandler handler = new SuperTypeHandler(currentClassifier, superclassType,
-							lazyHandlers);
+							typeResolver);
 					tryTo(handler);
 				}
 
@@ -142,7 +143,7 @@ public class CompilationUnitASTVisitor extends ASTVisitor {
 						if (object != null && object instanceof Type) {
 							Type superInterfaceType = (Type)object;
 							AsyncHandler handler = new SuperInterfaceTypeHandler(
-									(BehavioredClassifier)currentClassifier, superInterfaceType, lazyHandlers);
+									(BehavioredClassifier)currentClassifier, superInterfaceType, typeResolver);
 							tryTo(handler);
 						}
 					}

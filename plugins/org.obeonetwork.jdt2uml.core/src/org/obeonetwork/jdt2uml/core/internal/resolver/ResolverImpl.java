@@ -1,8 +1,6 @@
-package org.obeonetwork.jdt2uml.core.api;
+package org.obeonetwork.jdt2uml.core.internal.resolver;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
@@ -17,69 +15,48 @@ import org.eclipse.uml2.uml.Classifier;
 import org.eclipse.uml2.uml.NamedElement;
 import org.eclipse.uml2.uml.Namespace;
 import org.obeonetwork.jdt2uml.core.CoreActivator;
-import org.obeonetwork.jdt2uml.core.api.handler.LazyHandler;
+import org.obeonetwork.jdt2uml.core.api.Utils;
+import org.obeonetwork.jdt2uml.core.api.lazy.LazyClass;
+import org.obeonetwork.jdt2uml.core.api.resolver.Resolver;
+import org.obeonetwork.jdt2uml.core.api.resolver.ResolverResult;
 
-public class DomTypeResolver {
+public class ResolverImpl implements Resolver {
 
 	protected Namespace context;
 
-	protected Type rootType;
+	protected Set<LazyClass> lazyClasses;
 
-	protected Map<Type, Classifier> resolverMap;
+	protected ResolverResult underResolution;
 
-	protected boolean isResolved;
-
-	protected Set<LazyHandler> lazyHandlers;
-
-	public DomTypeResolver(Namespace context, Type rootType, Set<LazyHandler> lazyHandlers) {
+	public ResolverImpl(Namespace context, Set<LazyClass> lazyClasses) {
 		if (context == null) {
 			throw new IllegalStateException("Null context should not appended");
 		}
-		if (rootType == null) {
-			throw new IllegalStateException("Null rootType should not appended");
-		}
 		this.context = context;
-		this.rootType = rootType;
-		this.lazyHandlers = lazyHandlers;
-		resolverMap = new LinkedHashMap<Type, Classifier>();
-		isResolved = false;
+		this.lazyClasses = lazyClasses;
 	}
 
-	public boolean isResolved() {
-		return isResolved;
-	}
-
-	public boolean tryToResolve() {
-		return tryToResolve(rootType);
-	}
-
-	public Map<Type, Classifier> getResolverMap() {
-		return resolverMap;
-	}
-
-	public Classifier getRootClassifier() {
-		Classifier rootClassifier;
-		if (rootType.isParameterizedType()) {
-			// TODO enhance this
-			rootClassifier = resolverMap.get(((ParameterizedType)rootType).getType());
-		} else if (rootType.isArrayType()) {
-			rootClassifier = resolverMap.get(((ArrayType)rootType).getElementType());
-		} else {
-			rootClassifier = resolverMap.get(rootType);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public ResolverResult resolve(Type rootType) {
+		underResolution = new ResolverResultImpl(rootType);
+		boolean resolved = tryToResolve(rootType);
+		if (resolved) {
+			underResolution.setAsResolved();
 		}
-		return rootClassifier;
-	}
-
-	public Type getRootType() {
-		return rootType;
+		ResolverResult result = underResolution;
+		underResolution = null;
+		return result;
 	}
 
 	protected Classifier searchClassifierInModels(String qualifiedName) {
 		Classifier classifier = Utils.searchClassifierInModels(context, qualifiedName);
 		if (classifier == null) {
-			for (LazyHandler lazyHandler : lazyHandlers) {
-				if (lazyHandler.isCompatible(qualifiedName)) {
-					NamedElement resolved = lazyHandler.resolve();
+			for (LazyClass lazyClass : lazyClasses) {
+				if (lazyClass.getLazyHandler().canHandle(qualifiedName)) {
+					NamedElement resolved = lazyClass.resolve();
 					if (resolved instanceof Classifier) {
 						classifier = (Classifier)resolved;
 						break;
@@ -93,7 +70,7 @@ public class DomTypeResolver {
 	protected boolean tryToResolve(Type type) {
 		boolean result = false;
 
-		if (resolverMap.containsKey(type)) {
+		if (underResolution.getResolverMap().containsKey(type)) {
 			result = true;
 		} else {
 			if (type.isPrimitiveType()) {
@@ -120,12 +97,12 @@ public class DomTypeResolver {
 		org.eclipse.uml2.uml.PrimitiveType umlPrimitiveType;
 		if (typeCode.equals(PrimitiveType.VOID)) {
 			umlPrimitiveType = null;
-			resolverMap.put(primitiveType, umlPrimitiveType);
+			underResolution.getResolverMap().put(primitiveType, umlPrimitiveType);
 			result = true;
 		} else {
 			umlPrimitiveType = Utils.searchPrimiveTypeInModels(context, typeCode.toString());
 			if (umlPrimitiveType != null) {
-				resolverMap.put(primitiveType, umlPrimitiveType);
+				underResolution.getResolverMap().put(primitiveType, umlPrimitiveType);
 				result = true;
 			}
 		}
@@ -135,13 +112,13 @@ public class DomTypeResolver {
 	protected boolean tryToResolve(QualifiedType qualifiedType) {
 		boolean result = false;
 
-		if (resolverMap.containsKey(qualifiedType)) {
+		if (underResolution.getResolverMap().containsKey(qualifiedType)) {
 			result = true;
 		} else {
 			String qualifiedName = qualifiedType.getName().getFullyQualifiedName();
 			Classifier classifier = searchClassifierInModels(qualifiedName);
 			if (classifier != null) {
-				resolverMap.put(qualifiedType, classifier);
+				underResolution.getResolverMap().put(qualifiedType, classifier);
 				result = true;
 			}
 		}
@@ -152,7 +129,7 @@ public class DomTypeResolver {
 	protected boolean tryToResolve(SimpleType simpleType) {
 		boolean result = false;
 
-		if (resolverMap.containsKey(simpleType)) {
+		if (underResolution.getResolverMap().containsKey(simpleType)) {
 			result = true;
 		} else {
 			ITypeBinding resolveBinding = simpleType.resolveBinding();
@@ -161,7 +138,7 @@ public class DomTypeResolver {
 				if (qualifiedName != null) {
 					Classifier classifier = searchClassifierInModels(qualifiedName);
 					if (classifier != null) {
-						resolverMap.put(simpleType, classifier);
+						underResolution.getResolverMap().put(simpleType, classifier);
 						result = true;
 					}
 				}
@@ -174,7 +151,7 @@ public class DomTypeResolver {
 	protected boolean tryToResolve(ParameterizedType parameterizedType) {
 		boolean result = false;
 
-		if (resolverMap.containsKey(parameterizedType)) {
+		if (underResolution.getResolverMap().containsKey(parameterizedType)) {
 			result = true;
 		} else {
 			result = true;

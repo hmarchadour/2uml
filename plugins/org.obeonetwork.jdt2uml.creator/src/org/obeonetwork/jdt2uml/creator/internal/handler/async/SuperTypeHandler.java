@@ -1,41 +1,37 @@
 package org.obeonetwork.jdt2uml.creator.internal.handler.async;
 
-import java.util.Set;
-
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.uml2.uml.Classifier;
-import org.obeonetwork.jdt2uml.core.api.DomTypeResolver;
-import org.obeonetwork.jdt2uml.core.api.handler.LazyHandler;
+import org.obeonetwork.jdt2uml.core.api.resolver.Resolver;
+import org.obeonetwork.jdt2uml.core.api.resolver.ResolverResult;
 
 public final class SuperTypeHandler extends AbstractAsyncHandler {
 
-	protected org.eclipse.jdt.core.dom.Type superType;
+	protected Type superType;
 
-	protected Set<LazyHandler> lazyHandlers;
+	protected Resolver typesResolver;
 
-	protected DomTypeResolver typesResolver;
+	protected ResolverResult latestResult;
 
-	public SuperTypeHandler(Classifier currentClassifier, org.eclipse.jdt.core.dom.Type superType,
-			Set<LazyHandler> lazyHandlers) {
+	public SuperTypeHandler(Classifier currentClassifier, Type superType, Resolver typesResolver) {
 		super(currentClassifier);
 
 		this.superType = superType;
-		this.lazyHandlers = lazyHandlers;
-		this.typesResolver = new DomTypeResolver(currentClassifier, superType, lazyHandlers);
+		this.typesResolver = typesResolver;
 
 	}
 
 	public boolean isHandleable() {
-		boolean isResolved = typesResolver.isResolved();
-		if (!isResolved) {
-			isResolved = typesResolver.tryToResolve();
+		if (latestResult == null || !latestResult.isResolved()) {
+			latestResult = typesResolver.resolve(superType);
 		}
-		return isResolved;
+		return latestResult.isResolved();
 	}
 
 	public void handle() {
 
 		if (isHandleable() && !isHandled()) {
-			Classifier rootClassifier = typesResolver.getRootClassifier();
+			Classifier rootClassifier = latestResult.getRootClassifier();
 			currentClassifier.createGeneralization(rootClassifier);
 		}
 	}

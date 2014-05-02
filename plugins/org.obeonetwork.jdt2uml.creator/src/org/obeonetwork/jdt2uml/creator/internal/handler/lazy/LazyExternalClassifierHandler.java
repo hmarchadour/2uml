@@ -1,18 +1,11 @@
 package org.obeonetwork.jdt2uml.creator.internal.handler.lazy;
 
-import java.io.IOException;
-
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.uml2.uml.NamedElement;
-import org.eclipse.uml2.uml.Package;
 import org.obeonetwork.jdt2uml.core.api.handler.AsyncHandler;
 import org.obeonetwork.jdt2uml.core.api.handler.LazyHandler;
-import org.obeonetwork.jdt2uml.creator.CreatorActivator;
 import org.obeonetwork.jdt2uml.creator.internal.handler.async.ExternalClassifierHandler;
-
-import com.google.common.collect.Maps;
 
 public final class LazyExternalClassifierHandler implements LazyHandler {
 
@@ -20,12 +13,12 @@ public final class LazyExternalClassifierHandler implements LazyHandler {
 
 	protected AsyncHandler asyncHandler;
 
-	public LazyExternalClassifierHandler(Package currentPackage, IClassFile classFile) {
+	public LazyExternalClassifierHandler(IClassFile classFile) {
 		this.classFile = classFile;
-		this.asyncHandler = new ExternalClassifierHandler(currentPackage, classFile);
+		this.asyncHandler = new ExternalClassifierHandler(classFile);
 	}
 
-	public boolean isCompatible(String qualifiedName) {
+	public boolean canHandle(String qualifiedName) {
 		IType type = classFile.getType();
 		boolean result = qualifiedName != null && type.getElementName().length() > 0
 				&& qualifiedName.endsWith(type.getElementName());
@@ -46,14 +39,7 @@ public final class LazyExternalClassifierHandler implements LazyHandler {
 	}
 
 	public void handle() {
-		// if not handled handle and save
+		// if not handled handle
 		asyncHandler.handle();
-
-		Resource resource = asyncHandler.getCurrentClassifier().eResource();
-		try {
-			resource.save(Maps.newHashMap());
-		} catch (IOException e) {
-			CreatorActivator.logUnexpectedError(e);
-		}
 	}
 }
