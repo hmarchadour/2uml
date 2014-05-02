@@ -82,6 +82,11 @@ public final class FieldDeclarationHandler extends AbstractAsyncHandler {
 			} else {
 				attribute.setVisibility(VisibilityKind.PACKAGE_LITERAL); // Default
 			}
+
+			if (currentClassifier.getOwnedTemplateSignature() != null) {
+				// Todo handle Generic types
+			}
+
 			@SuppressWarnings("rawtypes")
 			List modifiers = fieldDeclaration.modifiers();
 			for (Object object : modifiers) {

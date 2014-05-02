@@ -6,6 +6,7 @@ import java.util.Map;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.uml2.uml.Classifier;
 import org.obeonetwork.jdt2uml.core.api.resolver.ResolverResult;
 
@@ -46,6 +47,8 @@ public class ResolverResultImpl implements ResolverResult {
 			rootClassifier = resolverMap.get(((ParameterizedType)rootType).getType());
 		} else if (rootType.isArrayType()) {
 			rootClassifier = resolverMap.get(((ArrayType)rootType).getElementType());
+		} else if (rootType.isWildcardType()) {
+			rootClassifier = resolverMap.get(((WildcardType)rootType).getBound());
 		} else {
 			rootClassifier = resolverMap.get(rootType);
 		}

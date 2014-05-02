@@ -10,52 +10,52 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.uml2.uml.resource.UMLResource;
 import org.obeonetwork.jdt2uml.core.CoreActivator;
 import org.obeonetwork.jdt2uml.core.api.Utils;
-import org.obeonetwork.jdt2uml.core.api.job.JobDescriptor;
-import org.obeonetwork.jdt2uml.core.api.job.ProjectTODO;
-import org.obeonetwork.jdt2uml.core.api.job.UMLJob;
+import org.obeonetwork.jdt2uml.core.api.build.Build;
+import org.obeonetwork.jdt2uml.core.api.build.BuildDescriptor;
+import org.obeonetwork.jdt2uml.core.api.build.BuildTodo;
 import org.obeonetwork.jdt2uml.core.api.visitor.LibVisitor;
-import org.obeonetwork.jdt2uml.core.internal.job.ExportLibModel;
-import org.obeonetwork.jdt2uml.core.internal.job.ExportProjectModel;
+import org.obeonetwork.jdt2uml.core.internal.build.BuildLib;
+import org.obeonetwork.jdt2uml.core.internal.build.BuildProject;
 
-public class ProjectTODOImpl implements ProjectTODO {
+public class BuildTodoImpl implements BuildTodo {
 
 	protected IJavaProject javaProject;
 
-	protected JobDescriptor projectDescriptor;
+	protected BuildDescriptor projectDescriptor;
 
-	protected JobDescriptor libDescriptor;
+	protected BuildDescriptor libDescriptor;
 
-	protected Set<ProjectTODO> subJobsTODOs;
+	protected Set<BuildTodo> subJobsTODOs;
 
-	public ProjectTODOImpl(IJavaProject javaProject, JobDescriptor projectDescriptor,
-			JobDescriptor libDescriptor) {
+	public BuildTodoImpl(IJavaProject javaProject, BuildDescriptor projectDescriptor,
+			BuildDescriptor libDescriptor) {
 		this.javaProject = javaProject;
 		this.projectDescriptor = projectDescriptor;
 		this.libDescriptor = libDescriptor;
 
-		subJobsTODOs = new HashSet<ProjectTODO>();
+		subJobsTODOs = new HashSet<BuildTodo>();
 	}
 
 	@Override
 	public IStatus run(IProgressMonitor monitor) throws InterruptedException {
-		for (ProjectTODO subJobsTODO : subJobsTODOs) {
+		for (BuildTodo subJobsTODO : subJobsTODOs) {
 			subJobsTODO.run(monitor);
 		}
 
 		Utils.importUMLResource(libDescriptor.getModel(), UMLResource.JAVA_PRIMITIVE_TYPES_LIBRARY_URI);
-		for (JobDescriptor depProjectJob : getDepProjectJobs()) {
+		for (BuildDescriptor depProjectJob : getDepProjectJobs()) {
 			if (!projectDescriptor.equals(depProjectJob)) {
 				Utils.importUMLResource(libDescriptor.getModel(), depProjectJob.getSemanticModelURI());
 			}
 		}
 
-		UMLJob exportLibrary = new ExportLibModel(libDescriptor);
+		Build exportLibrary = new BuildLib(libDescriptor);
 		exportLibrary.run(monitor);
 
 		Utils.importUMLResource(projectDescriptor.getModel(), libDescriptor.getSemanticModelURI());
 
 		LibVisitor libVisitor = (LibVisitor)libDescriptor.getVisitor();
-		UMLJob exportModel = new ExportProjectModel(libVisitor.getLazyClasses(), projectDescriptor);
+		Build exportModel = new BuildProject(libVisitor.getLazyClasses(), projectDescriptor);
 		exportModel.run(monitor);
 
 		return new Status(IStatus.OK, CoreActivator.PLUGIN_ID, null);
@@ -67,75 +67,75 @@ public class ProjectTODOImpl implements ProjectTODO {
 	}
 
 	@Override
-	public JobDescriptor getLibDescriptor() {
+	public BuildDescriptor getLibDescriptor() {
 		return libDescriptor;
 	}
 
 	@Override
-	public JobDescriptor getProjectDescriptor() {
+	public BuildDescriptor getProjectDescriptor() {
 		return projectDescriptor;
 	}
 
 	@Override
-	public Set<ProjectTODO> getSubJobsTODO() {
+	public Set<BuildTodo> getSubBuildTodos() {
 		return subJobsTODOs;
 	}
 
 	@Override
-	public void avoidDuplicatedTODOs(Set<ProjectTODO> toReplace) {
-		ProjectTODO[] subJobsTODOsArray = subJobsTODOs.toArray(new ProjectTODO[0]);
+	public void avoidDuplicatedBuilds(Set<BuildTodo> toReplace) {
+		BuildTodo[] subJobsTODOsArray = subJobsTODOs.toArray(new BuildTodo[0]);
 
 		for (int i = 0; i < subJobsTODOsArray.length; i++) {
-			ProjectTODO subJobsTODO = subJobsTODOsArray[i];
-			for (ProjectTODO oneToReplace : toReplace) {
+			BuildTodo subJobsTODO = subJobsTODOsArray[i];
+			for (BuildTodo oneToReplace : toReplace) {
 				if (subJobsTODO.isSameTo(oneToReplace)) {
 					subJobsTODOs.remove(subJobsTODO);
 					subJobsTODOs.add(oneToReplace);
 				}
 			}
 		}
-		for (ProjectTODO subJobsTODO : subJobsTODOs) {
-			subJobsTODO.avoidDuplicatedTODOs(toReplace);
+		for (BuildTodo subJobsTODO : subJobsTODOs) {
+			subJobsTODO.avoidDuplicatedBuilds(toReplace);
 		}
 	}
 
 	@Override
-	public Set<ProjectTODO> getAllJobsTODO() {
-		Set<ProjectTODO> allSubJobsTODO = new HashSet<ProjectTODO>();
+	public Set<BuildTodo> getAllBuildTodos() {
+		Set<BuildTodo> allSubJobsTODO = new HashSet<BuildTodo>();
 		allSubJobsTODO.add(this);
-		for (ProjectTODO subJobsTODO : subJobsTODOs) {
-			allSubJobsTODO.addAll(subJobsTODO.getAllJobsTODO());
+		for (BuildTodo subJobsTODO : subJobsTODOs) {
+			allSubJobsTODO.addAll(subJobsTODO.getAllBuildTodos());
 		}
 		return allSubJobsTODO;
 	}
 
 	@Override
-	public void addSubJobsTODO(ProjectTODO jobsTODO) {
+	public void addSubBuilds(BuildTodo jobsTODO) {
 		subJobsTODOs.add(jobsTODO);
 	}
 
 	@Override
-	public Set<JobDescriptor> getDepLibJobs() {
-		Set<JobDescriptor> depLibJobs = new HashSet<JobDescriptor>();
+	public Set<BuildDescriptor> getDepLibJobs() {
+		Set<BuildDescriptor> depLibJobs = new HashSet<BuildDescriptor>();
 		depLibJobs.add(libDescriptor);
-		for (ProjectTODO subJobsTODO : subJobsTODOs) {
+		for (BuildTodo subJobsTODO : subJobsTODOs) {
 			depLibJobs.addAll(subJobsTODO.getDepLibJobs());
 		}
 		return depLibJobs;
 	}
 
 	@Override
-	public Set<JobDescriptor> getDepProjectJobs() {
-		Set<JobDescriptor> depProjectJobs = new HashSet<JobDescriptor>();
+	public Set<BuildDescriptor> getDepProjectJobs() {
+		Set<BuildDescriptor> depProjectJobs = new HashSet<BuildDescriptor>();
 		depProjectJobs.add(projectDescriptor);
-		for (ProjectTODO subJobsTODO : subJobsTODOs) {
+		for (BuildTodo subJobsTODO : subJobsTODOs) {
 			depProjectJobs.addAll(subJobsTODO.getDepProjectJobs());
 		}
 		return depProjectJobs;
 	}
 
 	@Override
-	public boolean isSameTo(ProjectTODO toCompare) {
+	public boolean isSameTo(BuildTodo toCompare) {
 		return this.getProject().equals(toCompare.getProject());
 	}
 }

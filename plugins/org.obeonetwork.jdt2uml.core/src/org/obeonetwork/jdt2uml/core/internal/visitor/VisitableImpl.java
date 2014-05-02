@@ -1,4 +1,4 @@
-package org.obeonetwork.jdt2uml.core.internal.wrapper;
+package org.obeonetwork.jdt2uml.core.internal.visitor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.obeonetwork.jdt2uml.core.api.visitor.Visitable;

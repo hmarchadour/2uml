@@ -8,34 +8,39 @@
  * Contributors:
  *    Hugo Marchadour - initial API and implementation and/or initial documentation
  *******************************************************************************/
-package org.obeonetwork.jdt2uml.core.internal.job;
+package org.obeonetwork.jdt2uml.core.internal.build;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.obeonetwork.jdt2uml.core.api.job.JobDescriptor;
-import org.obeonetwork.jdt2uml.core.api.job.UMLJob;
-import org.obeonetwork.jdt2uml.core.api.visitor.LibVisitor;
+import org.obeonetwork.jdt2uml.core.api.build.Build;
+import org.obeonetwork.jdt2uml.core.api.build.BuildDescriptor;
+import org.obeonetwork.jdt2uml.core.api.lazy.LazyClass;
+import org.obeonetwork.jdt2uml.core.api.visitor.ProjectVisitor;
 
 import com.google.common.collect.Maps;
 
-public class ExportLibModel implements UMLJob {
+public class BuildProject implements Build {
 
-	private LibVisitor libVisitor;
+	private ProjectVisitor projectVisitor;
 
-	private JobDescriptor jobDescriptor;
+	private BuildDescriptor jobDescriptor;
 
-	public ExportLibModel(JobDescriptor jobDescriptor) {
-		this.libVisitor = (LibVisitor)jobDescriptor.getVisitor();
+	private Set<LazyClass> lazyClasses;
+
+	public BuildProject(Set<LazyClass> lazyClasses, BuildDescriptor jobDescriptor) {
+		this.projectVisitor = (ProjectVisitor)jobDescriptor.getVisitor();
+		this.lazyClasses = lazyClasses;
 		this.jobDescriptor = jobDescriptor;
 	}
 
 	@Override
-	public JobDescriptor getJobDescriptor() {
+	public BuildDescriptor getDescriptor() {
 		return jobDescriptor;
 	}
 
@@ -48,8 +53,8 @@ public class ExportLibModel implements UMLJob {
 			resource.getContents().add(jobDescriptor.getModel());
 
 			monitor.setTaskName(jobDescriptor.getTitle());
-			libVisitor.visit(jobDescriptor.getModel(), jobDescriptor.getJavaProject());
-			libVisitor.endCallBack();
+			projectVisitor.visit(lazyClasses, jobDescriptor.getModel(), jobDescriptor.getJavaProject());
+			projectVisitor.endCallBack();
 			try {
 				resource.save(Maps.newHashMap());
 			} catch (IOException e) {

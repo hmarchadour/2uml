@@ -24,11 +24,11 @@ import org.eclipse.jdt.core.JavaCore;
 import org.obeonetwork.jdt2uml.core.CoreActivator;
 import org.obeonetwork.jdt2uml.core.api.CoreFactory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
-import org.obeonetwork.jdt2uml.core.api.job.JobDescriptor;
-import org.obeonetwork.jdt2uml.core.api.job.ProjectTODO;
+import org.obeonetwork.jdt2uml.core.api.build.BuildDescriptor;
+import org.obeonetwork.jdt2uml.core.api.build.BuildTodo;
 import org.obeonetwork.jdt2uml.core.api.visitor.LibVisitor;
 import org.obeonetwork.jdt2uml.core.api.visitor.ProjectVisitor;
-import org.obeonetwork.jdt2uml.core.internal.job.ExportModelDescriptor;
+import org.obeonetwork.jdt2uml.core.internal.build.BuildDescriptorImpl;
 import org.obeonetwork.jdt2uml.creator.CreatorActivator;
 import org.obeonetwork.jdt2uml.creator.api.CreatorFactory;
 
@@ -46,11 +46,11 @@ public class ExportModels implements IWorkspaceRunnable {
 	public void run(IProgressMonitor monitor) throws CoreException {
 		totalWork = 0;
 
-		Set<ProjectTODO> firstLevelTodos = new HashSet<ProjectTODO>();
+		Set<BuildTodo> firstLevelTodos = new HashSet<BuildTodo>();
 
 		for (IJavaProject javaProject : projectsToHandle) {
 			try {
-				ProjectTODO recursiveTODO = recursiveTODO(javaProject, monitor);
+				BuildTodo recursiveTODO = recursiveTODO(javaProject, monitor);
 				firstLevelTodos.add(recursiveTODO);
 			} catch (CoreException e) {
 				CoreActivator.logUnexpectedError(e);
@@ -61,7 +61,7 @@ public class ExportModels implements IWorkspaceRunnable {
 
 		monitor.beginTask("Export UML Models", totalWork);
 
-		for (ProjectTODO jobsTODO : firstLevelTodos) {
+		for (BuildTodo jobsTODO : firstLevelTodos) {
 			try {
 				jobsTODO.run(monitor);
 			} catch (InterruptedException e) {
@@ -76,18 +76,18 @@ public class ExportModels implements IWorkspaceRunnable {
 	 * @param firstTODOs
 	 * @throws CoreException
 	 */
-	private void cleanDuplicatesTodos(Set<ProjectTODO> firstTODOs) throws CoreException {
+	private void cleanDuplicatesTodos(Set<BuildTodo> firstTODOs) throws CoreException {
 
-		Set<ProjectTODO> allTODOs = new LinkedHashSet<ProjectTODO>();
-		for (ProjectTODO firstTODO : firstTODOs) {
-			allTODOs.addAll(firstTODO.getAllJobsTODO());
+		Set<BuildTodo> allTODOs = new LinkedHashSet<BuildTodo>();
+		for (BuildTodo firstTODO : firstTODOs) {
+			allTODOs.addAll(firstTODO.getAllBuildTodos());
 		}
 
 		// get a set of unique ProjectTODOs
-		Set<ProjectTODO> allUniqueTODOs = new LinkedHashSet<ProjectTODO>();
-		for (ProjectTODO oneOfAllTODOs : allTODOs) {
+		Set<BuildTodo> allUniqueTODOs = new LinkedHashSet<BuildTodo>();
+		for (BuildTodo oneOfAllTODOs : allTODOs) {
 			boolean isUnique = true;
-			for (ProjectTODO anUniqueTODO : allUniqueTODOs) {
+			for (BuildTodo anUniqueTODO : allUniqueTODOs) {
 				if (!anUniqueTODO.equals(oneOfAllTODOs) && anUniqueTODO.isSameTo(oneOfAllTODOs)) {
 					isUnique = false;
 					break;
@@ -100,11 +100,11 @@ public class ExportModels implements IWorkspaceRunnable {
 		}
 
 		// clean
-		ProjectTODO[] firstTODOsArray = firstTODOs.toArray(new ProjectTODO[0]);
+		BuildTodo[] firstTODOsArray = firstTODOs.toArray(new BuildTodo[0]);
 		for (int i = 0; i < firstTODOsArray.length; i++) {
 			boolean toClean = false;
-			ProjectTODO firstLevelTodo = firstTODOsArray[i];
-			for (ProjectTODO anUniqueTODO : allUniqueTODOs) {
+			BuildTodo firstLevelTodo = firstTODOsArray[i];
+			for (BuildTodo anUniqueTODO : allUniqueTODOs) {
 				if (!anUniqueTODO.equals(firstLevelTodo) && anUniqueTODO.isSameTo(firstLevelTodo)) {
 					toClean = true;
 					break;
@@ -113,29 +113,29 @@ public class ExportModels implements IWorkspaceRunnable {
 			if (toClean) {
 				firstTODOs.remove(firstLevelTodo);
 			} else {
-				firstLevelTodo.avoidDuplicatedTODOs(allUniqueTODOs);
+				firstLevelTodo.avoidDuplicatedBuilds(allUniqueTODOs);
 			}
 		}
 	}
 
-	private ProjectTODO recursiveTODO(IJavaProject javaProject, IProgressMonitor monitor)
+	private BuildTodo recursiveTODO(IJavaProject javaProject, IProgressMonitor monitor)
 			throws CoreException {
 		LibVisitor libVisitor = CreatorFactory.createLibVisitor(monitor);
 		ProjectVisitor projectVisitor = CreatorFactory.createProjectVisitor(monitor);
 
-		JobDescriptor libraryDescriptor = new ExportModelDescriptor("Export Libraries Model in "
+		BuildDescriptor libraryDescriptor = new BuildDescriptorImpl("Export Libraries Model in "
 				+ javaProject.getElementName(), javaProject, libVisitor);
-		JobDescriptor projectDescriptor = new ExportModelDescriptor("Export Project Model in "
+		BuildDescriptor projectDescriptor = new BuildDescriptorImpl("Export Project Model in "
 				+ javaProject.getElementName(), javaProject, projectVisitor);
 
-		ProjectTODO result = CoreFactory.createJobsTODO(javaProject, projectDescriptor, libraryDescriptor);
+		BuildTodo result = CoreFactory.createJobsTODO(javaProject, projectDescriptor, libraryDescriptor);
 
 		IProject[] referencedProjects = javaProject.getProject().getReferencedProjects();
 		for (IProject referencedProject : referencedProjects) {
 			if (referencedProject.hasNature(JavaCore.NATURE_ID)) {
 				IJavaProject referencedJDTProject = JavaCore.create(referencedProject);
-				ProjectTODO recursiveTODOs = recursiveTODO(referencedJDTProject, monitor);
-				result.addSubJobsTODO(recursiveTODOs);
+				BuildTodo recursiveTODOs = recursiveTODO(referencedJDTProject, monitor);
+				result.addSubBuilds(recursiveTODOs);
 			}
 		}
 		return result;

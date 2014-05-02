@@ -1,13 +1,11 @@
-package org.obeonetwork.jdt2uml.core.api.job;
-
-import java.util.Set;
+package org.obeonetwork.jdt2uml.core.api.build;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.uml2.uml.Model;
 import org.obeonetwork.jdt2uml.core.api.visitor.Visitor;
 
-public interface JobDescriptor {
+public interface BuildDescriptor {
 
 	boolean isDone();
 
@@ -16,8 +14,6 @@ public interface JobDescriptor {
 	Model getModel();
 
 	Visitor getVisitor();
-
-	Set<Model> getRelatedProjectResults();
 
 	String getFileName();
 

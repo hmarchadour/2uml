@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.uml2.uml.Classifier;
 import org.eclipse.uml2.uml.NamedElement;
 import org.eclipse.uml2.uml.Namespace;
@@ -83,6 +84,8 @@ public class ResolverImpl implements Resolver {
 				result = tryToResolve((SimpleType)type);
 			} else if (type.isParameterizedType()) {
 				result = tryToResolve((ParameterizedType)type);
+			} else if (type.isWildcardType()) {
+				result = tryToResolve((WildcardType)type);
 			} else {
 				CoreActivator.log(IStatus.INFO, "Type not handled " + type.toString());
 			}
@@ -169,6 +172,14 @@ public class ResolverImpl implements Resolver {
 				Type type = parameterizedType.getType();
 				result = tryToResolve(type);
 			}
+		}
+		return result;
+	}
+
+	protected boolean tryToResolve(WildcardType parameterizedType) {
+		boolean result = true;
+		if (parameterizedType.getBound() != null) {
+			result = tryToResolve(parameterizedType.getBound());
 		}
 		return result;
 	}

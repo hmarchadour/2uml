@@ -11,6 +11,7 @@ import org.eclipse.uml2.uml.Classifier;
 import org.eclipse.uml2.uml.Enumeration;
 import org.eclipse.uml2.uml.Interface;
 import org.eclipse.uml2.uml.Operation;
+import org.eclipse.uml2.uml.Parameter;
 import org.eclipse.uml2.uml.Type;
 import org.eclipse.uml2.uml.VisibilityKind;
 import org.obeonetwork.jdt2uml.core.api.resolver.Resolver;
@@ -94,18 +95,26 @@ public final class MethodDeclarationHandler extends AbstractAsyncHandler {
 			} else {
 				Type umlType = latestReturnResult.getRootClassifier();
 				if (umlType != null) {
-					operation.createReturnResult("return", umlType);
+					Parameter returnParam = operation.createReturnResult("return", umlType);
+					// Todo handle Generic types
 				} // else void
 			}
 			for (SingleVariableDeclaration arg : latestArgResults.keySet()) {
 				ResolverResult latestArgResult = latestArgResults.get(arg);
 
 				Type umlArgType = latestArgResult.getRootClassifier();
+
 				if (umlArgType == null) {
 					throw new IllegalStateException("Should not appended");
 				}
+				Parameter parameter = operation.createOwnedParameter(arg.getName().getIdentifier(),
+						umlArgType);
+				// Generic types part
+				if (umlArgType instanceof Classifier
+						&& ((Classifier)umlArgType).getOwnedTemplateSignature() != null) {
+					// Todo handle Generic types
+				}
 
-				operation.createOwnedParameter(arg.getName().getIdentifier(), umlArgType);
 			}
 
 			if (currentClassifier instanceof Interface) {

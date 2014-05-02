@@ -8,10 +8,7 @@
  * Contributors:
  *    Hugo Marchadour - initial API and implementation and/or initial documentation
  *******************************************************************************/
-package org.obeonetwork.jdt2uml.core.internal.job;
-
-import java.util.HashSet;
-import java.util.Set;
+package org.obeonetwork.jdt2uml.core.internal.build;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -20,11 +17,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.uml2.uml.Model;
 import org.eclipse.uml2.uml.UMLFactory;
 import org.obeonetwork.jdt2uml.core.api.Utils;
-import org.obeonetwork.jdt2uml.core.api.job.JobDescriptor;
+import org.obeonetwork.jdt2uml.core.api.build.BuildDescriptor;
 import org.obeonetwork.jdt2uml.core.api.visitor.CreatorVisitor;
 import org.obeonetwork.jdt2uml.core.api.visitor.Visitor;
 
-public class ExportModelDescriptor implements JobDescriptor {
+public class BuildDescriptorImpl implements BuildDescriptor {
 
 	protected final String title;
 
@@ -34,15 +31,13 @@ public class ExportModelDescriptor implements JobDescriptor {
 
 	protected final CreatorVisitor visitor;
 
-	protected final Set<Model> relatedProjectResults;
-
 	protected Model model;
 
 	protected Resource resource;
 
 	protected boolean done;
 
-	public ExportModelDescriptor(String title, IJavaProject project, CreatorVisitor visitor) {
+	public BuildDescriptorImpl(String title, IJavaProject project, CreatorVisitor visitor) {
 		this.title = title;
 		this.javaProject = project;
 		this.fileName = visitor.getNewModelFileName(javaProject);
@@ -53,7 +48,6 @@ public class ExportModelDescriptor implements JobDescriptor {
 		this.resource.getContents().add(model);
 		this.model.setName(getFileName());
 
-		this.relatedProjectResults = new HashSet<Model>();
 		this.done = false;
 	}
 
@@ -87,14 +81,6 @@ public class ExportModelDescriptor implements JobDescriptor {
 	@Override
 	public Model getModel() {
 		return model;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Set<Model> getRelatedProjectResults() {
-		return relatedProjectResults;
 	}
 
 	/**

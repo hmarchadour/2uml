@@ -1,12 +1,12 @@
-package org.obeonetwork.jdt2uml.core.api.job;
+package org.obeonetwork.jdt2uml.core.api.build;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
-public interface UMLJob {
+public interface Build {
 
 	IStatus run(IProgressMonitor monitor) throws InterruptedException;
 
-	JobDescriptor getJobDescriptor();
+	BuildDescriptor getDescriptor();
 
 }
