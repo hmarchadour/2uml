@@ -34,11 +34,11 @@ public class CompilationUnitASTVisitor extends ASTVisitor {
 
 	private Set<AsyncHandler> handlersToRelaunch;
 
-	private Resolver typeResolver;
+	private Resolver resolver;
 
-	public CompilationUnitASTVisitor(Package currentPackage, Resolver typeResolver) {
+	public CompilationUnitASTVisitor(Package currentPackage, Resolver resolver) {
 		this.currentPackage = currentPackage;
-		this.typeResolver = typeResolver;
+		this.resolver = resolver;
 
 		this.handlersToRelaunch = new LinkedHashSet<AsyncHandler>();
 	}
@@ -71,7 +71,7 @@ public class CompilationUnitASTVisitor extends ASTVisitor {
 					"Visit a fieldDeclaration whithout currentClassifier should not appended");
 		} else {
 			AsyncHandler handler = new FieldDeclarationHandler(currentClassifier, fieldDeclaration,
-					typeResolver);
+					resolver);
 			tryTo(handler);
 		}
 		return super.visit(fieldDeclaration);
@@ -84,7 +84,7 @@ public class CompilationUnitASTVisitor extends ASTVisitor {
 					"Visit a methodDeclaration whithout currentClassifier should not appended");
 		} else {
 			AsyncHandler handler = new MethodDeclarationHandler(currentClassifier, methodDeclaration,
-					typeResolver);
+					resolver);
 			tryTo(handler);
 		}
 		return super.visit(methodDeclaration);
@@ -132,7 +132,7 @@ public class CompilationUnitASTVisitor extends ASTVisitor {
 				Type superclassType = typeDeclaration.getSuperclassType();
 				if (superclassType != null) {
 					AsyncHandler handler = new SuperTypeHandler(currentClassifier, superclassType,
-							typeResolver);
+							resolver);
 					tryTo(handler);
 				}
 
@@ -143,7 +143,7 @@ public class CompilationUnitASTVisitor extends ASTVisitor {
 						if (object != null && object instanceof Type) {
 							Type superInterfaceType = (Type)object;
 							AsyncHandler handler = new SuperInterfaceTypeHandler(
-									(BehavioredClassifier)currentClassifier, superInterfaceType, typeResolver);
+									(BehavioredClassifier)currentClassifier, superInterfaceType, resolver);
 							tryTo(handler);
 						}
 					}

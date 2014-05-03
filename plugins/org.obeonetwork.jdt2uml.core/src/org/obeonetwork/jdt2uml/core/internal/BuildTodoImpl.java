@@ -13,6 +13,7 @@ import org.obeonetwork.jdt2uml.core.api.Utils;
 import org.obeonetwork.jdt2uml.core.api.build.Build;
 import org.obeonetwork.jdt2uml.core.api.build.BuildDescriptor;
 import org.obeonetwork.jdt2uml.core.api.build.BuildTodo;
+import org.obeonetwork.jdt2uml.core.api.lazy.LazyClass;
 import org.obeonetwork.jdt2uml.core.api.visitor.LibVisitor;
 import org.obeonetwork.jdt2uml.core.internal.build.BuildLib;
 import org.obeonetwork.jdt2uml.core.internal.build.BuildProject;
@@ -21,41 +22,49 @@ public class BuildTodoImpl implements BuildTodo {
 
 	protected IJavaProject javaProject;
 
-	protected BuildDescriptor projectDescriptor;
+	protected BuildDescriptor projectDesc;
 
-	protected BuildDescriptor libDescriptor;
+	protected BuildDescriptor libDesc;
 
-	protected Set<BuildTodo> subJobsTODOs;
+	protected Set<BuildTodo> subBuildTODOs;
 
 	public BuildTodoImpl(IJavaProject javaProject, BuildDescriptor projectDescriptor,
 			BuildDescriptor libDescriptor) {
 		this.javaProject = javaProject;
-		this.projectDescriptor = projectDescriptor;
-		this.libDescriptor = libDescriptor;
+		this.projectDesc = projectDescriptor;
+		this.libDesc = libDescriptor;
 
-		subJobsTODOs = new HashSet<BuildTodo>();
+		subBuildTODOs = new HashSet<BuildTodo>();
 	}
 
 	@Override
 	public IStatus run(IProgressMonitor monitor) throws InterruptedException {
-		for (BuildTodo subJobsTODO : subJobsTODOs) {
-			subJobsTODO.run(monitor);
+
+		// Build dependencies before
+		for (BuildTodo subBuildTODO : subBuildTODOs) {
+			subBuildTODO.run(monitor);
 		}
 
-		Utils.importUMLResource(libDescriptor.getModel(), UMLResource.JAVA_PRIMITIVE_TYPES_LIBRARY_URI);
-		for (BuildDescriptor depProjectJob : getDepProjectJobs()) {
-			if (!projectDescriptor.equals(depProjectJob)) {
-				Utils.importUMLResource(libDescriptor.getModel(), depProjectJob.getSemanticModelURI());
+		// Import Java primitive in Lib model
+		Utils.importUMLResource(libDesc.getModel(), UMLResource.JAVA_PRIMITIVE_TYPES_LIBRARY_URI);
+
+		// Import dependencies in the current library model
+		for (BuildDescriptor depProjectJob : getDepProjectDescriptors()) {
+			if (!projectDesc.equals(depProjectJob)) {
+				Utils.importUMLResource(libDesc.getModel(), depProjectJob.getSemanticModelURI());
 			}
 		}
 
-		Build exportLibrary = new BuildLib(libDescriptor);
-		exportLibrary.run(monitor);
+		// Build the current library model
+		Build buildLib = new BuildLib(libDesc);
+		buildLib.run(monitor);
 
-		Utils.importUMLResource(projectDescriptor.getModel(), libDescriptor.getSemanticModelURI());
+		// Import the library in the project model
+		Utils.importUMLResource(projectDesc.getModel(), libDesc.getSemanticModelURI());
 
-		LibVisitor libVisitor = (LibVisitor)libDescriptor.getVisitor();
-		Build exportModel = new BuildProject(libVisitor.getLazyClasses(), projectDescriptor);
+		// Build the current project model
+		Set<LazyClass> lazyClasses = ((LibVisitor)libDesc.getVisitor()).getLazyClasses();
+		Build exportModel = new BuildProject(lazyClasses, projectDesc);
 		exportModel.run(monitor);
 
 		return new Status(IStatus.OK, CoreActivator.PLUGIN_ID, null);
@@ -68,70 +77,70 @@ public class BuildTodoImpl implements BuildTodo {
 
 	@Override
 	public BuildDescriptor getLibDescriptor() {
-		return libDescriptor;
+		return libDesc;
 	}
 
 	@Override
 	public BuildDescriptor getProjectDescriptor() {
-		return projectDescriptor;
+		return projectDesc;
 	}
 
 	@Override
 	public Set<BuildTodo> getSubBuildTodos() {
-		return subJobsTODOs;
+		return subBuildTODOs;
 	}
 
 	@Override
 	public void avoidDuplicatedBuilds(Set<BuildTodo> toReplace) {
-		BuildTodo[] subJobsTODOsArray = subJobsTODOs.toArray(new BuildTodo[0]);
+		BuildTodo[] subBuildTODOsArray = subBuildTODOs.toArray(new BuildTodo[0]);
 
-		for (int i = 0; i < subJobsTODOsArray.length; i++) {
-			BuildTodo subJobsTODO = subJobsTODOsArray[i];
+		for (int i = 0; i < subBuildTODOsArray.length; i++) {
+			BuildTodo subBuildTODO = subBuildTODOsArray[i];
 			for (BuildTodo oneToReplace : toReplace) {
-				if (subJobsTODO.isSameTo(oneToReplace)) {
-					subJobsTODOs.remove(subJobsTODO);
-					subJobsTODOs.add(oneToReplace);
+				if (subBuildTODO.isSameTo(oneToReplace)) {
+					subBuildTODOs.remove(subBuildTODO);
+					subBuildTODOs.add(oneToReplace);
 				}
 			}
 		}
-		for (BuildTodo subJobsTODO : subJobsTODOs) {
-			subJobsTODO.avoidDuplicatedBuilds(toReplace);
+		for (BuildTodo subBuildTODO : subBuildTODOs) {
+			subBuildTODO.avoidDuplicatedBuilds(toReplace);
 		}
 	}
 
 	@Override
 	public Set<BuildTodo> getAllBuildTodos() {
-		Set<BuildTodo> allSubJobsTODO = new HashSet<BuildTodo>();
-		allSubJobsTODO.add(this);
-		for (BuildTodo subJobsTODO : subJobsTODOs) {
-			allSubJobsTODO.addAll(subJobsTODO.getAllBuildTodos());
+		Set<BuildTodo> allSubBuildTodo = new HashSet<BuildTodo>();
+		allSubBuildTodo.add(this);
+		for (BuildTodo subBuildTODO : subBuildTODOs) {
+			allSubBuildTodo.addAll(subBuildTODO.getAllBuildTodos());
 		}
-		return allSubJobsTODO;
+		return allSubBuildTodo;
 	}
 
 	@Override
-	public void addSubBuilds(BuildTodo jobsTODO) {
-		subJobsTODOs.add(jobsTODO);
+	public void addSubBuildTodos(BuildTodo buildTodo) {
+		subBuildTODOs.add(buildTodo);
 	}
 
 	@Override
-	public Set<BuildDescriptor> getDepLibJobs() {
-		Set<BuildDescriptor> depLibJobs = new HashSet<BuildDescriptor>();
-		depLibJobs.add(libDescriptor);
-		for (BuildTodo subJobsTODO : subJobsTODOs) {
-			depLibJobs.addAll(subJobsTODO.getDepLibJobs());
+	public Set<BuildDescriptor> getDepLibDescriptors() {
+		Set<BuildDescriptor> depLibDescriptors = new HashSet<BuildDescriptor>();
+		depLibDescriptors.add(libDesc);
+		for (BuildTodo subBuildTODO : subBuildTODOs) {
+			depLibDescriptors.addAll(subBuildTODO.getDepLibDescriptors());
 		}
-		return depLibJobs;
+		return depLibDescriptors;
 	}
 
 	@Override
-	public Set<BuildDescriptor> getDepProjectJobs() {
-		Set<BuildDescriptor> depProjectJobs = new HashSet<BuildDescriptor>();
-		depProjectJobs.add(projectDescriptor);
-		for (BuildTodo subJobsTODO : subJobsTODOs) {
-			depProjectJobs.addAll(subJobsTODO.getDepProjectJobs());
+	public Set<BuildDescriptor> getDepProjectDescriptors() {
+		Set<BuildDescriptor> depProjectDescriptors = new HashSet<BuildDescriptor>();
+		depProjectDescriptors.add(projectDesc);
+		for (BuildTodo subBuildTODO : subBuildTODOs) {
+			depProjectDescriptors.addAll(subBuildTODO.getDepProjectDescriptors());
 		}
-		return depProjectJobs;
+		return depProjectDescriptors;
 	}
 
 	@Override

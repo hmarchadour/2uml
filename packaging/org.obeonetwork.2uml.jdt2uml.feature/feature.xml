@@ -23,24 +23,14 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
    <plugin
          id="org.obeonetwork.jdt2uml.creator"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-   <!--<plugin
-         id="org.obeonetwork.jdt2uml.updator"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>-->
-   <plugin
-         id="org.obeonetwork.jdt2uml.ide"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+
    <plugin
          id="org.obeonetwork.jdt2uml.ui"
          download-size="0"

@@ -17,7 +17,6 @@ Export-Package: org.obeonetwork.jdt2uml.core,
  org.obeonetwork.jdt2uml.core.api.build,
  org.obeonetwork.jdt2uml.core.api.handler,
  org.obeonetwork.jdt2uml.core.api.lazy,
- org.obeonetwork.jdt2uml.core.api.listener,
  org.obeonetwork.jdt2uml.core.api.resolver,
  org.obeonetwork.jdt2uml.core.api.visitor,
  org.obeonetwork.jdt2uml.core.internal.build

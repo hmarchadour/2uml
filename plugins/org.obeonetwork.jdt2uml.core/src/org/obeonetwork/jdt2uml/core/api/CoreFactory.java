@@ -40,7 +40,7 @@ public final class CoreFactory {
 		return new VisitableImpl(javaElement);
 	}
 
-	public static BuildTodo createJobsTODO(IJavaProject javaProject, BuildDescriptor projectDescriptor,
+	public static BuildTodo createBuildTodo(IJavaProject javaProject, BuildDescriptor projectDescriptor,
 			BuildDescriptor libDescriptor) {
 		return new BuildTodoImpl(javaProject, projectDescriptor, libDescriptor);
 	}

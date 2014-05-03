@@ -16,9 +16,9 @@ public interface BuildTodo {
 
 	BuildDescriptor getProjectDescriptor();
 
-	Set<BuildDescriptor> getDepLibJobs();
+	Set<BuildDescriptor> getDepLibDescriptors();
 
-	Set<BuildDescriptor> getDepProjectJobs();
+	Set<BuildDescriptor> getDepProjectDescriptors();
 
 	void avoidDuplicatedBuilds(Set<BuildTodo> toRemove);
 
@@ -26,7 +26,7 @@ public interface BuildTodo {
 
 	Set<BuildTodo> getAllBuildTodos();
 
-	void addSubBuilds(BuildTodo toAdd);
+	void addSubBuildTodos(BuildTodo toAdd);
 
 	boolean isSameTo(BuildTodo toCompare);
 }

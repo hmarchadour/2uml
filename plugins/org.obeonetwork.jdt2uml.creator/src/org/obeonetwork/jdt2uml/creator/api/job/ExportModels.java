@@ -128,14 +128,14 @@ public class ExportModels implements IWorkspaceRunnable {
 		BuildDescriptor projectDescriptor = new BuildDescriptorImpl("Export Project Model in "
 				+ javaProject.getElementName(), javaProject, projectVisitor);
 
-		BuildTodo result = CoreFactory.createJobsTODO(javaProject, projectDescriptor, libraryDescriptor);
+		BuildTodo result = CoreFactory.createBuildTodo(javaProject, projectDescriptor, libraryDescriptor);
 
 		IProject[] referencedProjects = javaProject.getProject().getReferencedProjects();
 		for (IProject referencedProject : referencedProjects) {
 			if (referencedProject.hasNature(JavaCore.NATURE_ID)) {
 				IJavaProject referencedJDTProject = JavaCore.create(referencedProject);
 				BuildTodo recursiveTODOs = recursiveTODO(referencedJDTProject, monitor);
-				result.addSubBuilds(recursiveTODOs);
+				result.addSubBuildTodos(recursiveTODOs);
 			}
 		}
 		return result;
